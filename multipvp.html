@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MultiPvP v19.1 - Copy & Play</title>
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <style>
+        * {
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+            outline: none;
+        }
+
+        body {
+            margin: 0;
+            background: #000;
+            color: white;
+            font-family: 'Arial Black', sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        :root {
+            --blue: #0088ff;
+            --orange: #ff8800;
+            --red: #ff3333;
+            --green: #44ff44;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, #004e92, #000428);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20000;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            width: 95%;
+            max-width: 800px;
+        }
+
+        .mode-card {
+            background: #1a1a1a;
+            border: 3px solid #333;
+            height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transform: skew(-5deg);
+            cursor: pointer;
+            transition: 0.1s;
+            text-align: center;
+        }
+
+        .mode-card:active {
+            transform: skew(-5deg) scale(0.95);
+            background: #333;
+        }
+
+        .active-card {
+            border-color: var(--blue);
+            background: linear-gradient(45deg, #001a33, #000);
+        }
+
+        .locked {
+            opacity: 0.5;
+            cursor: default;
+        }
+
+        /* Online Panel & Copy Button */
+        #onlinePanel {
+            display: none;
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border: 2px solid var(--blue);
+            border-radius: 12px;
+            width: 300px;
+            box-shadow: 0 0 20px var(--blue);
+        }
+
+        #onlinePanel input {
+            width: 92%;
+            padding: 10px;
+            margin: 10px 0;
+            background: #111;
+            border: 1px solid var(--blue);
+            color: white;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        .copy-wrapper {
+            background: #222;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            border: 1px dashed #555;
+        }
+
+        #myIdDisplay {
+            font-size: 11px;
+            color: var(--green);
+            word-break: break-all;
+            margin-bottom: 8px;
+            font-family: monospace;
+        }
+
+        .copy-btn {
+            background: var(--blue);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* HUD & Controls */
+        #gameUI {
+            position: absolute;
+            top: 10px;
+            width: 95%;
+            display: none;
+            justify-content: space-between;
+            z-index: 500;
+            pointer-events: none;
+            left: 2.5%;
+        }
+
+        .bar-bg {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid white;
+            height: 30px;
+            width: 220px;
+            transform: skew(-15deg);
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+        #controls {
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            height: 200px;
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10000;
+            padding: 0 20px;
+            box-sizing: border-box;
+            pointer-events: none;
+        }
+
+        #joyBase {
+            width: 140px;
+            height: 140px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid white;
+            border-radius: 50%;
+            position: relative;
+            pointer-events: auto;
+        }
+
+        #joyStick {
+            width: 60px;
+            height: 60px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            pointer-events: none;
+        }
+
+        .btn-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            pointer-events: auto;
+        }
+
+        .act-btn {
+            width: 95px;
+            height: 95px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid white;
+            color: white;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .act-btn.cd {
+            opacity: 0.5;
+            border-color: #555;
+            pointer-events: none;
+            background: #222;
+        }
+
+        .dash-btn {
+            grid-column: span 2;
+            height: 55px;
+            border-radius: 12px;
+            background: var(--blue);
+            border: none;
+            font-size: 18px;
+        }
+
+        .cd-num {
+            font-size: 30px;
+            color: var(--red);
+        }
+
+        #resultMenu {
+            display: none;
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            background: #000;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <audio id="bgMusic" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"></audio>
+
+    <div id="mainMenu" class="overlay">
+        <h1 style="font-size: 70px; margin-bottom: 40px; text-shadow: 0 0 25px var(--blue);">MultiPvP</h1>
+        <div class="mode-card active-card" style="width:240px; height:90px" onpointerdown="showMenu('modeMenu')">
+            <h3>OYNA</h3>
+        </div>
+    </div>
+
+    <div id="modeMenu" class="overlay" style="display:none">
+        <h2 style="margin-bottom: 20px;">MOD SEÇİMİ</h2>
+        <div class="grid-container">
+            <div class="mode-card active-card" onpointerdown="showMenu('diffMenu')"><span>OFFLINE</span>
+                <h3>MAÇ YAP</h3>
+            </div>
+            <div class="mode-card active-card" style="border-color:var(--green)" onpointerdown="openOnlinePanel()">
+                <span>ONLINE</span>
+                <h3>DÜELLO</h3>
+            </div>
+            <div class="mode-card active-card" style="border-color:var(--orange)" onpointerdown="startMatchmaking()">
+                <span>1v1</span>
+                <h3>BUL</h3>
+            </div>
+            <div class="mode-card active-card" style="border-color:var(--blue)" onpointerdown="startGame('TRAINING')">
+                <span>EĞİTİM</span>
+                <h3>BAŞLA</h3>
+            </div>
+            <div class="mode-card locked"><span>ETKİNLİK</span><small>YAKINDA</small></div>
+            <div class="mode-card active-card" style="border-color:var(--red)" onpointerdown="location.reload()">
+                <h3>GERİ</h3>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; width: 300px; text-align: center;">
+            <input type="text" id="playerNameInput" placeholder="Adını Değiştir" maxlength="12" style="width: 92%; padding: 10px; background: #111; border: 2px solid var(--blue); 
+                color: white; text-align: center; border-radius: 5px; font-size: 14px; font-weight: bold;">
+            <div id="currentNameDisplay" style="margin-top: 8px; font-size: 12px; color: #888;">
+                Şu anki adın: <span id="currentNameSpan" style="color: var(--blue); font-weight: bold;">OYUNCU</span>
+            </div>
+        </div>
+
+        <div id="onlinePanel">
+            <div class="copy-wrapper">
+                <div id="myIdDisplay">ID ALINIYOR...</div>
+                <button id="copyBtn" class="copy-btn" onclick="copyMyId()">ID KOPYALA</button>
+            </div>
+            <input type="text" id="targetPeerId" placeholder="Arkadaşının ID'sini Yapıştır">
+            <div class="mode-card" style="height:45px; width:100%; border-color:var(--green)"
+                onpointerdown="connectToFriend()">BAĞLAN</div>
+        </div>
+    </div>
+
+    <div id="matchmakingOverlay" class="overlay" style="display:none">
+        <h2 style="margin-bottom: 20px;">1v1 EŞLEŞTİRME</h2>
+        <div class="copy-wrapper" style="width: 300px; text-align: center;">
+            <div id="matchmakingStatus" style="color:var(--blue); font-size: 14px; margin-bottom:10px">ARANIYOR...</div>
+            <div style="font-size: 10px; color: #666;">ODA: <span id="roomDebug"></span></div>
+        </div>
+        <div class="mode-card active-card" style="border-color:var(--red); width: 200px; height: 50px;"
+            onpointerdown="location.reload()">
+            <h3>İPTAL</h3>
+        </div>
+    </div>
+
+    <div id="diffMenu" class="overlay" style="display:none">
+        <div style="display:flex; gap:15px">
+            <div class="mode-card" style="border-color:var(--green); width:120px" onpointerdown="startGame('KOLAY')">
+                <h3>KOLAY</h3>
+            </div>
+            <div class="mode-card" style="border-color:var(--blue); width:120px" onpointerdown="startGame('NORMAL')">
+                <h3>NORMAL</h3>
+            </div>
+            <div class="mode-card" style="border-color:var(--red); width:120px" onpointerdown="startGame('ZOR')">
+                <h3>ZOR</h3>
+            </div>
+        </div>
+    </div>
+
+    <div id="invitationOverlay" class="overlay" style="display:none">
+        <h2 style="margin-bottom: 20px;">DÜELLO DAVETİ</h2>
+        <div class="copy-wrapper" style="width: 320px; text-align: center;">
+            <div id="invitationMessage"
+                style="color:var(--blue); font-size: 16px; margin-bottom:15px; line-height: 1.5;">
+                Bekleniyor...
+            </div>
+        </div>
+        <div id="invitationButtons" style="display:flex; gap:15px; margin-top: 15px;">
+            <div class="mode-card active-card" style="border-color:var(--green); width: 150px; height: 60px;"
+                onpointerdown="acceptInvitation()">
+                <h3>KABUL ET</h3>
+            </div>
+            <div class="mode-card active-card" style="border-color:var(--red); width: 150px; height: 60px;"
+                onpointerdown="rejectInvitation()">
+                <h3>REDDET</h3>
+            </div>
+        </div>
+    </div>
+
+    <div id="resultMenu" class="overlay">
+        <div id="resTitle" style="font-size: 60px; margin-bottom: 20px;">ZAFER!</div>
+        <div class="mode-card active-card" style="width:150px; height:70px" onpointerdown="location.reload()">
+            <h3>MENÜ</h3>
+        </div>
+    </div>
+
+    <div id="tutorialOverlay"
+        style="position:fixed; top:20px; width:100%; text-align:center; display:none; flex-direction:column; align-items:center; z-index:2000; pointer-events:none;">
+        <div style="background:rgba(0,0,0,0.8); border:2px solid var(--blue); padding:15px 30px; border-radius:10px;">
+            <h2 id="tutTitle" style="margin:0; font-size:24px; color:var(--blue)">EĞİTİM</h2>
+            <div id="tutText" style="font-size:18px; margin-top:5px; color:white">Yükleniyor...</div>
+            <div id="tutProgress" style="font-size:14px; margin-top:5px; color:#aaa"></div>
+        </div>
+    </div>
+
+    <div id="gameUI">
+        <div><span id="playerNameDisplay">OYUNCU</span>
+            <div class="bar-bg">
+                <div id="p1H" class="bar-fill" style="background:var(--blue)"></div>
+            </div>
+        </div>
+        <div style="text-align:right"><span id="botNameDisplay">BOT</span>
+            <div class="bar-bg">
+                <div id="p2H" class="bar-fill" style="background:var(--orange)"></div>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="controls">
+        <div id="joyBase">
+            <div id="joyStick"></div>
+        </div>
+        <div class="btn-container">
+            <div class="act-btn" id="btnPunch" onpointerdown="triggerAction('punch')">YUMRUK</div>
+            <div class="act-btn" id="btnKick" onpointerdown="triggerAction('kick')">TEKME</div>
+            <div class="act-btn dash-btn" id="btnDash" onpointerdown="triggerAction('dash')">DASH</div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const music = document.getElementById('bgMusic');
+
+        let isPlaying = false, moveDir = 0, jumpCmd = false, maxHP = 500;
+        let aiSpeed = 0.05, currentDiff = "NORMAL", gameFrame = 0, animationId = null;
+        let shake = 0, isOnline = false, amIHost = false, peer, conn, currentPeerId = "";
+        let playerName = localStorage.getItem('playerName') || "OYUNCU";
+        const GROUND_Y = 100;
+
+        // --- FIGHTER CLASS (Moved Up) ---
+        class Fighter {
+            constructor(color, isBot) {
+                this.color = color; this.isBot = isBot;
+                this.reset(0);
+            }
+            reset(x) {
+                this.x = x; this.y = canvas.height - GROUND_Y; this.hp = maxHP; this.vy = 0;
+                this.actionState = "IDLE"; this.actionTimer = 0;
+                this.cd = { punch: false, kick: false, dash: false };
+                this.isDead = false; this.onGround = true; this.facing = 1;
+            }
+            update() {
+                if (!this.isBot || !isOnline) {
+                    this.y += this.vy;
+                    if (this.y < canvas.height - GROUND_Y) { this.vy += 1; this.onGround = false; }
+                    else { this.y = canvas.height - GROUND_Y; this.vy = 0; this.onGround = true; }
+                    if (!this.isBot && jumpCmd && this.onGround) this.vy = -22;
+                    if (!isOnline) {
+                        let target = this.isBot ? p1 : bot;
+                        this.facing = (this.x < target.x) ? 1 : -1;
+                    }
+                }
+                if (this.actionState !== 'IDLE') {
+                    this.actionTimer += (this.actionState === 'DASH' ? 0.05 : 0.08);
+                    if (this.actionTimer >= 1) { this.actionState = 'IDLE'; this.actionTimer = 0; }
+                }
+                this.draw();
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.scale(this.facing * 1.5, 1.5);
+                let breath = Math.sin(gameFrame * 0.1) * 2;
+                let run = Math.sin(gameFrame * 0.4) * 15;
+                let isMoving = Math.abs(this.isBot ? 0 : moveDir) > 0 && this.onGround;
+
+                ctx.fillStyle = this.color; ctx.strokeStyle = "#fff"; ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.ellipse(0, -70 + breath, 25, 50, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                let hY = -130 + breath;
+                ctx.fillStyle = "#ffccaa"; ctx.beginPath(); ctx.arc(0, hY, 22, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = this.color; ctx.fillRect(-22, hY - 12, 44, 12);
+                ctx.beginPath(); ctx.moveTo(-20, hY - 5); ctx.lineTo(-60, hY - 5 + Math.sin(gameFrame * 0.2) * 15); ctx.lineTo(-60, hY + 5 + Math.sin(gameFrame * 0.2) * 15); ctx.fill();
+                ctx.fillStyle = "white"; ctx.beginPath(); ctx.moveTo(5, hY - 2); ctx.lineTo(18, hY - 5); ctx.lineTo(12, hY + 4); ctx.fill();
+
+                let fH_X = 20, fL_X = 15;
+                if (this.actionState === 'PUNCH') fH_X += 60 * Math.sin(this.actionTimer * Math.PI);
+                if (this.actionState === 'KICK') fL_X += 50 * Math.sin(this.actionTimer * Math.PI);
+                else if (isMoving) fL_X += run;
+
+                this.drawPart(fH_X, -80 + breath, 14, "#fff");
+                this.drawPart(fL_X, -10, 12, "#111");
+                this.drawPart(-15 + (isMoving ? -run : 0), -10, 12, "#111");
+                ctx.restore();
+            }
+
+            drawPart(x, y, r, c) { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
+            doAction(type) {
+                if (this.cd[type] || this.actionState !== 'IDLE' || !isPlaying) return;
+                this.cd[type] = true; this.actionState = type.toUpperCase(); this.actionTimer = 0;
+                if (!this.isBot) startCD(type === 'punch' ? 'btnPunch' : (type === 'kick' ? 'btnKick' : 'btnDash'), type === 'punch' ? 1 : (type === 'kick' ? 3 : 7), type.toUpperCase());
+                if (type === 'dash') this.x += this.facing * 300;
+                else {
+                    setTimeout(() => {
+                        let target = this.isBot ? p1 : bot;
+                        if (Math.abs(this.x - target.x) < 200) {
+                            if (isOnline && !this.isBot) {
+                                conn.send({ type: 'hit', damage: (type === 'kick' ? 35 : 15) });
+                            } else {
+                                shake = 15; target.hp -= (type === 'kick' ? 35 : 15); updateUI();
+                            }
+
+                            // Training mode hit counting
+                            if (currentDiff === 'TRAINING' && !this.isBot && tutorialStep < T_STEPS.length) {
+                                let s = T_STEPS[tutorialStep];
+                                if (s && s.id === type) {
+                                    trainHits++;
+                                    updateTutorialUI();
+                                }
+                            }
+                        }
+                    }, 150);
+                }
+                setTimeout(() => this.cd[type] = false, type === 'punch' ? 1000 : (type === 'kick' ? 3000 : 7000));
+            }
+        }
+
+        let p1 = new Fighter(getComputedStyle(document.documentElement).getPropertyValue('--blue'), false);
+        let bot = new Fighter(getComputedStyle(document.documentElement).getPropertyValue('--orange'), true);
+
+        // --- HELPER FUNCTIONS ---
+        function generateShortCode() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            let code = '';
+            for (let i = 0; i < 6; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return 'DUEL_' + code;
+        }
+
+        // --- COPY FUNCTION ---
+        function copyMyId() {
+            if (!currentPeerId) return;
+            // Extract just the 6-letter code for display
+            const displayCode = currentPeerId.replace('DUEL_', '');
+            navigator.clipboard.writeText(displayCode).then(() => {
+                const btn = document.getElementById('copyBtn');
+                const oldText = btn.innerText;
+                btn.innerText = "KOPYALANDI! ✅";
+                btn.style.background = "var(--green)";
+                setTimeout(() => {
+                    btn.innerText = oldText;
+                    btn.style.background = "var(--blue)";
+                }, 2000);
+            });
+        }
+
+        // --- ONLINE LOGIC ---
+        function openOnlinePanel() {
+            document.getElementById('onlinePanel').style.display = 'block';
+            if (!peer) {
+                const customId = generateShortCode();
+
+                // Show connecting message
+                document.getElementById('myIdDisplay').innerText = 'BAĞLANIYOR...';
+                document.getElementById('myIdDisplay').style.color = '#888';
+
+                // Set timeout for ID generation
+                const timeout = setTimeout(() => {
+                    if (!currentPeerId) {
+                        document.getElementById('myIdDisplay').innerText = 'BAĞLANTI HATASI!';
+                        document.getElementById('myIdDisplay').style.color = 'var(--red)';
+                        setTimeout(() => location.reload(), 2000);
+                    }
+                }, 10000); // 10 second timeout
+
+                peer = new Peer(customId);
+
+                peer.on('open', id => {
+                    clearTimeout(timeout);
+                    currentPeerId = id;
+                    // Display only the 6-letter code without the DUEL_ prefix
+                    const displayCode = id.replace('DUEL_', '');
+                    document.getElementById('myIdDisplay').innerText = displayCode;
+                    document.getElementById('myIdDisplay').style.color = 'var(--green)';
+                });
+
+                peer.on('error', err => {
+                    clearTimeout(timeout);
+                    console.error('Peer error:', err);
+                    document.getElementById('myIdDisplay').innerText = 'BAĞLANTI HATASI!';
+                    document.getElementById('myIdDisplay').style.color = 'var(--red)';
+                    setTimeout(() => location.reload(), 2000);
+                });
+
+                peer.on('connection', c => {
+                    conn = c;
+                    amIHost = true;
+
+                    // Wait for invitation request
+                    conn.on('data', data => {
+                        if (data.type === 'inviteRequest') {
+                            // Show invitation UI
+                            showMenu('invitationOverlay');
+                            document.getElementById('invitationButtons').style.display = 'flex';
+                            document.getElementById('invitationMessage').innerText =
+                                `${data.name} sizin kodunuzla maça katılmak istiyor.`;
+                        }
+                    });
+                });
+            }
+        }
+
+        function connectToFriend() {
+            const userCode = document.getElementById('targetPeerId').value.trim().toUpperCase();
+            if (userCode) {
+                // Add DUEL_ prefix to the code entered by user
+                const fullId = 'DUEL_' + userCode;
+                conn = peer.connect(fullId);
+                amIHost = false;
+
+                // Show waiting overlay
+                showMenu('invitationOverlay');
+                document.getElementById('invitationButtons').style.display = 'none';
+                document.getElementById('invitationMessage').innerText = 'Karşı tarafın onayı bekleniyor...';
+
+                conn.on('open', () => {
+                    // Send invitation request with player name
+                    conn.send({ type: 'inviteRequest', name: playerName });
+                });
+
+                conn.on('data', data => {
+                    if (data.type === 'inviteAccepted') {
+                        // Start countdown
+                        startMatchCountdown();
+                    } else if (data.type === 'inviteRejected') {
+                        document.getElementById('invitationMessage').innerText = 'Karşı taraf daveti reddetti.';
+                        setTimeout(() => location.reload(), 2000);
+                    }
+                });
+            }
+        }
+
+        // --- INVITATION ACCEPT/REJECT FUNCTIONS ---
+        function acceptInvitation() {
+            document.getElementById('invitationButtons').style.display = 'none';
+            conn.send({ type: 'inviteAccepted' });
+            startMatchCountdown();
+        }
+
+        function rejectInvitation() {
+            document.getElementById('invitationButtons').style.display = 'none';
+            document.getElementById('invitationMessage').innerText = 'Davet reddedildi.';
+            conn.send({ type: 'inviteRejected' });
+            setTimeout(() => location.reload(), 2000);
+        }
+
+        function startMatchCountdown() {
+            let countdown = 5;
+            document.getElementById('invitationButtons').style.display = 'none';
+            document.getElementById('invitationMessage').innerText = `Maça ${countdown} saniye içinde giriliyor...`;
+
+            const interval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    document.getElementById('invitationMessage').innerText = `Maça ${countdown} saniye içinde giriliyor...`;
+                } else {
+                    clearInterval(interval);
+                    setupConnection();
+                }
+            }, 1000);
+        }
+
+        // --- MATCHMAKING LOGIC ---
+        let seekingRoomIdx = 1;
+        const MAX_ROOMS = 10;
+
+        function startMatchmaking() {
+            showMenu('matchmakingOverlay');
+            document.getElementById('matchmakingStatus').innerText = "UYGUN ODA ARANIYOR...";
+            document.getElementById('roomDebug').innerText = "-";
+
+            if (peer) peer.destroy();
+            seekingRoomIdx = 1;
+            checkRoom(seekingRoomIdx);
+        }
+
+        function checkRoom(idx) {
+            if (idx > MAX_ROOMS) {
+                document.getElementById('matchmakingStatus').innerText = "ODA BULUNAMADI!";
+                setTimeout(() => location.reload(), 2000);
+                return;
+            }
+            document.getElementById('matchmakingStatus').innerText = "ODA KONTROL EDİLİYOR...";
+            document.getElementById('roomDebug').innerText = idx;
+
+
+            let tempPeer = new Peer();
+            let roomCheckTimeout;
+
+            tempPeer.on('open', myId => {
+                let c = tempPeer.connect(`multipvp_room_${idx}`);
+
+                // Set timeout for room check
+                roomCheckTimeout = setTimeout(() => {
+                    tempPeer.destroy();
+                    checkRoom(idx + 1);
+                }, 5000); // 5 second timeout per room
+
+                c.on('open', () => {
+                    c.on('data', data => {
+                        if (data.type === 'WELCOME') {
+                            clearTimeout(roomCheckTimeout);
+                            // Found match! Use this connection.
+                            peer = tempPeer;
+                            conn = c;
+                            amIHost = false;
+
+                            // Don't listen to data here anymore, setupConnection will handle it.
+                            c.off('data');
+
+                            // Show match found and countdown
+                            document.getElementById('matchmakingStatus').innerText = 'MAÇ BULUNDU!';
+                            let countdown = 5;
+                            document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
+
+                            const interval = setInterval(() => {
+                                countdown--;
+                                if (countdown > 0) {
+                                    document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
+                                } else {
+                                    clearInterval(interval);
+                                    setupConnection();
+                                }
+                            }, 1000);
+                        } else {
+                            // Busy
+                            clearTimeout(roomCheckTimeout);
+                            tempPeer.destroy();
+                            checkRoom(idx + 1);
+                        }
+                    });
+                });
+
+                tempPeer.on('error', err => {
+                    clearTimeout(roomCheckTimeout);
+                    tempPeer.destroy();
+                    if (err.type === 'peer-unavailable') {
+                        claimRoom(idx);
+                    } else {
+                        console.error('Matchmaking error:', err);
+                        checkRoom(idx + 1);
+                    }
+                });
+            });
+        }
+
+        function claimRoom(idx) {
+            document.getElementById('matchmakingStatus').innerText = "ODA KURULUYOR...";
+            document.getElementById('roomDebug').innerText = idx;
+            peer = new Peer(`multipvp_room_${idx}`);
+
+            peer.on('open', id => {
+                currentPeerId = id;
+                document.getElementById('matchmakingStatus').innerText = "RAKİP BEKLENİYOR...";
+                amIHost = true;
+            });
+
+            peer.on('error', err => {
+                console.error('Room claim error:', err);
+                document.getElementById('matchmakingStatus').innerText = "BAĞLANTI HATASI!";
+                setTimeout(() => location.reload(), 2000);
+            });
+
+            peer.on('connection', c => {
+                if (conn && conn.open) {
+                    c.on('open', () => c.send({ type: 'BUSY' }));
+                    setTimeout(() => c.close(), 500);
+                    return;
+                }
+                conn = c;
+                conn.on('open', () => {
+                    conn.send({ type: 'WELCOME' });
+
+                    // Show match found and countdown
+                    document.getElementById('matchmakingStatus').innerText = 'MAÇ BULUNDU!';
+                    let countdown = 5;
+                    document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
+
+                    const interval = setInterval(() => {
+                        countdown--;
+                        if (countdown > 0) {
+                            document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
+                        } else {
+                            clearInterval(interval);
+                            setupConnection();
+                        }
+                    }, 1000);
+                });
+            });
+        }
+
+
+        function connectToRoom(roomId) {
+            // Deprecated
+        }
+
+        function setupConnection() {
+            const start = () => {
+                isOnline = true;
+                // Send player name to opponent
+                conn.send({ type: 'playerName', name: playerName });
+                startGame('ONLINE');
+            };
+
+            if (conn.open) start();
+            else conn.on('open', start);
+
+            conn.on('data', data => {
+                if (data.type === 'playerName') {
+                    // Receive opponent's name
+                    document.getElementById('botNameDisplay').innerText = data.name;
+                } else if (data.type === 'hit') {
+                    p1.hp -= data.damage;
+                    shake = 15;
+                    updateUI();
+                } else if (data.type === 'state') {
+                    bot.x = data.x; bot.y = data.y; bot.hp = data.hp;
+                    bot.actionState = data.actionState; bot.actionTimer = data.actionTimer;
+                    bot.facing = data.facing;
+                    updateUI();
+                } else if (data.type === 'gameOver') {
+                    bot.hp = 0;
+                    updateUI();
+                }
+            });
+
+            conn.on('close', () => {
+                alert("Bağlantı koptu!");
+                location.reload();
+            });
+        }
+
+        // --- TRAINING CONSTANTS ---
+        let tutorialStep = 0;
+        let trainHits = 0;
+        let isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+        const T_STEPS = [
+            {
+                id: 'move',
+                pc: "Hareket et (A / D)",
+                mob: "Hareket et (Joystick)",
+                check: () => Math.abs(p1.x - 150) > 200, // Moved significantly
+                done: false
+            },
+            {
+                id: 'jump',
+                pc: "Zıpla (Space veya W)",
+                mob: "Zıpla (Joystick Yukarı)",
+                check: () => jumpCmd,
+                done: false
+            },
+            {
+                id: 'dash',
+                pc: "Dash At (L veya Shift)",
+                mob: "Dash At (DASH Tuşu)",
+                check: () => p1.actionState === 'DASH',
+                done: false
+            },
+            {
+                id: 'punch',
+                pc: "Yumruk At (J)",
+                mob: "Yumruk At (YUMRUK Tuşu)",
+                count: 3,
+                check: () => p1.actionState === 'PUNCH' && Math.abs(p1.x - bot.x) < 200, // Simple hit check
+                done: false
+            },
+            {
+                id: 'kick',
+                pc: "Tekme At (K)",
+                mob: "Tekme At (TEKME Tuşu)",
+                count: 3,
+                check: () => p1.actionState === 'KICK' && Math.abs(p1.x - bot.x) < 200,
+                done: false
+            }
+        ];
+
+        function startTraining() {
+            tutorialStep = 0;
+            trainHits = 0;
+            T_STEPS.forEach(s => s.done = false);
+            document.getElementById('tutorialOverlay').style.display = 'flex';
+            updateTutorialUI();
+        }
+
+        function updateTutorialUI() {
+            if (tutorialStep >= T_STEPS.length) {
+                document.getElementById('tutTitle').innerText = "TEBRİKLER!";
+                document.getElementById('tutText').innerText = "Eğitim Tamamlandı.";
+                document.getElementById('tutProgress').innerText = "Menüye dönülüyor...";
+                setTimeout(() => location.reload(), 3000);
+                return;
+            }
+
+            let s = T_STEPS[tutorialStep];
+            document.getElementById('tutTitle').innerText = "GÖREV " + (tutorialStep + 1);
+            let msg = isMobile ? s.mob : s.pc;
+            if (s.count) msg += ` (${trainHits}/${s.count})`;
+            document.getElementById('tutText').innerText = msg;
+            document.getElementById('tutProgress').innerText = "";
+        }
+
+        function updateTutorial() {
+            if (tutorialStep >= T_STEPS.length) return;
+
+            let s = T_STEPS[tutorialStep];
+
+            // Special hit counting for punch/kick
+            if (s.id === 'punch' || s.id === 'kick') {
+                // Logic handled in doAction mainly via flags, 
+                // but here we just check if step is done.
+                if (trainHits >= s.count) {
+                    nextStep();
+                }
+            } else {
+                if (s.check()) {
+                    nextStep();
+                }
+            }
+        }
+
+        function nextStep() {
+            trainHits = 0;
+            tutorialStep++;
+            updateTutorialUI();
+
+            // Small celebration effect?
+            ctx.save();
+            ctx.fillStyle = "rgba(0,255,0,0.3)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.restore();
+        }
+
+        // Modified loop for training
+        function animate() {
+            if (!isPlaying) return;
+            let sx = (Math.random() - 0.5) * shake; let sy = (Math.random() - 0.5) * shake; shake *= 0.9;
+            ctx.setTransform(1, 0, 0, 1, sx, sy);
+            ctx.fillStyle = "#0a0a0a"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            gameFrame++;
+
+            // Always update and draw players
+            p1.x += moveDir;
+            p1.update();
+            bot.update();
+
+            // Training Check
+            if (currentDiff === 'TRAINING') {
+                updateTutorial();
+            }
+
+            // Network / AI Logic
+            if (isOnline && conn && conn.open) {
+                conn.send({
+                    type: 'state',
+                    x: p1.x, y: p1.y, hp: p1.hp, actionState: p1.actionState, actionTimer: p1.actionTimer, facing: p1.facing
+                });
+            } else if (!isOnline && !bot.isDead && currentDiff !== 'TRAINING') {
+                // Normal Bot AI
+                let d = p1.x - bot.x; let ad = Math.abs(d);
+                if (ad > 250) bot.x += d > 0 ? 6 : -6;
+                if (Math.random() < aiSpeed && ad < 220) Math.random() < 0.7 ? bot.doAction('punch') : bot.doAction('kick');
+            }
+
+            // Boundaries
+            p1.x = Math.max(50, Math.min(canvas.width - 50, p1.x));
+            bot.x = Math.max(50, Math.min(canvas.width - 50, bot.x));
+
+            animationId = requestAnimationFrame(animate);
+        }
+
+
+        // --- GAME CORE ---
+        function showMenu(id) {
+            document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none');
+            document.getElementById(id).style.display = 'flex';
+            if (id === 'modeMenu') music.play().catch(() => { });
+        }
+
+        function startGame(diff) {
+            if (animationId) cancelAnimationFrame(animationId);
+            currentDiff = diff;
+            document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none');
+            document.getElementById('gameUI').style.display = 'flex';
+            document.getElementById('controls').style.display = 'flex';
+            document.getElementById('playerNameDisplay').innerText = playerName;
+            document.getElementById('botNameDisplay').innerText = isOnline ? "RAKİP" : `BOT (${diff})`;
+
+            if (diff === 'TRAINING') {
+                startTraining();
+                aiSpeed = 0; // Passive
+            } else {
+                aiSpeed = diff === 'KOLAY' ? 0.02 : (diff === 'NORMAL' ? 0.05 : 0.1);
+            }
+
+            resize();
+            p1.reset(amIHost ? 150 : canvas.width - 250);
+            bot.reset(amIHost ? canvas.width - 250 : 150);
+            isPlaying = true;
+            animate();
+        }
+
+
+
+        function animate() {
+            if (!isPlaying) return;
+            let sx = (Math.random() - 0.5) * shake; let sy = (Math.random() - 0.5) * shake; shake *= 0.9;
+            ctx.setTransform(1, 0, 0, 1, sx, sy);
+            ctx.fillStyle = "#0a0a0a"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            gameFrame++;
+
+            // Always update and draw players
+            p1.x += moveDir;
+            p1.update();
+            bot.update();
+
+            // Training Check
+            if (currentDiff === 'TRAINING') {
+                updateTutorial();
+            }
+
+            // Network / AI Logic
+            if (isOnline && conn && conn.open) {
+                conn.send({
+                    type: 'state',
+                    x: p1.x, y: p1.y, hp: p1.hp, actionState: p1.actionState, actionTimer: p1.actionTimer, facing: p1.facing
+                });
+            } else if (!isOnline && !bot.isDead && currentDiff !== 'TRAINING') {
+                // Normal Bot AI
+                let d = p1.x - bot.x; let ad = Math.abs(d);
+                if (ad > 250) bot.x += d > 0 ? 6 : -6;
+                if (Math.random() < aiSpeed && ad < 220) Math.random() < 0.7 ? bot.doAction('punch') : bot.doAction('kick');
+            }
+
+            // Boundaries
+            p1.x = Math.max(50, Math.min(canvas.width - 50, p1.x));
+            bot.x = Math.max(50, Math.min(canvas.width - 50, bot.x));
+
+            animationId = requestAnimationFrame(animate);
+        }
+
+        function updateUI() {
+            document.getElementById('p1H').style.width = (p1.hp / maxHP * 100) + "%";
+            document.getElementById('p2H').style.width = (bot.hp / maxHP * 100) + "%";
+            if ((p1.hp <= 0 || bot.hp <= 0) && isPlaying) {
+                isPlaying = false;
+                if (isOnline && p1.hp <= 0) {
+                    conn.send({ type: 'gameOver' });
+                }
+                document.getElementById('resTitle').innerText = p1.hp > 0 ? "ZAFER!" : "BOZGUN...";
+                document.getElementById('resultMenu').style.display = 'flex';
+            }
+        }
+
+        function startCD(id, sec, label) {
+            const btn = document.getElementById(id); let time = sec; btn.classList.add('cd');
+            btn.innerHTML = `<span class="cd-num">${time}</span>`;
+            const itv = setInterval(() => { time--; if (time > 0) btn.innerHTML = `<span class="cd-num">${time}</span>`; else { clearInterval(itv); btn.classList.remove('cd'); btn.innerHTML = label; } }, 1000);
+        }
+
+        window.triggerAction = (t) => p1.doAction(t);
+        const jBase = document.getElementById('joyBase'), jStick = document.getElementById('joyStick');
+        jBase.onpointermove = (e) => {
+            if (!e.buttons || !isPlaying) return;
+            const r = jBase.getBoundingClientRect();
+            const dx = e.clientX - (r.left + 70), dy = e.clientY - (r.top + 70);
+            const ang = Math.atan2(dy, dx), dist = Math.min(50, Math.sqrt(dx * dx + dy * dy));
+            jStick.style.transform = `translate(${Math.cos(ang) * dist}px, ${Math.sin(ang) * dist}px)`;
+            moveDir = dx > 20 ? 9 : (dx < -20 ? -9 : 0); jumpCmd = dy < -35;
+        };
+        jBase.onpointerup = () => { jStick.style.transform = 'none'; moveDir = 0; jumpCmd = false; };
+
+        // --- KEYBOARD CONTROLS ---
+        const pressedKeys = new Set();
+
+        window.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT') return;
+
+            pressedKeys.add(e.code);
+            updateMoveDir();
+
+            if (!e.repeat) {
+                switch (e.code) {
+                    case 'KeyJ': window.triggerAction('punch'); break;
+                    case 'KeyK': window.triggerAction('kick'); break;
+                    case 'KeyL':
+                    case 'ShiftLeft':
+                    case 'ShiftRight':
+                        window.triggerAction('dash');
+                        break;
+                }
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            pressedKeys.delete(e.code);
+            updateMoveDir();
+        });
+
+        function updateMoveDir() {
+            const left = pressedKeys.has('KeyA') || pressedKeys.has('ArrowLeft');
+            const right = pressedKeys.has('KeyD') || pressedKeys.has('ArrowRight');
+            const up = pressedKeys.has('KeyW') || pressedKeys.has('ArrowUp') || pressedKeys.has('Space');
+
+            if (left && !right) moveDir = -9;
+            else if (right && !left) moveDir = 9;
+            else moveDir = 0;
+
+            jumpCmd = up;
+        }
+
+        // --- PLAYER NAME MANAGEMENT ---
+        const playerNameInput = document.getElementById('playerNameInput');
+        const currentNameSpan = document.getElementById('currentNameSpan');
+        playerNameInput.value = playerName;
+        currentNameSpan.innerText = playerName;
+
+        playerNameInput.addEventListener('input', (e) => {
+            playerName = e.target.value.trim() || "OYUNCU";
+            localStorage.setItem('playerName', playerName);
+            currentNameSpan.innerText = playerName;
+        });
+
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.onresize = resize;
+    </script>
+</body>
+
+</html>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>MultiPvP</title>
+    <title>MultiPvP v19.1 - Copy & Play</title>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <style>
         * {
@@ -979,9 +979,9 @@
             }
 
             resize();
-            // Spawn characters at safe positions relative to canvas width
-            const leftSpawn = canvas.width * 0.15;  // 15% from left
-            const rightSpawn = canvas.width * 0.85; // 85% from left (15% from right)
+            // Use fixed spawn positions for consistent cross-platform play
+            const leftSpawn = 200;
+            const rightSpawn = 800;
             p1.reset(amIHost ? leftSpawn : rightSpawn);
             bot.reset(amIHost ? rightSpawn : leftSpawn);
             isPlaying = true;
@@ -1115,4 +1115,3 @@
 </body>
 
 </html>
-

@@ -979,8 +979,11 @@
             }
 
             resize();
-            p1.reset(amIHost ? 150 : canvas.width - 250);
-            bot.reset(amIHost ? canvas.width - 250 : 150);
+            // Spawn characters at safe positions relative to canvas width
+            const leftSpawn = canvas.width * 0.15;  // 15% from left
+            const rightSpawn = canvas.width * 0.85; // 85% from left (15% from right)
+            p1.reset(amIHost ? leftSpawn : rightSpawn);
+            bot.reset(amIHost ? rightSpawn : leftSpawn);
             isPlaying = true;
             animate();
         }

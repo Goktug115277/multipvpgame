@@ -419,16 +419,25 @@
                 this.reset(0);
             }
             reset(x) {
-                this.x = x; this.y = canvas.height - GROUND_Y; this.hp = maxHP; this.vy = 0;
-                this.actionState = "IDLE"; this.actionTimer = 0;
+                // Use fixed Y position for consistent cross-platform positioning
+                const groundLevel = 500; // Fixed ground level for all devices
+                this.x = x;
+                this.y = groundLevel;
+                this.hp = maxHP;
+                this.vy = 0;
+                this.actionState = "IDLE";
+                this.actionTimer = 0;
                 this.cd = { punch: false, kick: false, dash: false };
-                this.isDead = false; this.onGround = true; this.facing = 1;
+                this.isDead = false;
+                this.onGround = true;
+                this.facing = 1;
             }
             update() {
+                const groundLevel = 500; // Same fixed ground level
                 if (!this.isBot || !isOnline) {
                     this.y += this.vy;
-                    if (this.y < canvas.height - GROUND_Y) { this.vy += 1; this.onGround = false; }
-                    else { this.y = canvas.height - GROUND_Y; this.vy = 0; this.onGround = true; }
+                    if (this.y < groundLevel) { this.vy += 1; this.onGround = false; }
+                    else { this.y = groundLevel; this.vy = 0; this.onGround = true; }
                     if (!this.isBot && jumpCmd && this.onGround) this.vy = -22;
                     if (!isOnline) {
                         let target = this.isBot ? p1 : bot;

@@ -680,9 +680,13 @@
                 this.draw();
             }
             draw() {
+                // Dynamic scale based on canvas height
+                const baseScale = Math.max(0.6, canvas.height / 600); // Min scale 0.6, base on 600px height
+                const characterScale = baseScale * 1.5;
+
                 ctx.save();
                 ctx.translate(this.x, this.y);
-                ctx.scale(this.facing * 1.5, 1.5);
+                ctx.scale(this.facing * characterScale, characterScale);
                 let breath = Math.sin(gameFrame * 0.1) * 2;
                 let run = Math.sin(gameFrame * 0.4) * 15;
                 let isMoving = Math.abs(this.isBot ? 0 : moveDir) > 0 && this.onGround;

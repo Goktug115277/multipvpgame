@@ -256,6 +256,214 @@
             background: #000;
             pointer-events: none;
         }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .overlay h1 {
+                font-size: 50px !important;
+                margin-bottom: 30px !important;
+            }
+
+            .overlay h2 {
+                font-size: 20px !important;
+                margin-bottom: 15px !important;
+            }
+
+            .grid-container {
+                gap: 8px;
+                max-width: 95%;
+            }
+
+            .mode-card {
+                height: 100px;
+                font-size: 14px;
+            }
+
+            .mode-card h3 {
+                font-size: 16px;
+                margin: 5px 0;
+            }
+
+            .mode-card span {
+                font-size: 11px;
+            }
+
+            #onlinePanel {
+                width: 90%;
+                max-width: 280px;
+                padding: 15px;
+            }
+
+            #onlinePanel input {
+                font-size: 12px;
+                padding: 8px;
+            }
+
+            #gameUI {
+                top: 5px;
+                font-size: 12px;
+            }
+
+            .bar-bg {
+                height: 25px;
+                width: 160px;
+            }
+
+            #controls {
+                bottom: 10px;
+                height: 160px;
+                padding: 0 10px;
+            }
+
+            #joyBase {
+                width: 110px;
+                height: 110px;
+            }
+
+            #joyStick {
+                width: 50px;
+                height: 50px;
+                top: 30px;
+                left: 30px;
+            }
+
+            .btn-container {
+                gap: 10px;
+            }
+
+            .act-btn {
+                width: 75px;
+                height: 75px;
+                font-size: 11px;
+            }
+
+            .dash-btn {
+                height: 45px;
+                font-size: 14px;
+            }
+
+            .cd-num {
+                font-size: 24px;
+            }
+
+            #tutorialOverlay {
+                top: 10px;
+            }
+
+            #tutorialOverlay>div {
+                padding: 10px 20px !important;
+            }
+
+            #tutTitle {
+                font-size: 18px !important;
+            }
+
+            #tutText {
+                font-size: 14px !important;
+            }
+
+            #tutProgress {
+                font-size: 12px !important;
+            }
+
+            #resTitle {
+                font-size: 40px !important;
+            }
+
+            .copy-wrapper {
+                padding: 8px;
+            }
+
+            #myIdDisplay {
+                font-size: 10px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .overlay h1 {
+                font-size: 40px !important;
+                margin-bottom: 20px !important;
+            }
+
+            .overlay h2 {
+                font-size: 18px !important;
+            }
+
+            .grid-container {
+                gap: 6px;
+            }
+
+            .mode-card {
+                height: 85px;
+                font-size: 12px;
+            }
+
+            .mode-card h3 {
+                font-size: 14px;
+            }
+
+            .mode-card span {
+                font-size: 10px;
+            }
+
+            #onlinePanel {
+                width: 95%;
+                padding: 12px;
+            }
+
+            .bar-bg {
+                height: 20px;
+                width: 130px;
+            }
+
+            #controls {
+                bottom: 5px;
+                height: 140px;
+            }
+
+            #joyBase {
+                width: 90px;
+                height: 90px;
+            }
+
+            #joyStick {
+                width: 40px;
+                height: 40px;
+                top: 25px;
+                left: 25px;
+            }
+
+            .btn-container {
+                gap: 8px;
+            }
+
+            .act-btn {
+                width: 65px;
+                height: 65px;
+                font-size: 10px;
+            }
+
+            .dash-btn {
+                height: 40px;
+                font-size: 12px;
+            }
+
+            .cd-num {
+                font-size: 20px;
+            }
+
+            #tutTitle {
+                font-size: 16px !important;
+            }
+
+            #tutText {
+                font-size: 12px !important;
+            }
+
+            #resTitle {
+                font-size: 35px !important;
+            }
+        }
     </style>
 </head>
 
@@ -1060,10 +1268,15 @@
         jBase.onpointermove = (e) => {
             if (!e.buttons || !isPlaying) return;
             const r = jBase.getBoundingClientRect();
-            const dx = e.clientX - (r.left + 70), dy = e.clientY - (r.top + 70);
-            const ang = Math.atan2(dy, dx), dist = Math.min(50, Math.sqrt(dx * dx + dy * dy));
+            const centerX = r.width / 2;
+            const centerY = r.height / 2;
+            const maxDist = r.width / 2 - 20; // Dynamic max distance based on size
+            const dx = e.clientX - (r.left + centerX), dy = e.clientY - (r.top + centerY);
+            const ang = Math.atan2(dy, dx), dist = Math.min(maxDist, Math.sqrt(dx * dx + dy * dy));
             jStick.style.transform = `translate(${Math.cos(ang) * dist}px, ${Math.sin(ang) * dist}px)`;
-            moveDir = dx > 20 ? 9 : (dx < -20 ? -9 : 0); jumpCmd = dy < -35;
+            const threshold = r.width / 7; // Dynamic threshold
+            moveDir = dx > threshold ? 9 : (dx < -threshold ? -9 : 0);
+            jumpCmd = dy < -threshold * 1.5;
         };
         jBase.onpointerup = () => { jStick.style.transform = 'none'; moveDir = 0; jumpCmd = false; };
 

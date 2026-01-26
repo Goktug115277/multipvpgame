@@ -648,8 +648,8 @@
                 this.reset(0);
             }
             reset(x) {
-                // Use fixed Y position for consistent cross-platform positioning
-                const groundLevel = 500; // Fixed ground level for all devices
+                // Dynamic ground level based on canvas height
+                const groundLevel = canvas.height - 100; // 100px from bottom
                 this.x = x;
                 this.y = groundLevel;
                 this.hp = maxHP;
@@ -662,7 +662,7 @@
                 this.facing = 1;
             }
             update() {
-                const groundLevel = 500; // Same fixed ground level
+                const groundLevel = canvas.height - 100; // Same dynamic ground level
                 if (!this.isBot || !isOnline) {
                     this.y += this.vy;
                     if (this.y < groundLevel) { this.vy += 1; this.onGround = false; }

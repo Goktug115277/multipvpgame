@@ -682,7 +682,7 @@
             draw() {
                 // Dynamic scale based on canvas height
                 const baseScale = Math.max(0.6, canvas.height / 600); // Min scale 0.6, base on 600px height
-                const characterScale = baseScale * 1.5;
+                const characterScale = baseScale * 1.5 * 0.6; // Reduced by 40%
 
                 ctx.save();
                 ctx.translate(this.x, this.y);

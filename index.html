@@ -5,7 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>MultiPvP</title>
-    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js" onerror="loadPeerJSFallback()"></script>
+    <script>
+        // Fallback CDN for PeerJS if unpkg fails
+        function loadPeerJSFallback() {
+            console.log('Primary PeerJS CDN failed, loading fallback...');
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/peerjs@1.4.7/dist/peerjs.min.js';
+            script.onerror = () => {
+                console.error('All PeerJS CDNs failed!');
+                alert('Bağlantı kütüphanesi yüklenemedi! İnternet bağlantınızı kontrol edin ve sayfayı yenileyin.');
+            };
+            document.head.appendChild(script);
+        }
+    </script>
     <style>
         * {
             touch-action: none;
@@ -893,14 +906,32 @@
         let matchmakingActive = false;
 
         function startMatchmaking() {
-            showMenu('matchmakingOverlay');
-            document.getElementById('matchmakingStatus').innerText = "UYGUN ODA ARANIYOR...";
-            document.getElementById('roomDebug').innerText = "-";
+            // Check if PeerJS is loaded
+            if (typeof Peer === 'undefined') {
+                alert('Bağlantı kütüphanesi henüz yüklenmedi! Lütfen birkaç saniye bekleyip tekrar deneyin.');
+                return;
+            }
 
-            if (peer) peer.destroy();
+            showMenu('matchmakingOverlay');
+            document.getElementById('matchmakingStatus').innerText = "BAĞLANTI KURULUYOR...";
+            document.getElementById('roomDebug').innerText = "Hazırlanıyor...";
+
+            if (peer) {
+                try {
+                    peer.destroy();
+                } catch (e) {
+                    console.error('Error destroying old peer:', e);
+                }
+                peer = null;
+            }
+
             seekingRoomIdx = 1;
             matchmakingActive = true;
-            checkRoom(seekingRoomIdx);
+
+            // Small delay to ensure UI updates
+            setTimeout(() => {
+                checkRoom(seekingRoomIdx);
+            }, 100);
         }
 
         function checkRoom(idx) {
@@ -909,16 +940,27 @@
             if (idx > MAX_ROOMS) {
                 // Restart from room 1 instead of giving up
                 document.getElementById('matchmakingStatus').innerText = "YENİDEN ARANIYOR...";
+                document.getElementById('roomDebug').innerText = "Baştan başlıyor...";
                 setTimeout(() => {
                     seekingRoomIdx = 1;
                     checkRoom(1);
-                }, 1000);
+                }, 1500);
                 return;
             }
             document.getElementById('matchmakingStatus').innerText = "ODA KONTROL EDİLİYOR...";
-            document.getElementById('roomDebug').innerText = `${idx}/${MAX_ROOMS}`;
+            document.getElementById('roomDebug').innerText = `Oda ${idx}/${MAX_ROOMS}`;
 
-            let tempPeer = new Peer();
+            let tempPeer;
+            try {
+                tempPeer = new Peer();
+            } catch (e) {
+                console.error('Failed to create Peer:', e);
+                document.getElementById('matchmakingStatus').innerText = "BAĞLANTI HATASI!";
+                document.getElementById('roomDebug').innerText = "PeerJS başlatılamadı";
+                setTimeout(() => checkRoom(idx + 1), 1000);
+                return;
+            }
+
             let roomCheckTimeout;
             let connectionTimeout;
             let isResolved = false;

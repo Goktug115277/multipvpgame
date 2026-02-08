@@ -900,10 +900,10 @@
             }, 1000);
         }
 
-        // --- MATCHMAKING LOGIC ---
-        let seekingRoomIdx = 1;
-        const MAX_ROOMS = 20; // Increased room count
+        // --- DYNAMIC MATCHMAKING LOGIC ---
+        const LOBBY_ROOM = 'multipvp_lobby_v1';
         let matchmakingActive = false;
+        let lobbyCheckTimeout;
 
         function startMatchmaking() {
             // Check if PeerJS is loaded
@@ -925,111 +925,74 @@
                 peer = null;
             }
 
-            seekingRoomIdx = 1;
             matchmakingActive = true;
 
             // Small delay to ensure UI updates
             setTimeout(() => {
-                checkRoom(seekingRoomIdx);
+                tryJoinLobby();
             }, 100);
         }
 
-        function checkRoom(idx) {
-            if (!matchmakingActive) return; // Stop if matchmaking was cancelled
+        function tryJoinLobby() {
+            if (!matchmakingActive) return;
 
-            if (idx > MAX_ROOMS) {
-                // Restart from room 1 instead of giving up
-                document.getElementById('matchmakingStatus').innerText = "YENİDEN ARANIYOR...";
-                document.getElementById('roomDebug').innerText = "Baştan başlıyor...";
-                setTimeout(() => {
-                    seekingRoomIdx = 1;
-                    checkRoom(1);
-                }, 1500);
-                return;
-            }
-            document.getElementById('matchmakingStatus').innerText = "ODA KONTROL EDİLİYOR...";
-            document.getElementById('roomDebug').innerText = `Oda ${idx}/${MAX_ROOMS}`;
+            document.getElementById('matchmakingStatus').innerText = "LOBBY ARANIYOR...";
+            document.getElementById('roomDebug').innerText = "Rakip aranıyor...";
 
-            let tempPeer;
             try {
-                tempPeer = new Peer();
+                peer = new Peer();
             } catch (e) {
                 console.error('Failed to create Peer:', e);
                 document.getElementById('matchmakingStatus').innerText = "BAĞLANTI HATASI!";
                 document.getElementById('roomDebug').innerText = "PeerJS başlatılamadı";
-                setTimeout(() => checkRoom(idx + 1), 1000);
+                setTimeout(() => location.reload(), 2000);
                 return;
             }
 
-            let roomCheckTimeout;
-            let connectionTimeout;
-            let isResolved = false;
+            peer.on('open', myId => {
+                if (!matchmakingActive) return;
 
-            // Cleanup function to prevent memory leaks
-            const cleanup = () => {
-                if (isResolved) return;
-                isResolved = true;
-                clearTimeout(roomCheckTimeout);
-                clearTimeout(connectionTimeout);
-                if (tempPeer && !peer) {
-                    tempPeer.destroy();
-                }
-            };
+                console.log('My ID:', myId);
+                document.getElementById('matchmakingStatus').innerText = "LOBBY'YE BAĞLANILIYOR...";
 
-            tempPeer.on('open', myId => {
-                if (!matchmakingActive) {
-                    cleanup();
-                    return;
-                }
+                // Try to connect to lobby
+                conn = peer.connect(LOBBY_ROOM);
 
-                let c = tempPeer.connect(`multipvp_room_${idx}`);
-                let dataReceived = false;
+                let connectionEstablished = false;
 
-                // Faster timeout for room check - 2 seconds instead of 5
-                roomCheckTimeout = setTimeout(() => {
-                    if (!dataReceived) {
-                        cleanup();
-                        checkRoom(idx + 1);
+                // Timeout if lobby doesn't respond
+                lobbyCheckTimeout = setTimeout(() => {
+                    if (!connectionEstablished) {
+                        console.log('Lobby not found, creating one...');
+                        conn.close();
+                        createLobby();
                     }
                 }, 2000);
 
-                // Additional timeout for connection establishment
-                connectionTimeout = setTimeout(() => {
-                    if (!dataReceived) {
-                        cleanup();
-                        checkRoom(idx + 1);
-                    }
-                }, 1500);
+                conn.on('open', () => {
+                    connectionEstablished = true;
+                    clearTimeout(lobbyCheckTimeout);
+                    console.log('Connected to lobby!');
 
-                c.on('open', () => {
-                    clearTimeout(connectionTimeout);
+                    document.getElementById('matchmakingStatus').innerText = "LOBBY BULUNDU!";
+                    document.getElementById('roomDebug').innerText = "Bağlanıyor...";
 
-                    // Set a timeout for receiving data
-                    const dataTimeout = setTimeout(() => {
-                        if (!dataReceived) {
-                            cleanup();
-                            checkRoom(idx + 1);
-                        }
-                    }, 1000);
+                    // Wait for welcome message
+                    const welcomeTimeout = setTimeout(() => {
+                        console.log('No welcome received, creating own lobby...');
+                        conn.close();
+                        createLobby();
+                    }, 1500);
 
-                    c.on('data', data => {
-                        dataReceived = true;
-                        clearTimeout(dataTimeout);
-
+                    conn.on('data', data => {
+                        clearTimeout(welcomeTimeout);
                         if (data.type === 'WELCOME') {
-                            cleanup();
-                            // Found match! Use this connection.
-                            peer = tempPeer;
-                            conn = c;
                             amIHost = false;
                             matchmakingActive = false;
 
-                            // Don't listen to data here anymore, setupConnection will handle it.
-                            c.off('data');
-
-                            // Show match found and countdown
+                            // Match found!
                             document.getElementById('matchmakingStatus').innerText = 'MAÇ BULUNDU!';
-                            let countdown = 3; // Reduced from 5 to 3 seconds
+                            let countdown = 3;
                             document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
 
                             const interval = setInterval(() => {
@@ -1041,86 +1004,97 @@
                                     setupConnection();
                                 }
                             }, 1000);
-                        } else {
-                            // Busy
-                            cleanup();
-                            checkRoom(idx + 1);
                         }
                     });
                 });
 
-                c.on('error', err => {
-                    console.log('Connection error:', err);
-                    cleanup();
-                    checkRoom(idx + 1);
+                conn.on('error', err => {
+                    clearTimeout(lobbyCheckTimeout);
+                    console.log('Connection error, creating lobby:', err);
+                    createLobby();
                 });
             });
 
-            tempPeer.on('error', err => {
-                if (err.type === 'peer-unavailable') {
-                    cleanup();
-                    claimRoom(idx);
+            peer.on('error', err => {
+                console.error('Peer error:', err);
+                if (err.type === 'unavailable-id' || err.type === 'peer-unavailable') {
+                    // Lobby doesn't exist, create it
+                    createLobby();
                 } else {
-                    console.error('Matchmaking error:', err);
-                    cleanup();
-                    checkRoom(idx + 1);
+                    document.getElementById('matchmakingStatus').innerText = "BAĞLANTI HATASI!";
+                    document.getElementById('roomDebug').innerText = err.type || "Bilinmeyen hata";
+                    setTimeout(() => location.reload(), 2000);
                 }
             });
         }
 
-        function claimRoom(idx) {
+        function createLobby() {
             if (!matchmakingActive) return;
 
-            document.getElementById('matchmakingStatus').innerText = "ODA KURULUYOR...";
-            document.getElementById('roomDebug').innerText = `Oda ${idx}`;
-            peer = new Peer(`multipvp_room_${idx}`);
+            console.log('Creating lobby...');
+            document.getElementById('matchmakingStatus').innerText = "LOBBY OLUŞTURULUYOR...";
+            document.getElementById('roomDebug').innerText = "Rakip bekleniyor...";
 
-            let claimTimeout = setTimeout(() => {
-                if (!conn || !conn.open) {
-                    // Failed to claim room, try next one
+            // Destroy old peer if exists
+            if (peer) {
+                try {
                     peer.destroy();
-                    peer = null;
-                    checkRoom(idx + 1);
+                } catch (e) {
+                    console.error('Error destroying peer:', e);
                 }
-            }, 5000);
+            }
+
+            try {
+                peer = new Peer(LOBBY_ROOM);
+            } catch (e) {
+                console.error('Failed to create lobby:', e);
+                document.getElementById('matchmakingStatus').innerText = "LOBBY OLUŞTURULAMADI!";
+                setTimeout(() => location.reload(), 2000);
+                return;
+            }
 
             peer.on('open', id => {
+                console.log('Lobby created with ID:', id);
                 currentPeerId = id;
-                document.getElementById('matchmakingStatus').innerText = "RAKİP BEKLENİYOR...";
                 amIHost = true;
+                document.getElementById('matchmakingStatus').innerText = "RAKİP BEKLENİYOR...";
+                document.getElementById('roomDebug').innerText = "Lobby hazır";
             });
 
             peer.on('error', err => {
-                clearTimeout(claimTimeout);
-                console.error('Room claim error:', err);
+                console.error('Lobby creation error:', err);
 
-                // If room is already taken, try next room
                 if (err.type === 'unavailable-id') {
-                    peer = null;
-                    checkRoom(idx + 1);
+                    // Someone else just created the lobby, try joining again
+                    console.log('Lobby already exists, trying to join...');
+                    setTimeout(() => tryJoinLobby(), 500);
                 } else {
                     document.getElementById('matchmakingStatus').innerText = "BAĞLANTI HATASI!";
+                    document.getElementById('roomDebug').innerText = err.type || "Bilinmeyen hata";
                     setTimeout(() => location.reload(), 2000);
                 }
             });
 
             peer.on('connection', c => {
-                clearTimeout(claimTimeout);
-
                 if (conn && conn.open) {
+                    // Already have a connection, reject this one
+                    console.log('Already connected, rejecting new connection');
                     c.on('open', () => c.send({ type: 'BUSY' }));
                     setTimeout(() => c.close(), 500);
                     return;
                 }
+
+                console.log('Player joined lobby!');
                 conn = c;
                 matchmakingActive = false;
 
                 conn.on('open', () => {
+                    // Send welcome to joiner
                     conn.send({ type: 'WELCOME' });
 
-                    // Show match found and countdown
+                    // Match found!
                     document.getElementById('matchmakingStatus').innerText = 'MAÇ BULUNDU!';
-                    let countdown = 3; // Reduced from 5 to 3 seconds
+                    let countdown = 3;
                     document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
 
                     const interval = setInterval(() => {

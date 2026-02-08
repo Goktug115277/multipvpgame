@@ -889,7 +889,8 @@
 
         // --- MATCHMAKING LOGIC ---
         let seekingRoomIdx = 1;
-        const MAX_ROOMS = 10;
+        const MAX_ROOMS = 20; // Increased room count
+        let matchmakingActive = false;
 
         function startMatchmaking() {
             showMenu('matchmakingOverlay');
@@ -898,46 +899,95 @@
 
             if (peer) peer.destroy();
             seekingRoomIdx = 1;
+            matchmakingActive = true;
             checkRoom(seekingRoomIdx);
         }
 
         function checkRoom(idx) {
+            if (!matchmakingActive) return; // Stop if matchmaking was cancelled
+
             if (idx > MAX_ROOMS) {
-                document.getElementById('matchmakingStatus').innerText = "ODA BULUNAMADI!";
-                setTimeout(() => location.reload(), 2000);
+                // Restart from room 1 instead of giving up
+                document.getElementById('matchmakingStatus').innerText = "YENİDEN ARANIYOR...";
+                setTimeout(() => {
+                    seekingRoomIdx = 1;
+                    checkRoom(1);
+                }, 1000);
                 return;
             }
             document.getElementById('matchmakingStatus').innerText = "ODA KONTROL EDİLİYOR...";
-            document.getElementById('roomDebug').innerText = idx;
-
+            document.getElementById('roomDebug').innerText = `${idx}/${MAX_ROOMS}`;
 
             let tempPeer = new Peer();
             let roomCheckTimeout;
+            let connectionTimeout;
+            let isResolved = false;
+
+            // Cleanup function to prevent memory leaks
+            const cleanup = () => {
+                if (isResolved) return;
+                isResolved = true;
+                clearTimeout(roomCheckTimeout);
+                clearTimeout(connectionTimeout);
+                if (tempPeer && !peer) {
+                    tempPeer.destroy();
+                }
+            };
 
             tempPeer.on('open', myId => {
-                let c = tempPeer.connect(`multipvp_room_${idx}`);
+                if (!matchmakingActive) {
+                    cleanup();
+                    return;
+                }
 
-                // Set timeout for room check
+                let c = tempPeer.connect(`multipvp_room_${idx}`);
+                let dataReceived = false;
+
+                // Faster timeout for room check - 2 seconds instead of 5
                 roomCheckTimeout = setTimeout(() => {
-                    tempPeer.destroy();
-                    checkRoom(idx + 1);
-                }, 5000); // 5 second timeout per room
+                    if (!dataReceived) {
+                        cleanup();
+                        checkRoom(idx + 1);
+                    }
+                }, 2000);
+
+                // Additional timeout for connection establishment
+                connectionTimeout = setTimeout(() => {
+                    if (!dataReceived) {
+                        cleanup();
+                        checkRoom(idx + 1);
+                    }
+                }, 1500);
 
                 c.on('open', () => {
+                    clearTimeout(connectionTimeout);
+
+                    // Set a timeout for receiving data
+                    const dataTimeout = setTimeout(() => {
+                        if (!dataReceived) {
+                            cleanup();
+                            checkRoom(idx + 1);
+                        }
+                    }, 1000);
+
                     c.on('data', data => {
+                        dataReceived = true;
+                        clearTimeout(dataTimeout);
+
                         if (data.type === 'WELCOME') {
-                            clearTimeout(roomCheckTimeout);
+                            cleanup();
                             // Found match! Use this connection.
                             peer = tempPeer;
                             conn = c;
                             amIHost = false;
+                            matchmakingActive = false;
 
                             // Don't listen to data here anymore, setupConnection will handle it.
                             c.off('data');
 
                             // Show match found and countdown
                             document.getElementById('matchmakingStatus').innerText = 'MAÇ BULUNDU!';
-                            let countdown = 5;
+                            let countdown = 3; // Reduced from 5 to 3 seconds
                             document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
 
                             const interval = setInterval(() => {
@@ -951,30 +1001,46 @@
                             }, 1000);
                         } else {
                             // Busy
-                            clearTimeout(roomCheckTimeout);
-                            tempPeer.destroy();
+                            cleanup();
                             checkRoom(idx + 1);
                         }
                     });
                 });
 
-                tempPeer.on('error', err => {
-                    clearTimeout(roomCheckTimeout);
-                    tempPeer.destroy();
-                    if (err.type === 'peer-unavailable') {
-                        claimRoom(idx);
-                    } else {
-                        console.error('Matchmaking error:', err);
-                        checkRoom(idx + 1);
-                    }
+                c.on('error', err => {
+                    console.log('Connection error:', err);
+                    cleanup();
+                    checkRoom(idx + 1);
                 });
+            });
+
+            tempPeer.on('error', err => {
+                if (err.type === 'peer-unavailable') {
+                    cleanup();
+                    claimRoom(idx);
+                } else {
+                    console.error('Matchmaking error:', err);
+                    cleanup();
+                    checkRoom(idx + 1);
+                }
             });
         }
 
         function claimRoom(idx) {
+            if (!matchmakingActive) return;
+
             document.getElementById('matchmakingStatus').innerText = "ODA KURULUYOR...";
-            document.getElementById('roomDebug').innerText = idx;
+            document.getElementById('roomDebug').innerText = `Oda ${idx}`;
             peer = new Peer(`multipvp_room_${idx}`);
+
+            let claimTimeout = setTimeout(() => {
+                if (!conn || !conn.open) {
+                    // Failed to claim room, try next one
+                    peer.destroy();
+                    peer = null;
+                    checkRoom(idx + 1);
+                }
+            }, 5000);
 
             peer.on('open', id => {
                 currentPeerId = id;
@@ -983,24 +1049,36 @@
             });
 
             peer.on('error', err => {
+                clearTimeout(claimTimeout);
                 console.error('Room claim error:', err);
-                document.getElementById('matchmakingStatus').innerText = "BAĞLANTI HATASI!";
-                setTimeout(() => location.reload(), 2000);
+
+                // If room is already taken, try next room
+                if (err.type === 'unavailable-id') {
+                    peer = null;
+                    checkRoom(idx + 1);
+                } else {
+                    document.getElementById('matchmakingStatus').innerText = "BAĞLANTI HATASI!";
+                    setTimeout(() => location.reload(), 2000);
+                }
             });
 
             peer.on('connection', c => {
+                clearTimeout(claimTimeout);
+
                 if (conn && conn.open) {
                     c.on('open', () => c.send({ type: 'BUSY' }));
                     setTimeout(() => c.close(), 500);
                     return;
                 }
                 conn = c;
+                matchmakingActive = false;
+
                 conn.on('open', () => {
                     conn.send({ type: 'WELCOME' });
 
                     // Show match found and countdown
                     document.getElementById('matchmakingStatus').innerText = 'MAÇ BULUNDU!';
-                    let countdown = 5;
+                    let countdown = 3; // Reduced from 5 to 3 seconds
                     document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
 
                     const interval = setInterval(() => {

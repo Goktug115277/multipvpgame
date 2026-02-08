@@ -904,6 +904,8 @@
         const LOBBY_ROOM = 'multipvp_lobby_v1';
         let matchmakingActive = false;
         let lobbyCheckTimeout;
+        let retryCount = 0;
+        const MAX_RETRIES = 5;
 
         function startMatchmaking() {
             // Check if PeerJS is loaded
@@ -926,6 +928,7 @@
             }
 
             matchmakingActive = true;
+            retryCount = 0; // Reset retry counter
 
             // Small delay to ensure UI updates
             setTimeout(() => {
@@ -960,14 +963,14 @@
 
                 let connectionEstablished = false;
 
-                // Timeout if lobby doesn't respond
+                // Timeout if lobby doesn't respond - increased to 3 seconds
                 lobbyCheckTimeout = setTimeout(() => {
                     if (!connectionEstablished) {
                         console.log('Lobby not found, creating one...');
                         conn.close();
                         createLobby();
                     }
-                }, 2000);
+                }, 3000);
 
                 conn.on('open', () => {
                     connectionEstablished = true;
@@ -977,12 +980,12 @@
                     document.getElementById('matchmakingStatus').innerText = "LOBBY BULUNDU!";
                     document.getElementById('roomDebug').innerText = "Bağlanıyor...";
 
-                    // Wait for welcome message
+                    // Wait for welcome message - increased to 3 seconds
                     const welcomeTimeout = setTimeout(() => {
                         console.log('No welcome received, creating own lobby...');
                         conn.close();
                         createLobby();
-                    }, 1500);
+                    }, 3000);
 
                     conn.on('data', data => {
                         clearTimeout(welcomeTimeout);
@@ -1031,9 +1034,21 @@
         function createLobby() {
             if (!matchmakingActive) return;
 
-            console.log('Creating lobby...');
+            retryCount++;
+            console.log(`Creating lobby... (attempt ${retryCount}/${MAX_RETRIES})`);
+
+            // Check retry limit
+            if (retryCount > MAX_RETRIES) {
+                console.error('Max retries reached');
+                document.getElementById('matchmakingStatus').innerText = "BAĞLANTI KURULAMADI!";
+                document.getElementById('roomDebug').innerText = "Çok fazla deneme yapıldı";
+                matchmakingActive = false;
+                setTimeout(() => location.reload(), 3000);
+                return;
+            }
+
             document.getElementById('matchmakingStatus').innerText = "LOBBY OLUŞTURULUYOR...";
-            document.getElementById('roomDebug').innerText = "Rakip bekleniyor...";
+            document.getElementById('roomDebug').innerText = `Rakip bekleniyor... (${retryCount}/${MAX_RETRIES})`;
 
             // Destroy old peer if exists
             if (peer) {
@@ -1088,8 +1103,14 @@
                 conn = c;
                 matchmakingActive = false;
 
+                // Set up data listener FIRST
+                conn.on('data', data => {
+                    console.log('Received data from joiner:', data);
+                });
+
+                // Send WELCOME immediately when connection opens
                 conn.on('open', () => {
-                    // Send welcome to joiner
+                    console.log('Connection opened, sending WELCOME');
                     conn.send({ type: 'WELCOME' });
 
                     // Match found!
@@ -1107,6 +1128,27 @@
                         }
                     }, 1000);
                 });
+
+                // If connection is already open, send immediately
+                if (conn.open) {
+                    console.log('Connection already open, sending WELCOME immediately');
+                    conn.send({ type: 'WELCOME' });
+
+                    // Match found!
+                    document.getElementById('matchmakingStatus').innerText = 'MAÇ BULUNDU!';
+                    let countdown = 3;
+                    document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
+
+                    const interval = setInterval(() => {
+                        countdown--;
+                        if (countdown > 0) {
+                            document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
+                        } else {
+                            clearInterval(interval);
+                            setupConnection();
+                        }
+                    }, 1000);
+                }
             });
         }
 

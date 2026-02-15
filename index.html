@@ -658,13 +658,12 @@
         class Fighter {
             constructor(color, isBot) {
                 this.color = color; this.isBot = isBot;
+                this.normalizedY = 0; // Normalized Y position (0 = ground, positive = in air)
                 this.reset(0);
             }
             reset(x) {
-                // Dynamic ground level based on canvas height
-                const groundLevel = canvas.height - 100; // 100px from bottom
                 this.x = x;
-                this.y = groundLevel;
+                this.normalizedY = 0; // Start on ground
                 this.hp = maxHP;
                 this.vy = 0;
                 this.actionState = "IDLE";
@@ -674,18 +673,45 @@
                 this.onGround = true;
                 this.facing = 1;
             }
+            getScreenY() {
+                // Convert normalized Y to screen Y position
+                const groundLevel = canvas.height - 100;
+                return groundLevel - this.normalizedY;
+            }
+            setFromScreenY(screenY) {
+                // Convert screen Y to normalized Y
+                const groundLevel = canvas.height - 100;
+                this.normalizedY = groundLevel - screenY;
+            }
             update() {
-                const groundLevel = canvas.height - 100; // Same dynamic ground level
-                if (!this.isBot || !isOnline) {
-                    this.y += this.vy;
-                    if (this.y < groundLevel) { this.vy += 1; this.onGround = false; }
-                    else { this.y = groundLevel; this.vy = 0; this.onGround = true; }
+                // Only update physics for local player or in offline mode
+                const shouldUpdatePhysics = (!this.isBot || !isOnline);
+
+                if (shouldUpdatePhysics) {
+                    // Update normalized Y with velocity
+                    this.normalizedY -= this.vy; // Negative because screen Y increases downward
+
+                    // Apply gravity and ground collision
+                    if (this.normalizedY > 0) {
+                        this.vy += 1;
+                        this.onGround = false;
+                    } else {
+                        this.normalizedY = 0;
+                        this.vy = 0;
+                        this.onGround = true;
+                    }
+
+                    // Jump logic
                     if (!this.isBot && jumpCmd && this.onGround) this.vy = -22;
+
+                    // Facing direction (only in offline mode)
                     if (!isOnline) {
                         let target = this.isBot ? p1 : bot;
                         this.facing = (this.x < target.x) ? 1 : -1;
                     }
                 }
+
+                // Update action animations
                 if (this.actionState !== 'IDLE') {
                     this.actionTimer += (this.actionState === 'DASH' ? 0.05 : 0.08);
                     if (this.actionTimer >= 1) { this.actionState = 'IDLE'; this.actionTimer = 0; }
@@ -698,7 +724,7 @@
                 const characterScale = baseScale * 1.5 * 0.6; // Reduced by 40%
 
                 ctx.save();
-                ctx.translate(this.x, this.y);
+                ctx.translate(this.x, this.getScreenY()); // Use normalized Y position
                 ctx.scale(this.facing * characterScale, characterScale);
                 let breath = Math.sin(gameFrame * 0.1) * 2;
                 let run = Math.sin(gameFrame * 0.4) * 15;
@@ -1000,9 +1026,8 @@
 
                             const interval = setInterval(() => {
                                 countdown--;
-                                if (countdown > 0) {
-                                    document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
-                                } else {
+                                document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
+                                if (countdown <= 0) {
                                     clearInterval(interval);
                                     setupConnection();
                                 }
@@ -1120,9 +1145,8 @@
 
                     const interval = setInterval(() => {
                         countdown--;
-                        if (countdown > 0) {
-                            document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
-                        } else {
+                        document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
+                        if (countdown <= 0) {
                             clearInterval(interval);
                             setupConnection();
                         }
@@ -1141,9 +1165,8 @@
 
                     const interval = setInterval(() => {
                         countdown--;
-                        if (countdown > 0) {
-                            document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
-                        } else {
+                        document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
+                        if (countdown <= 0) {
                             clearInterval(interval);
                             setupConnection();
                         }
@@ -1177,8 +1200,12 @@
                     shake = 15;
                     updateUI();
                 } else if (data.type === 'state') {
-                    bot.x = data.x; bot.y = data.y; bot.hp = data.hp;
-                    bot.actionState = data.actionState; bot.actionTimer = data.actionTimer;
+                    // Receive opponent state with normalized Y position
+                    bot.x = data.x;
+                    bot.normalizedY = data.normalizedY; // Use normalized Y instead of screen Y
+                    bot.hp = data.hp;
+                    bot.actionState = data.actionState;
+                    bot.actionTimer = data.actionTimer;
                     bot.facing = data.facing;
                     updateUI();
                 } else if (data.type === 'gameOver') {
@@ -1376,6 +1403,7 @@
             gameFrame++;
 
             // Always update and draw players
+            // Only apply movement to local player
             p1.x += moveDir;
             p1.update();
             bot.update();
@@ -1387,9 +1415,15 @@
 
             // Network / AI Logic
             if (isOnline && conn && conn.open) {
+                // Send normalized Y position for cross-device compatibility
                 conn.send({
                     type: 'state',
-                    x: p1.x, y: p1.y, hp: p1.hp, actionState: p1.actionState, actionTimer: p1.actionTimer, facing: p1.facing
+                    x: p1.x,
+                    normalizedY: p1.normalizedY, // Send normalized Y instead of screen Y
+                    hp: p1.hp,
+                    actionState: p1.actionState,
+                    actionTimer: p1.actionTimer,
+                    facing: p1.facing
                 });
             } else if (!isOnline && !bot.isDead && currentDiff !== 'TRAINING') {
                 // Normal Bot AI

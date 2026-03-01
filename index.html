@@ -719,9 +719,14 @@
                 this.draw();
             }
             draw() {
-                // Fixed scale based on arena height (700 units) so characters look the same on all devices
-                const baseScale = 700 / 600; // ~1.17, relative to 600px reference
-                const characterScale = baseScale * 1.5 * 0.6;
+                // Device-aware character scale
+                const baseScale = 700 / 600; // ~1.17 base
+                const w = canvas.width;
+                let deviceMult;
+                if (w >= 1024) deviceMult = 0.40; // PC: %60 küçült
+                else if (w >= 768) deviceMult = 0.75; // Tablet: %25 küçült
+                else deviceMult = 0.30; // Telefon: %70 küçült
+                const characterScale = baseScale * 1.5 * deviceMult;
 
                 ctx.save();
                 ctx.translate(this.x, this.getScreenY()); // Use normalized Y position

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -700,8 +701,10 @@
                         this.onGround = true;
                     }
 
-                    // Jump logic
-                    if (!this.isBot && jumpCmd && this.onGround) this.vy = -22;
+                    // Jump logic - reduced height so chars stay on screen
+                    if (!this.isBot && jumpCmd && this.onGround) this.vy = -15;
+                    // Hard ceiling: max jump height = 350 arena units
+                    if (this.normalizedY > 350) { this.normalizedY = 350; this.vy = 0; }
 
                     // Facing direction (only in offline mode)
                     if (!isOnline) {
@@ -723,8 +726,8 @@
                 const w = canvas.width;
                 let deviceMult;
                 if (w >= 1024) deviceMult = 0.40; // PC: %60 küçült
-                else if (w >= 768) deviceMult = 0.75; // Tablet: %25 küçült
-                else deviceMult = 0.30; // Telefon: %70 küçült
+                else if (w >= 768) deviceMult = 0.55; // Tablet: %25 küçült
+                else deviceMult = 0.18; // Telefon: çok daha küçük
                 const characterScale = baseScale * 1.5 * deviceMult;
 
                 ctx.save();
@@ -762,7 +765,7 @@
                 else {
                     setTimeout(() => {
                         let target = this.isBot ? p1 : bot;
-                        if (Math.abs(this.x - target.x) < 200) {
+                        if (Math.abs(this.x - target.x) < 110) {
                             if (isOnline && !this.isBot) {
                                 conn.send({ type: 'hit', damage: (type === 'kick' ? 35 : 15) });
                             } else {
@@ -1506,7 +1509,7 @@
             const ang = Math.atan2(dy, dx), dist = Math.min(maxDist, Math.sqrt(dx * dx + dy * dy));
             jStick.style.transform = `translate(${Math.cos(ang) * dist}px, ${Math.sin(ang) * dist}px)`;
             const threshold = r.width / 7; // Dynamic threshold
-            moveDir = dx > threshold ? 9 : (dx < -threshold ? -9 : 0);
+            moveDir = dx > threshold ? 6 : (dx < -threshold ? -6 : 0);
             jumpCmd = dy < -threshold * 1.5;
         };
         jBase.onpointerup = () => { jStick.style.transform = 'none'; moveDir = 0; jumpCmd = false; };
@@ -1543,8 +1546,8 @@
             const right = pressedKeys.has('KeyD') || pressedKeys.has('ArrowRight');
             const up = pressedKeys.has('KeyW') || pressedKeys.has('ArrowUp') || pressedKeys.has('Space');
 
-            if (left && !right) moveDir = -9;
-            else if (right && !left) moveDir = 9;
+            if (left && !right) moveDir = -6;
+            else if (right && !left) moveDir = 6;
             else moveDir = 0;
 
             jumpCmd = up;
@@ -1586,5 +1589,3 @@
 </body>
 
 </html>
-
-

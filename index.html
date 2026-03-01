@@ -674,13 +674,13 @@
                 this.facing = 1;
             }
             getScreenY() {
-                // Convert normalized Y to screen Y position
-                const groundLevel = canvas.height - 100;
+                // Convert normalized Y to arena Y position (fixed 700-unit tall arena, ground at y=600)
+                const groundLevel = 600;
                 return groundLevel - this.normalizedY;
             }
             setFromScreenY(screenY) {
-                // Convert screen Y to normalized Y
-                const groundLevel = canvas.height - 100;
+                // Convert arena Y to normalized Y
+                const groundLevel = 600;
                 this.normalizedY = groundLevel - screenY;
             }
             update() {
@@ -1321,43 +1321,6 @@
             ctx.restore();
         }
 
-        // Modified loop for training
-        function animate() {
-            if (!isPlaying) return;
-            let sx = (Math.random() - 0.5) * shake; let sy = (Math.random() - 0.5) * shake; shake *= 0.9;
-            ctx.setTransform(1, 0, 0, 1, sx, sy);
-            ctx.fillStyle = "#0a0a0a"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            gameFrame++;
-
-            // Always update and draw players
-            p1.x += moveDir;
-            p1.update();
-            bot.update();
-
-            // Training Check
-            if (currentDiff === 'TRAINING') {
-                updateTutorial();
-            }
-
-            // Network / AI Logic
-            if (isOnline && conn && conn.open) {
-                conn.send({
-                    type: 'state',
-                    x: p1.x, y: p1.y, hp: p1.hp, actionState: p1.actionState, actionTimer: p1.actionTimer, facing: p1.facing
-                });
-            } else if (!isOnline && !bot.isDead && currentDiff !== 'TRAINING') {
-                // Normal Bot AI
-                let d = p1.x - bot.x; let ad = Math.abs(d);
-                if (ad > 250) bot.x += d > 0 ? 6 : -6;
-                if (Math.random() < aiSpeed && ad < 220) Math.random() < 0.7 ? bot.doAction('punch') : bot.doAction('kick');
-            }
-
-            // Boundaries
-            p1.x = Math.max(50, Math.min(canvas.width - 50, p1.x));
-            bot.x = Math.max(50, Math.min(canvas.width - 50, bot.x));
-
-            animationId = requestAnimationFrame(animate);
-        }
 
 
         // --- GAME CORE ---
@@ -1398,8 +1361,40 @@
         function animate() {
             if (!isPlaying) return;
             let sx = (Math.random() - 0.5) * shake; let sy = (Math.random() - 0.5) * shake; shake *= 0.9;
-            ctx.setTransform(1, 0, 0, 1, sx, sy);
-            ctx.fillStyle = "#0a0a0a"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Clear canvas
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.fillStyle = "#0a0a0a";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Apply fixed arena viewport (no camera follow)
+            const arenaScale = window._arenaScale || 1;
+            const arenaOffsetX = window._arenaOffsetX || 0;
+            const arenaOffsetY = window._arenaOffsetY || 0;
+            ctx.setTransform(arenaScale, 0, 0, arenaScale, arenaOffsetX + sx, arenaOffsetY + sy);
+
+            // Draw arena background
+            ctx.fillStyle = "#0a0a0a";
+            ctx.fillRect(ARENA_LEFT - 20, 0, ARENA_WIDTH + 40, canvas.height / arenaScale + 100);
+
+            // Draw arena boundary lines (white)
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+            ctx.lineWidth = 4 / arenaScale;
+            ctx.setLineDash([12 / arenaScale, 6 / arenaScale]);
+            // Left boundary
+            ctx.beginPath();
+            ctx.moveTo(ARENA_LEFT, 0);
+            ctx.lineTo(ARENA_LEFT, canvas.height / arenaScale);
+            ctx.stroke();
+            // Right boundary
+            ctx.beginPath();
+            ctx.moveTo(ARENA_RIGHT, 0);
+            ctx.lineTo(ARENA_RIGHT, canvas.height / arenaScale);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.restore();
+
             gameFrame++;
 
             // Always update and draw players
@@ -1432,9 +1427,9 @@
                 if (Math.random() < aiSpeed && ad < 220) Math.random() < 0.7 ? bot.doAction('punch') : bot.doAction('kick');
             }
 
-            // Boundaries
-            p1.x = Math.max(50, Math.min(canvas.width - 50, p1.x));
-            bot.x = Math.max(50, Math.min(canvas.width - 50, bot.x));
+            // Boundaries - clamp to arena
+            p1.x = Math.max(ARENA_LEFT + 20, Math.min(ARENA_RIGHT - 20, p1.x));
+            bot.x = Math.max(ARENA_LEFT + 20, Math.min(ARENA_RIGHT - 20, bot.x));
 
             animationId = requestAnimationFrame(animate);
         }
@@ -1526,7 +1521,28 @@
             currentNameSpan.innerText = playerName;
         });
 
-        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        // Arena constants: center at 500, left boundary at 100, right at 900 (±400)
+        const ARENA_CENTER = 500;
+        const ARENA_HALF = 400;
+        const ARENA_LEFT = ARENA_CENTER - ARENA_HALF;  // 100
+        const ARENA_RIGHT = ARENA_CENTER + ARENA_HALF;  // 900
+        const ARENA_WIDTH = ARENA_HALF * 2;             // 800
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            // Compute scale so the full arena (ARENA_WIDTH + some padding) fits horizontally
+            const padding = 40; // pixels of padding on each side in arena space
+            const scaleX = canvas.width / (ARENA_WIDTH + padding * 2);
+            const scaleY = canvas.height / 700; // arena is ~700 units tall
+            const scale = Math.min(scaleX, scaleY, 1); // never upscale past 1:1
+
+            window._arenaScale = scale;
+            // Center the arena on screen
+            window._arenaOffsetX = (canvas.width - ARENA_WIDTH * scale) / 2 - ARENA_LEFT * scale;
+            window._arenaOffsetY = (canvas.height - 700 * scale) / 2;
+        }
         window.onresize = resize;
     </script>
 </body>

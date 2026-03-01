@@ -650,7 +650,6 @@
 
         let isPlaying = false, moveDir = 0, jumpCmd = false, maxHP = 500;
         let aiSpeed = 0.05, currentDiff = "NORMAL", gameFrame = 0, animationId = null;
-        let cameraX = 0; // Camera offset for viewport
         let shake = 0, isOnline = false, amIHost = false, peer, conn, currentPeerId = "";
         let playerName = localStorage.getItem('playerName') || "OYUNCU";
         const GROUND_Y = 100;
@@ -1020,14 +1019,8 @@
                             amIHost = false;
                             matchmakingActive = false;
 
-                            // Match found! Send ready signal
+                            // Match found!
                             document.getElementById('matchmakingStatus').innerText = 'MAÇ BULUNDU!';
-                            document.getElementById('roomDebug').innerText = 'Hazırlanıyor...';
-
-                            // Send ready signal to host
-                            conn.send({ type: 'READY' });
-                        } else if (data.type === 'START_COUNTDOWN') {
-                            // Start synchronized countdown
                             let countdown = 3;
                             document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
 
@@ -1138,24 +1131,6 @@
                 // Set up data listener FIRST
                 conn.on('data', data => {
                     console.log('Received data from joiner:', data);
-                    if (data.type === 'READY') {
-                        // Joiner is ready, start synchronized countdown
-                        console.log('Joiner ready, starting countdown');
-                        conn.send({ type: 'START_COUNTDOWN' });
-
-                        // Start countdown on host too
-                        let countdown = 3;
-                        document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
-
-                        const interval = setInterval(() => {
-                            countdown--;
-                            document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
-                            if (countdown <= 0) {
-                                clearInterval(interval);
-                                setupConnection();
-                            }
-                        }, 1000);
-                    }
                 });
 
                 // Send WELCOME immediately when connection opens
@@ -1163,9 +1138,19 @@
                     console.log('Connection opened, sending WELCOME');
                     conn.send({ type: 'WELCOME' });
 
-                    // Match found! Wait for joiner to be ready
+                    // Match found!
                     document.getElementById('matchmakingStatus').innerText = 'MAÇ BULUNDU!';
-                    document.getElementById('roomDebug').innerText = 'Rakip hazırlanıyor...';
+                    let countdown = 3;
+                    document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
+
+                    const interval = setInterval(() => {
+                        countdown--;
+                        document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
+                        if (countdown <= 0) {
+                            clearInterval(interval);
+                            setupConnection();
+                        }
+                    }, 1000);
                 });
 
                 // If connection is already open, send immediately
@@ -1173,9 +1158,19 @@
                     console.log('Connection already open, sending WELCOME immediately');
                     conn.send({ type: 'WELCOME' });
 
-                    // Match found! Wait for joiner to be ready
+                    // Match found!
                     document.getElementById('matchmakingStatus').innerText = 'MAÇ BULUNDU!';
-                    document.getElementById('roomDebug').innerText = 'Rakip hazırlanıyor...';
+                    let countdown = 3;
+                    document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
+
+                    const interval = setInterval(() => {
+                        countdown--;
+                        document.getElementById('roomDebug').innerText = `${countdown} saniye...`;
+                        if (countdown <= 0) {
+                            clearInterval(interval);
+                            setupConnection();
+                        }
+                    }, 1000);
                 }
             });
         }
@@ -1402,28 +1397,9 @@
 
         function animate() {
             if (!isPlaying) return;
-
-            // Camera system: keep both players visible
-            const minX = Math.min(p1.x, bot.x);
-            const maxX = Math.max(p1.x, bot.x);
-            const centerX = (minX + maxX) / 2;
-            const playersDistance = maxX - minX;
-
-            // Calculate required zoom to fit both players
-            const margin = 200; // Minimum margin from screen edge
-            const requiredWidth = playersDistance + margin * 2;
-            const targetScale = Math.min(1, canvas.width / requiredWidth);
-
-            // Smooth camera follow
-            const targetCameraX = canvas.width / 2 - centerX;
-            cameraX += (targetCameraX - cameraX) * 0.1; // Smooth interpolation
-
             let sx = (Math.random() - 0.5) * shake; let sy = (Math.random() - 0.5) * shake; shake *= 0.9;
-
-            // Apply camera transform
-            ctx.setTransform(targetScale, 0, 0, targetScale, cameraX * targetScale + sx, sy);
-            ctx.fillStyle = "#0a0a0a";
-            ctx.fillRect(-cameraX / targetScale, 0, canvas.width / targetScale, canvas.height / targetScale);
+            ctx.setTransform(1, 0, 0, 1, sx, sy);
+            ctx.fillStyle = "#0a0a0a"; ctx.fillRect(0, 0, canvas.width, canvas.height);
             gameFrame++;
 
             // Always update and draw players
@@ -1456,10 +1432,9 @@
                 if (Math.random() < aiSpeed && ad < 220) Math.random() < 0.7 ? bot.doAction('punch') : bot.doAction('kick');
             }
 
-            // Boundaries - use larger virtual arena
-            const arenaWidth = 2000; // Virtual arena width
-            p1.x = Math.max(50, Math.min(arenaWidth - 50, p1.x));
-            bot.x = Math.max(50, Math.min(arenaWidth - 50, bot.x));
+            // Boundaries
+            p1.x = Math.max(50, Math.min(canvas.width - 50, p1.x));
+            bot.x = Math.max(50, Math.min(canvas.width - 50, bot.x));
 
             animationId = requestAnimationFrame(animate);
         }

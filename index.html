@@ -1569,16 +1569,13 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
 
-            // Compute scale so the full arena fits with minimal padding
-            const padding = 10; // small padding on each side in arena space
-            const scaleX = canvas.width / (ARENA_WIDTH + padding * 2);
-            const scaleY = canvas.height / 700; // arena is ~700 units tall
-            const scale = Math.min(scaleX, scaleY); // scale to fill screen on all devices
-
+            // Scale so arena fills the full width → boundary lines sit at screen edges
+            const scale = canvas.width / ARENA_WIDTH;
             window._arenaScale = scale;
-            // Center the arena on screen
-            window._arenaOffsetX = (canvas.width - ARENA_WIDTH * scale) / 2 - ARENA_LEFT * scale;
-            window._arenaOffsetY = (canvas.height - 700 * scale) / 2;
+            // Left boundary (ARENA_LEFT) maps to x=0 on screen
+            window._arenaOffsetX = -ARENA_LEFT * scale;
+            // Ground (y=600 in arena) sits at 78% of screen height, keeps chars above mobile controls
+            window._arenaOffsetY = canvas.height * 0.78 - 600 * scale;
         }
         window.onresize = resize;
     </script>

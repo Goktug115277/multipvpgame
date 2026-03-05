@@ -765,7 +765,9 @@
                 else {
                     setTimeout(() => {
                         let target = this.isBot ? p1 : bot;
-                        if (Math.abs(this.x - target.x) < 110) {
+                        const dx = Math.abs(this.x - target.x);
+                        const dy = Math.abs(this.normalizedY - target.normalizedY);
+                        if (dx < 110 && dy < 150) {
                             if (isOnline && !this.isBot) {
                                 conn.send({ type: 'hit', damage: (type === 'kick' ? 35 : 15) });
                             } else {

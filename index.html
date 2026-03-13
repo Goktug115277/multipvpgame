@@ -882,16 +882,25 @@
                     if (d.status === 'accepted') {
                         duelRef.off('value');
                         roomRef = db.ref('rooms/' + code);
-                        roomRef.child('guestName').set(playerName);
                         roomRef.onDisconnect().child('status').set('done');
-                        // Host'un startAt yazmasını bekle
-                        const startAtRef = roomRef.child('startAt');
-                        startAtRef.on('value', snapSt => {
-                            const startAt = snapSt.val();
-                            if (!startAt) return;
-                            startAtRef.off();
-                            waitForStart(d.hostName || 'RAKİP', startAt);
+                        // Host'un startAt yazmasını bekle - tüm room objesini dinle
+                        const hostName = d.hostName || 'RAKİP';
+                        let startAtReceived = false;
+                        roomRef.on('value', snapRoom => {
+                            const room = snapRoom.val();
+                            if (!room || !room.startAt || startAtReceived) return;
+                            startAtReceived = true;
+                            roomRef.off('value');
+                            waitForStart(hostName, room.startAt);
                         });
+                        // Güvenlik: 10sn sonra başla yoksa hatala
+                        setTimeout(() => {
+                            if (!startAtReceived) {
+                                roomRef.off('value');
+                                document.getElementById('invitationMessage').innerText = 'Bağlantı hatası. Yeniden deneniyor...';
+                                setTimeout(() => location.reload(), 2000);
+                            }
+                        }, 10000);
                     } else if (d.status === 'rejected') {
                         duelRef.off('value');
                         document.getElementById('invitationMessage').innerText = 'Karşı taraf daveti reddetti.';
@@ -908,11 +917,13 @@
             const duelRef = db.ref('duels/' + currentDuelCode);
             duelRef.update({ status: 'accepted' });
             roomRef = db.ref('rooms/' + currentDuelCode);
-            const startAt = Date.now() + 4000;
-            roomRef.set({ hostName: playerName, status: 'playing', startAt: startAt });
-            roomRef.onDisconnect().remove();
+            const startAt = Date.now() + 5000; // 5sn - guest'e Firebase'e yazma süresi tanı
             document.getElementById('invitationMessage').innerText = 'Davet kabul edildi! Maç başlıyor...';
-            waitForStart(guestName, startAt);
+            // Önce room verisini yaz, yazıldıktan SONRA başlat (race condition önleme)
+            roomRef.set({ hostName: playerName, status: 'playing', startAt: startAt }).then(() => {
+                roomRef.onDisconnect().remove();
+                waitForStart(guestName, startAt);
+            });
         }
 
         function rejectInvitation() {
@@ -959,7 +970,7 @@
                         if (d && d.match && d.match.hostId === myPlayerId) {
                             matchmakingActive = false;
                             lobbyRef.off();
-                            const startAt = Date.now() + 4000; // 4 saniye sonra başla
+                            const startAt = Date.now() + 5000; // 5 saniye sonra başla (daha fazla süre)
                             roomRef = db.ref('rooms/' + d.match.roomId);
                             // Host odayı kurar ve startAt timestamp'ini yazar
                             roomRef.set({
@@ -967,11 +978,12 @@
                                 guestName: d.match.guestName,
                                 status: 'playing',
                                 startAt: startAt
+                            }).then(() => {
+                                // Oda yazıldıktan sonra host başlatır
+                                roomRef.onDisconnect().remove();
+                                setTimeout(() => lobbyRef.remove(), 5000);
+                                waitForStart(d.match.guestName, startAt);
                             });
-                            roomRef.onDisconnect().remove();
-                            setTimeout(() => lobbyRef.remove(), 4000);
-                            // Host da aynı timestamp'e göre bekler
-                            waitForStart(d.match.guestName, startAt);
                         }
                     });
 
@@ -979,19 +991,28 @@
                     // --- GUEST: Eşleşme bulundu ---
                     matchmakingActive = false; amIHost = false; myRole = 'guest';
                     roomRef = db.ref('rooms/' + val.match.roomId);
-                    roomRef.child('guestName').set(playerName);
                     roomRef.onDisconnect().child('status').set('done');
 
                     updateMatchStatus('MAÇ BULUNDU!', 'Host bekleniyor...');
 
-                    // Host'un startAt yazmasını bekle (room henüz oluşmamış olabilir)
-                    const startAtRef = roomRef.child('startAt');
-                    startAtRef.on('value', snap => {
-                        const startAt = snap.val();
-                        if (!startAt) return;
-                        startAtRef.off();
-                        waitForStart(val.match.hostName, startAt);
+                    // Tüm room objesini dinle - startAt yazılınca başla
+                    let startAtReceived = false;
+                    const hostName = val.match.hostName;
+                    roomRef.on('value', snapRoom => {
+                        const room = snapRoom.val();
+                        if (!room || !room.startAt || startAtReceived) return;
+                        startAtReceived = true;
+                        roomRef.off('value');
+                        waitForStart(hostName, room.startAt);
                     });
+                    // Güvenlik: 15sn sonra hâlâ başlamadıysa hata
+                    setTimeout(() => {
+                        if (!startAtReceived) {
+                            roomRef.off('value');
+                            updateMatchStatus('BAĞLANTI HATASI', 'Yeniden deniyor...');
+                            setTimeout(() => location.reload(), 2000);
+                        }
+                    }, 15000);
                 }
             });
         }

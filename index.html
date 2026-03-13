@@ -884,7 +884,14 @@
                         roomRef = db.ref('rooms/' + code);
                         roomRef.child('guestName').set(playerName);
                         roomRef.onDisconnect().child('status').set('done');
-                        setupFirebaseGame(d.hostName || 'RAKİP');
+                        // Host'un startAt yazmasını bekle
+                        const startAtRef = roomRef.child('startAt');
+                        startAtRef.on('value', snapSt => {
+                            const startAt = snapSt.val();
+                            if (!startAt) return;
+                            startAtRef.off();
+                            waitForStart(d.hostName || 'RAKİP', startAt);
+                        });
                     } else if (d.status === 'rejected') {
                         duelRef.off('value');
                         document.getElementById('invitationMessage').innerText = 'Karşı taraf daveti reddetti.';
@@ -901,10 +908,11 @@
             const duelRef = db.ref('duels/' + currentDuelCode);
             duelRef.update({ status: 'accepted' });
             roomRef = db.ref('rooms/' + currentDuelCode);
-            roomRef.set({ hostName: playerName, status: 'playing' });
+            const startAt = Date.now() + 4000;
+            roomRef.set({ hostName: playerName, status: 'playing', startAt: startAt });
             roomRef.onDisconnect().remove();
             document.getElementById('invitationMessage').innerText = 'Davet kabul edildi! Maç başlıyor...';
-            setTimeout(() => setupFirebaseGame(guestName), 1000);
+            waitForStart(guestName, startAt);
         }
 
         function rejectInvitation() {
@@ -938,44 +946,71 @@
                 if (!matchmakingActive) return;
                 if (error) { updateMatchStatus('HATA!', error.message); return; }
                 const val = snapshot.val();
+
                 if (val && val.waiting && val.waiting.id === myPlayerId) {
-                    // Biz bekliyoruz (host)
+                    // --- HOST: Bekliyoruz ---
                     amIHost = true; myRole = 'host';
                     updateMatchStatus('RAKİP BEKLENİYOR...', 'Lobby hazır');
                     lobbyRef.onDisconnect().remove();
+
                     lobbyRef.on('value', snap => {
                         if (!matchmakingActive) return;
                         const d = snap.val();
                         if (d && d.match && d.match.hostId === myPlayerId) {
-                            matchmakingActive = false; lobbyRef.off();
+                            matchmakingActive = false;
+                            lobbyRef.off();
+                            const startAt = Date.now() + 4000; // 4 saniye sonra başla
                             roomRef = db.ref('rooms/' + d.match.roomId);
-                            roomRef.set({ hostName: playerName, status: 'playing' });
+                            // Host odayı kurar ve startAt timestamp'ini yazar
+                            roomRef.set({
+                                hostName: playerName,
+                                guestName: d.match.guestName,
+                                status: 'playing',
+                                startAt: startAt
+                            });
                             roomRef.onDisconnect().remove();
-                            setTimeout(() => lobbyRef.remove(), 3000);
-                            startOnlineCountdown(d.match.guestName);
+                            setTimeout(() => lobbyRef.remove(), 4000);
+                            // Host da aynı timestamp'e göre bekler
+                            waitForStart(d.match.guestName, startAt);
                         }
                     });
+
                 } else if (val && val.match && val.match.guestId === myPlayerId) {
-                    // Eşleştirme bulundu (guest)
+                    // --- GUEST: Eşleşme bulundu ---
                     matchmakingActive = false; amIHost = false; myRole = 'guest';
                     roomRef = db.ref('rooms/' + val.match.roomId);
                     roomRef.child('guestName').set(playerName);
                     roomRef.onDisconnect().child('status').set('done');
-                    startOnlineCountdown(val.match.hostName);
+
+                    updateMatchStatus('MAÇ BULUNDU!', 'Host bekleniyor...');
+
+                    // Host'un startAt yazmasını bekle (room henüz oluşmamış olabilir)
+                    const startAtRef = roomRef.child('startAt');
+                    startAtRef.on('value', snap => {
+                        const startAt = snap.val();
+                        if (!startAt) return;
+                        startAtRef.off();
+                        waitForStart(val.match.hostName, startAt);
+                    });
                 }
             });
         }
 
-        function startOnlineCountdown(opponentName) {
+        // İki cihazı aynı timestamp'e göre senkronize başlatır
+        function waitForStart(opponentName, startAt) {
             updateMatchStatus('MAÇ BULUNDU!', '');
-            let countdown = 3;
-            document.getElementById('roomDebug').innerText = countdown + ' saniye...';
-            const iv = setInterval(() => {
-                countdown--;
-                document.getElementById('roomDebug').innerText = countdown > 0 ? countdown + ' saniye...' : '';
-                if (countdown <= 0) { clearInterval(iv); setupFirebaseGame(opponentName); }
-            }, 1000);
+            const tick = () => {
+                const remaining = Math.ceil((startAt - Date.now()) / 1000);
+                document.getElementById('roomDebug').innerText = remaining > 0 ? remaining + ' saniye...' : 'BAŞLIYOR!';
+                if (Date.now() >= startAt) {
+                    setupFirebaseGame(opponentName);
+                } else {
+                    setTimeout(tick, 250);
+                }
+            };
+            tick();
         }
+
 
         // --- FIREBASE GAME SYNC ---
         function setupFirebaseGame(opponentName) {

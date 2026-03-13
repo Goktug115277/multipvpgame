@@ -883,24 +883,9 @@
                         duelRef.off('value');
                         roomRef = db.ref('rooms/' + code);
                         roomRef.onDisconnect().child('status').set('done');
-                        // Host'un startAt yazmasını bekle - tüm room objesini dinle
                         const hostName = d.hostName || 'RAKİP';
-                        let startAtReceived = false;
-                        roomRef.on('value', snapRoom => {
-                            const room = snapRoom.val();
-                            if (!room || !room.startAt || startAtReceived) return;
-                            startAtReceived = true;
-                            roomRef.off('value');
-                            waitForStart(hostName, room.startAt);
-                        });
-                        // Güvenlik: 10sn sonra başla yoksa hatala
-                        setTimeout(() => {
-                            if (!startAtReceived) {
-                                roomRef.off('value');
-                                document.getElementById('invitationMessage').innerText = 'Bağlantı hatası. Yeniden deneniyor...';
-                                setTimeout(() => location.reload(), 2000);
-                            }
-                        }, 10000);
+                        // Polling ile startAt bekle - on() yerine güvenilir
+                        pollForStartAt(roomRef, hostName, 20000);
                     } else if (d.status === 'rejected') {
                         duelRef.off('value');
                         document.getElementById('invitationMessage').innerText = 'Karşı taraf daveti reddetti.';
@@ -937,92 +922,160 @@
 
         // --- MATCHMAKING (1v1 BUL) ---
         let matchmakingActive = false;
+        let myLobbyRef = null;
 
         function startMatchmaking() {
             showMenu('matchmakingOverlay');
-            updateMatchStatus('RAKİP ARANIYOR...', 'Bekleniyor...');
+            updateMatchStatus('RAKİP ARANIYOR...', '');
             matchmakingActive = true;
             myPlayerId = generateGameId();
-            const lobbyRef = db.ref('lobby');
 
-            lobbyRef.transaction(current => {
-                if (!current || !current.waiting ||
-                    (Date.now() - (current.waiting.ts || 0) > 60000)) {
-                    return { waiting: { id: myPlayerId, name: playerName, ts: Date.now() } };
-                }
-                if (current.waiting.id === myPlayerId) return; // abort
-                const roomId = current.waiting.id + '_' + myPlayerId;
-                return { match: { hostId: current.waiting.id, hostName: current.waiting.name, guestId: myPlayerId, guestName: playerName, roomId } };
-            }, (error, committed, snapshot) => {
+            // Her oyuncu kendi lobby kaydını yazar
+            myLobbyRef = db.ref('lobby/' + myPlayerId);
+            myLobbyRef.set({ name: playerName, ts: firebase.database.ServerValue.TIMESTAMP });
+            myLobbyRef.onDisconnect().remove();
+
+            // 1.5sn bekle - diğer oyuncunun da yazması için
+            updateMatchStatus('RAKİP ARANIYOR...', 'Bağlanıyor...');
+            setTimeout(() => scanForPartner(), 1500);
+        }
+
+        function scanForPartner() {
+            if (!matchmakingActive) return;
+            db.ref('lobby').once('value', snap => {
                 if (!matchmakingActive) return;
-                if (error) { updateMatchStatus('HATA!', error.message); return; }
-                const val = snapshot.val();
+                const lobby = snap.val();
+                if (!lobby) { updateMatchStatus('RAKİP BEKLENİYOR...', ''); watchForPartner(); return; }
 
-                if (val && val.waiting && val.waiting.id === myPlayerId) {
-                    // --- HOST: Bekliyoruz ---
-                    amIHost = true; myRole = 'host';
-                    updateMatchStatus('RAKİP BEKLENİYOR...', 'Lobby hazır');
-                    lobbyRef.onDisconnect().remove();
+                // Kendimden farklı, son 90sn içinde eklenmiş en eski kaydı bul
+                let oldest = null;
+                const myTs = lobby[myPlayerId] ? lobby[myPlayerId].ts : Date.now();
+                for (const [id, data] of Object.entries(lobby)) {
+                    if (id === myPlayerId) continue;
+                    if ((Date.now() - (data.ts || 0)) > 90000) continue; // bayat kayıt
+                    if (!oldest || data.ts < oldest.ts) oldest = { id, ...data };
+                }
 
-                    lobbyRef.on('value', snap => {
-                        if (!matchmakingActive) return;
-                        const d = snap.val();
-                        if (d && d.match && d.match.hostId === myPlayerId) {
-                            matchmakingActive = false;
-                            lobbyRef.off();
-                            const startAt = Date.now() + 5000; // 5 saniye sonra başla (daha fazla süre)
-                            roomRef = db.ref('rooms/' + d.match.roomId);
-                            // Host odayı kurar ve startAt timestamp'ini yazar
-                            roomRef.set({
-                                hostName: playerName,
-                                guestName: d.match.guestName,
-                                status: 'playing',
-                                startAt: startAt
-                            }).then(() => {
-                                // Oda yazıldıktan sonra host başlatır
-                                roomRef.onDisconnect().remove();
-                                setTimeout(() => lobbyRef.remove(), 5000);
-                                waitForStart(d.match.guestName, startAt);
-                            });
-                        }
-                    });
-
-                } else if (val && val.match && val.match.guestId === myPlayerId) {
-                    // --- GUEST: Eşleşme bulundu ---
-                    matchmakingActive = false; amIHost = false; myRole = 'guest';
-                    roomRef = db.ref('rooms/' + val.match.roomId);
-                    roomRef.onDisconnect().child('status').set('done');
-
-                    updateMatchStatus('MAÇ BULUNDU!', 'Host bekleniyor...');
-
-                    // Tüm room objesini dinle - startAt yazılınca başla
-                    let startAtReceived = false;
-                    const hostName = val.match.hostName;
-                    roomRef.on('value', snapRoom => {
-                        const room = snapRoom.val();
-                        if (!room || !room.startAt || startAtReceived) return;
-                        startAtReceived = true;
-                        roomRef.off('value');
-                        waitForStart(hostName, room.startAt);
-                    });
-                    // Güvenlik: 15sn sonra hâlâ başlamadıysa hata
-                    setTimeout(() => {
-                        if (!startAtReceived) {
-                            roomRef.off('value');
-                            updateMatchStatus('BAĞLANTI HATASI', 'Yeniden deniyor...');
-                            setTimeout(() => location.reload(), 2000);
-                        }
-                    }, 15000);
+                if (oldest && oldest.ts <= myTs) {
+                    // Daha eski bir host var - ben guest oluyorum
+                    becomeGuest(oldest);
+                } else {
+                    // Kimse yok ya da ben daha eskiyim - host oldum, bekle
+                    updateMatchStatus('RAKİP BEKLENİYOR...', '');
+                    watchForPartner();
                 }
             });
         }
 
+        function watchForPartner() {
+            if (!matchmakingActive) return;
+            amIHost = true; myRole = 'host';
+            roomRef = db.ref('rooms/' + myPlayerId);
+            roomRef.onDisconnect().remove();
+
+            // Guest gelince room'a guestId yazar, onu izle
+            roomRef.on('value', snap => {
+                if (!matchmakingActive) return;
+                const room = snap.val();
+                if (!room || !room.guestId) return;
+
+                matchmakingActive = false;
+                roomRef.off('value');
+                if (myLobbyRef) myLobbyRef.remove();
+
+                const startAt = Date.now() + 5000;
+                roomRef.update({ hostName: playerName, status: 'playing', startAt }).then(() => {
+                    roomRef.onDisconnect().remove();
+                    waitForStart(room.guestName, startAt);
+                });
+            });
+
+            // Lobby'de başka host çıkarsa onu da kontrol et (aynı anda başlama durumu)
+            db.ref('lobby').on('value', lobbySnap => {
+                if (!matchmakingActive) return;
+                const lobby = lobbySnap.val();
+                if (!lobby) return;
+                const myTs = lobby[myPlayerId] ? lobby[myPlayerId].ts : Date.now();
+                for (const [id, data] of Object.entries(lobby)) {
+                    if (id === myPlayerId) continue;
+                    if ((Date.now() - (data.ts || 0)) > 90000) continue;
+                    if (data.ts < myTs) {
+                        // Daha önce gelen biri var - ben guest oluyorum
+                        matchmakingActive = false;
+                        db.ref('lobby').off('value');
+                        roomRef.off('value');
+                        matchmakingActive = true;
+                        becomeGuest({ id, ...data });
+                        return;
+                    }
+                }
+            });
+        }
+
+        function becomeGuest(hostInfo) {
+            amIHost = false; myRole = 'guest';
+            updateMatchStatus('MAÇ BULUNDU!', 'Bağlanıyor...');
+
+            const hostRoomRef = db.ref('rooms/' + hostInfo.id);
+
+            // Host'un room'una transaction ile gir (aynı anda iki guest olmasın)
+            hostRoomRef.transaction(room => {
+                if (room && room.guestId) return; // zaten alınmış, abort
+                return {
+                    ...(room || { hostId: hostInfo.id, hostName: hostInfo.name }),
+                    guestId: myPlayerId,
+                    guestName: playerName
+                };
+            }, (err, committed) => {
+                if (!matchmakingActive) return;
+                if (!committed) {
+                    // Bu host alınmış, tekrar ara
+                    updateMatchStatus('RAKİP ARANIYOR...', 'Tekrar deneniyor...');
+                    setTimeout(() => scanForPartner(), 1000);
+                    return;
+                }
+
+                // Başarılı - host'un startAt yazmasını bekle (polling)
+                roomRef = hostRoomRef;
+                roomRef.onDisconnect().child('status').set('done');
+                if (myLobbyRef) myLobbyRef.remove();
+                db.ref('lobby').off('value');
+                pollForStartAt(roomRef, hostInfo.name, 20000);
+            });
+        }
+
+
+        // Guest tarafı: roomRef'teki startAt'ı polling ile bekle
+        function pollForStartAt(ref, opponentName, timeoutMs) {
+            const deadline = Date.now() + (timeoutMs || 20000);
+            const poll = () => {
+                ref.once('value', snap => {
+                    const r = snap.val();
+                    if (r && r.startAt) {
+                        waitForStart(opponentName, r.startAt);
+                    } else if (Date.now() < deadline) {
+                        setTimeout(poll, 500);
+                    } else {
+                        updateMatchStatus('BAĞLANTI HATASI', '');
+                        setTimeout(() => location.reload(), 2000);
+                    }
+                });
+            };
+            poll();
+        }
+
         // İki cihazı aynı timestamp'e göre senkronize başlatır
         function waitForStart(opponentName, startAt) {
-            updateMatchStatus('MAÇ BULUNDU!', '');
+            // Her iki overlay için de güncelle
+            const ms = document.getElementById('matchmakingStatus');
+            const dbg = document.getElementById('roomDebug');
+            const inv = document.getElementById('invitationMessage');
+            if (ms) ms.innerText = 'MAÇ BULUNDU!';
             const tick = () => {
                 const remaining = Math.ceil((startAt - Date.now()) / 1000);
-                document.getElementById('roomDebug').innerText = remaining > 0 ? remaining + ' saniye...' : 'BAŞLIYOR!';
+                const txt = remaining > 0 ? remaining + ' saniye...' : 'BAŞLIYOR!';
+                if (dbg) dbg.innerText = txt;
+                if (inv) inv.innerText = 'Maç başlıyor... ' + txt;
                 if (Date.now() >= startAt) {
                     setupFirebaseGame(opponentName);
                 } else {

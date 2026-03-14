@@ -638,6 +638,7 @@
 
         let isPlaying = false, moveDir = 0, jumpCmd = false, maxHP = 500;
         let aiSpeed = 0.05, currentDiff = "NORMAL", gameFrame = 0, animationId = null;
+        let lastFrameTime = 0; // deltaTime için
         let shake = 0, isOnline = false, amIHost = false, currentPeerId = "";
         let playerName = localStorage.getItem('playerName') || "OYUNCU";
         const GROUND_Y = 100;
@@ -1014,7 +1015,7 @@
                 roomRef.off('value');
                 if (myLobbyRef) myLobbyRef.remove();
 
-                const startAt = Date.now() + 4000;
+                const startAt = Date.now() + 1000; // Sadece sinyal, geri sayım lokal
                 updateMatchStatus('MAÇ BULUNDU!', 'Başlatılıyor...');
                 roomRef.update({ hostName: playerName, status: 'playing', startAt }).then(() => {
                     console.log('[MM] Host: startAt yazıldı:', startAt);
@@ -1097,22 +1098,28 @@
             });
         }
 
-        // İki cihazı aynı timestamp'e göre senkronize başlatır
+        // Her cihaz kendi lokal geri sayımını yapar (3 saniye)
         function waitForStart(opponentName, startAt) {
-            // Her iki overlay için de güncelle
             const ms = document.getElementById('matchmakingStatus');
             const dbg = document.getElementById('roomDebug');
             const inv = document.getElementById('invitationMessage');
             if (ms) ms.innerText = 'MAÇ BULUNDU!';
+
+            // Lokal geri sayım - her cihaz 3 saniye sayar
+            const localStart = Date.now() + 3000;
+            console.log('[MM] waitForStart çağrıldı, 3sn geri sayım başlıyor');
+
             const tick = () => {
-                const remaining = Math.ceil((startAt - Date.now()) / 1000);
-                const txt = remaining > 0 ? remaining + ' saniye...' : 'BAŞLIYOR!';
-                if (dbg) dbg.innerText = txt;
-                if (inv) inv.innerText = 'Maç başlıyor... ' + txt;
-                if (Date.now() >= startAt) {
-                    setupFirebaseGame(opponentName);
-                } else {
+                const remaining = Math.ceil((localStart - Date.now()) / 1000);
+                if (remaining > 0) {
+                    const txt = remaining + '...';
+                    if (dbg) dbg.innerText = txt;
+                    if (inv) inv.innerText = 'Maç başlıyor... ' + txt;
                     setTimeout(tick, 250);
+                } else {
+                    if (dbg) dbg.innerText = 'BAŞLIYOR!';
+                    if (inv) inv.innerText = 'BAŞLIYOR!';
+                    setupFirebaseGame(opponentName);
                 }
             };
             tick();
@@ -1278,13 +1285,20 @@
             p1.reset(amIHost ? leftSpawn : rightSpawn);
             bot.reset(amIHost ? rightSpawn : leftSpawn);
             isPlaying = true;
+            lastFrameTime = 0;
             animate();
         }
 
 
 
-        function animate() {
+        function animate(timestamp) {
             if (!isPlaying) return;
+
+            // DeltaTime hesapla - PC ve mobil aynı hızda hareket etsin
+            if (!lastFrameTime) lastFrameTime = timestamp;
+            const deltaTime = Math.min((timestamp - lastFrameTime) / 16.67, 3); // 60fps = 1.0, max 3x
+            lastFrameTime = timestamp;
+
             let sx = (Math.random() - 0.5) * shake; let sy = (Math.random() - 0.5) * shake; shake *= 0.9;
 
             // Clear canvas
@@ -1322,9 +1336,8 @@
 
             gameFrame++;
 
-            // Always update and draw players
-            // Only apply movement to local player
-            p1.x += moveDir;
+            // Hareket: deltaTime ile normalize edilmiş (PC=mobil aynı hız)
+            p1.x += moveDir * deltaTime;
             p1.update();
             bot.update();
 
@@ -1335,23 +1348,23 @@
 
             // Network / AI Logic
             if (isOnline && roomRef) {
-                // Firebase ile durum senkronizasyonu (her 33ms'de bir = ~30fps)
+                // Firebase senkronizasyonu (her 100ms = ~10fps - bant genişliği dostu)
                 const now = Date.now();
-                if (now - lastStateSend >= 33) {
+                if (now - lastStateSend >= 100) {
                     lastStateSend = now;
                     roomRef.child(myRole).set({
-                        x: p1.x,
-                        normalizedY: p1.normalizedY,
+                        x: Math.round(p1.x),
+                        normalizedY: Math.round(p1.normalizedY),
                         hp: p1.hp,
                         actionState: p1.actionState,
-                        actionTimer: p1.actionTimer,
+                        actionTimer: Math.round(p1.actionTimer * 100) / 100,
                         facing: p1.facing
                     });
                 }
             } else if (!isOnline && !bot.isDead && currentDiff !== 'TRAINING') {
-                // Normal Bot AI
+                // Normal Bot AI (deltaTime ile)
                 let d = p1.x - bot.x; let ad = Math.abs(d);
-                if (ad > 250) bot.x += d > 0 ? 6 : -6;
+                if (ad > 250) bot.x += (d > 0 ? 6 : -6) * deltaTime;
                 if (Math.random() < aiSpeed && ad < 220) Math.random() < 0.7 ? bot.doAction('punch') : bot.doAction('kick');
             }
 

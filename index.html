@@ -923,7 +923,7 @@
         // --- MATCHMAKING (1v1 BUL) ---
         let matchmakingActive = false;
         let myLobbyRef = null;
-    function startMatchmaking() {
+        function startMatchmaking() {
             showMenu('matchmakingOverlay');
             updateMatchStatus('RAKİP ARANIYOR...', 'Lobi hazırlanıyor...');
             matchmakingActive = true;
@@ -970,7 +970,7 @@
 
                 // Deterministik rol: timestamp küçük olan host.
                 // Timestamp eşitse ID küçük olan host.
-                const iShouldBeGuest = (partner.ts < myTs) || 
+                const iShouldBeGuest = (partner.ts < myTs) ||
                     (partner.ts === myTs && partner.id < myPlayerId);
 
                 console.log('[MM] Partner bulundu:', partner.id, 'ts:', partner.ts, 'myTs:', myTs, 'iShouldBeGuest:', iShouldBeGuest);
@@ -1028,30 +1028,14 @@
 
             const hostRoomRef = db.ref('rooms/' + hostInfo.id);
 
-            // Host'un room'una transaction ile gir
-            hostRoomRef.transaction(room => {
-                if (room && room.guestId) return; // zaten alınmış
-                return {
-                    ...(room || {}),
-                    hostId: hostInfo.id,
-                    hostName: hostInfo.name,
-                    guestId: myPlayerId,
-                    guestName: playerName
-                };
-            }, (err, committed) => {
-                if (err) {
-                    console.log('[MM] Guest: Transaction hatası:', err);
-                    updateMatchStatus('HATA', err.message);
-                    setTimeout(() => location.reload(), 3000);
-                    return;
-                }
-                if (!committed) {
-                    console.log('[MM] Guest: Oda dolu, tekrar aranıyor');
-                    updateMatchStatus('RAKİP ARANIYOR...', 'Tekrar deneniyor...');
-                    setTimeout(() => scanForPartner(), 1000);
-                    return;
-                }
-
+            // Transaction yerine update kullan - transaction host startAt yazdığında
+            // retry yapıp kendi guestId'sini "başkası yazmış" sanıyordu
+            hostRoomRef.update({
+                hostId: hostInfo.id,
+                hostName: hostInfo.name,
+                guestId: myPlayerId,
+                guestName: playerName
+            }).then(() => {
                 console.log('[MM] Guest: Odaya yazıldı, startAt bekleniyor');
                 matchmakingActive = false;
                 roomRef = hostRoomRef;
@@ -1059,9 +1043,13 @@
                 if (myLobbyRef) myLobbyRef.remove();
                 db.ref('lobby').off('child_added');
 
-                // startAt'ı listener ile bekle (polling yerine - daha güvenilir)
+                // startAt'ı listener ile bekle
                 updateMatchStatus('MAÇ BULUNDU!', 'Guest | Host bekleniyor...');
                 listenForStartAt(roomRef, hostInfo.name, 15000);
+            }).catch(err => {
+                console.log('[MM] Guest: Yazma hatası:', err);
+                updateMatchStatus('HATA', 'Bağlantı hatası');
+                setTimeout(() => location.reload(), 3000);
             });
         }
 

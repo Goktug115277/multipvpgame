@@ -1127,15 +1127,21 @@
 
 
         // --- FIREBASE GAME SYNC ---
+        let botTargetX = 0, botTargetY = 0; // Interpolation hedefleri
+
         function setupFirebaseGame(opponentName) {
             isOnline = true;
             startGame('ONLINE');
             document.getElementById('botNameDisplay').innerText = opponentName || 'RAKİP';
             const oppRole = myRole === 'host' ? 'guest' : 'host';
+            botTargetX = bot.x;
+            botTargetY = bot.normalizedY;
+
             // Rakip durumunu dinle
             roomRef.child(oppRole).on('value', snap => {
                 const d = snap.val(); if (!d) return;
-                bot.x = d.x; bot.normalizedY = d.normalizedY; bot.hp = d.hp;
+                botTargetX = d.x; botTargetY = d.normalizedY;
+                bot.hp = d.hp;
                 bot.actionState = d.actionState; bot.actionTimer = d.actionTimer; bot.facing = d.facing;
                 updateUI();
             });
@@ -1348,9 +1354,13 @@
 
             // Network / AI Logic
             if (isOnline && roomRef) {
-                // Firebase senkronizasyonu (her 100ms = ~10fps - bant genişliği dostu)
+                // Rakip pozisyonunu interpolate et (akıcı hareket)
+                bot.x += (botTargetX - bot.x) * 0.3;
+                bot.normalizedY += (botTargetY - bot.normalizedY) * 0.3;
+
+                // Firebase senkronizasyonu (her 20ms = ~50fps)
                 const now = Date.now();
-                if (now - lastStateSend >= 100) {
+                if (now - lastStateSend >= 20) {
                     lastStateSend = now;
                     roomRef.child(myRole).set({
                         x: Math.round(p1.x),

@@ -884,8 +884,8 @@
                         roomRef = db.ref('rooms/' + code);
                         roomRef.onDisconnect().child('status').set('done');
                         const hostName = d.hostName || 'RAKİP';
-                        // Polling ile startAt bekle - on() yerine güvenilir
-                        pollForStartAt(roomRef, hostName, 20000);
+                        // Listener ile startAt bekle
+                        listenForStartAt(roomRef, hostName, 20000);
                     } else if (d.status === 'rejected') {
                         duelRef.off('value');
                         document.getElementById('invitationMessage').innerText = 'Karşı taraf daveti reddetti.';
@@ -923,45 +923,62 @@
         // --- MATCHMAKING (1v1 BUL) ---
         let matchmakingActive = false;
         let myLobbyRef = null;
-
-        function startMatchmaking() {
+    function startMatchmaking() {
             showMenu('matchmakingOverlay');
-            updateMatchStatus('RAKİP ARANIYOR...', '');
+            updateMatchStatus('RAKİP ARANIYOR...', 'Lobi hazırlanıyor...');
             matchmakingActive = true;
             myPlayerId = generateGameId();
+            console.log('[MM] Matchmaking başladı, ID:', myPlayerId);
 
             // Her oyuncu kendi lobby kaydını yazar
             myLobbyRef = db.ref('lobby/' + myPlayerId);
             myLobbyRef.set({ name: playerName, ts: firebase.database.ServerValue.TIMESTAMP });
             myLobbyRef.onDisconnect().remove();
 
-            // 1.5sn bekle - diğer oyuncunun da yazması için
-            updateMatchStatus('RAKİP ARANIYOR...', 'Bağlanıyor...');
-            setTimeout(() => scanForPartner(), 1500);
+            // 2sn bekle - diğer oyuncunun da yazması için
+            setTimeout(() => scanForPartner(), 2000);
         }
 
         function scanForPartner() {
             if (!matchmakingActive) return;
+            console.log('[MM] Lobby taranıyor...');
             db.ref('lobby').once('value', snap => {
                 if (!matchmakingActive) return;
                 const lobby = snap.val();
-                if (!lobby) { updateMatchStatus('RAKİP BEKLENİYOR...', ''); watchForPartner(); return; }
+                if (!lobby) {
+                    console.log('[MM] Lobby boş, host olarak bekliyorum');
+                    updateMatchStatus('RAKİP BEKLENİYOR...', 'Host | ID: ' + myPlayerId);
+                    watchForPartner();
+                    return;
+                }
 
-                // Kendimden farklı, son 90sn içinde eklenmiş en eski kaydı bul
-                let oldest = null;
+                // Kendimden farklı, son 90sn içinde eklenmiş oyuncuları bul
+                let partner = null;
                 const myTs = lobby[myPlayerId] ? lobby[myPlayerId].ts : Date.now();
                 for (const [id, data] of Object.entries(lobby)) {
                     if (id === myPlayerId) continue;
-                    if ((Date.now() - (data.ts || 0)) > 90000) continue; // bayat kayıt
-                    if (!oldest || data.ts < oldest.ts) oldest = { id, ...data };
+                    if ((Date.now() - (data.ts || 0)) > 90000) continue;
+                    if (!partner || data.ts < partner.ts) partner = { id, ...data };
                 }
 
-                if (oldest && oldest.ts <= myTs) {
-                    // Daha eski bir host var - ben guest oluyorum
-                    becomeGuest(oldest);
+                if (!partner) {
+                    console.log('[MM] Lobide başka oyuncu yok, host olarak bekliyorum');
+                    updateMatchStatus('RAKİP BEKLENİYOR...', 'Host | ID: ' + myPlayerId);
+                    watchForPartner();
+                    return;
+                }
+
+                // Deterministik rol: timestamp küçük olan host.
+                // Timestamp eşitse ID küçük olan host.
+                const iShouldBeGuest = (partner.ts < myTs) || 
+                    (partner.ts === myTs && partner.id < myPlayerId);
+
+                console.log('[MM] Partner bulundu:', partner.id, 'ts:', partner.ts, 'myTs:', myTs, 'iShouldBeGuest:', iShouldBeGuest);
+
+                if (iShouldBeGuest) {
+                    becomeGuest(partner);
                 } else {
-                    // Kimse yok ya da ben daha eskiyim - host oldum, bekle
-                    updateMatchStatus('RAKİP BEKLENİYOR...', '');
+                    updateMatchStatus('RAKİP BEKLENİYOR...', 'Host | ID: ' + myPlayerId);
                     watchForPartner();
                 }
             });
@@ -972,84 +989,101 @@
             amIHost = true; myRole = 'host';
             roomRef = db.ref('rooms/' + myPlayerId);
             roomRef.onDisconnect().remove();
+            console.log('[MM] Host: rooms/' + myPlayerId + ' dinleniyor');
 
             // Guest gelince room'a guestId yazar, onu izle
             roomRef.on('value', snap => {
                 if (!matchmakingActive) return;
                 const room = snap.val();
                 if (!room || !room.guestId) return;
+                console.log('[MM] Host: Guest bulundu!', room.guestName);
 
                 matchmakingActive = false;
                 roomRef.off('value');
-                db.ref('lobby').off('value'); // Lobby dinlemeyi de kapat
                 if (myLobbyRef) myLobbyRef.remove();
 
-                const startAt = Date.now() + 5000;
+                const startAt = Date.now() + 4000;
+                updateMatchStatus('MAÇ BULUNDU!', 'Başlatılıyor...');
                 roomRef.update({ hostName: playerName, status: 'playing', startAt }).then(() => {
+                    console.log('[MM] Host: startAt yazıldı:', startAt);
                     roomRef.onDisconnect().remove();
                     waitForStart(room.guestName, startAt);
                 });
             });
 
-            // NOT: Lobby re-scan kaldırıldı. Bir kez host olarak commit edildikten sonra,
-            // room listener üzerinden guest beklenir. Önceki kodda lobby listener, 
-            // roomRef.off('value') çağırarak room listener'ı öldürüyordu ve bu da
-            // guest'in "bağlanıyor" ekranında kalmasına neden oluyordu.
+            // Lobby'de yeni oyuncu gelirse tekrar kontrol et (sadece child_added ile)
+            db.ref('lobby').on('child_added', snap => {
+                if (!matchmakingActive) return;
+                if (snap.key === myPlayerId) return;
+                // Yeni bir oyuncu geldi - room dinlemeye devam, guest zaten odama yazacak
+                console.log('[MM] Host: Yeni oyuncu lobide:', snap.key);
+                updateMatchStatus('RAKİP BEKLENİYOR...', 'Host | Oyuncu algılandı...');
+            });
         }
 
         function becomeGuest(hostInfo) {
             amIHost = false; myRole = 'guest';
-            updateMatchStatus('MAÇ BULUNDU!', 'Bağlanıyor...');
+            updateMatchStatus('MAÇ BULUNDU!', 'Guest | Odaya yazılıyor...');
+            console.log('[MM] Guest: Host odası:', hostInfo.id);
 
             const hostRoomRef = db.ref('rooms/' + hostInfo.id);
-            // Local flag - transaction callback zamanında matchmakingActive değişmiş olabilir
-            let guestActive = true;
 
-            // Host'un room'una transaction ile gir (aynı anda iki guest olmasın)
+            // Host'un room'una transaction ile gir
             hostRoomRef.transaction(room => {
-                if (room && room.guestId) return; // zaten alınmış, abort
+                if (room && room.guestId) return; // zaten alınmış
                 return {
-                    ...(room || { hostId: hostInfo.id, hostName: hostInfo.name }),
+                    ...(room || {}),
+                    hostId: hostInfo.id,
+                    hostName: hostInfo.name,
                     guestId: myPlayerId,
                     guestName: playerName
                 };
             }, (err, committed) => {
-                if (!guestActive) return;
+                if (err) {
+                    console.log('[MM] Guest: Transaction hatası:', err);
+                    updateMatchStatus('HATA', err.message);
+                    setTimeout(() => location.reload(), 3000);
+                    return;
+                }
                 if (!committed) {
-                    // Bu host alınmış, tekrar ara
+                    console.log('[MM] Guest: Oda dolu, tekrar aranıyor');
                     updateMatchStatus('RAKİP ARANIYOR...', 'Tekrar deneniyor...');
                     setTimeout(() => scanForPartner(), 1000);
                     return;
                 }
 
-                // Başarılı - host'un startAt yazmasını bekle (polling)
+                console.log('[MM] Guest: Odaya yazıldı, startAt bekleniyor');
                 matchmakingActive = false;
                 roomRef = hostRoomRef;
                 roomRef.onDisconnect().child('status').set('done');
                 if (myLobbyRef) myLobbyRef.remove();
-                db.ref('lobby').off('value');
-                pollForStartAt(roomRef, hostInfo.name, 20000);
+                db.ref('lobby').off('child_added');
+
+                // startAt'ı listener ile bekle (polling yerine - daha güvenilir)
+                updateMatchStatus('MAÇ BULUNDU!', 'Guest | Host bekleniyor...');
+                listenForStartAt(roomRef, hostInfo.name, 15000);
             });
         }
 
+        // Guest: startAt'ı Firebase listener ile bekle (polling yerine)
+        function listenForStartAt(ref, opponentName, timeoutMs) {
+            const timeout = setTimeout(() => {
+                ref.off('value');
+                console.log('[MM] Guest: startAt zaman aşımı!');
+                updateMatchStatus('BAĞLANTI HATASI', 'Host yanıt vermedi');
+                setTimeout(() => location.reload(), 2000);
+            }, timeoutMs || 15000);
 
-        // Guest tarafı: roomRef'teki startAt'ı polling ile bekle
-        function pollForStartAt(ref, opponentName, timeoutMs) {
-            const deadline = Date.now() + (timeoutMs || 20000);
-            const poll = () => {
-                ref.once('value', snap => {
-                    const r = snap.val();
-                    if (r && r.startAt) {
-                        waitForStart(opponentName, r.startAt);
-                    } else if (Date.now() < deadline) {
-                        setTimeout(poll, 500);
-                    } else {
-                        updateMatchStatus('BAĞLANTI HATASI', '');
-                        setTimeout(() => location.reload(), 2000);
-                    }
-                });
-            };
-            poll();
+            ref.on('value', snap => {
+                const r = snap.val();
+                console.log('[MM] Guest: Room güncellendi:', JSON.stringify(r));
+                if (r && r.startAt) {
+                    ref.off('value');
+                    clearTimeout(timeout);
+                    console.log('[MM] Guest: startAt alındı:', r.startAt);
+                    waitForStart(opponentName, r.startAt);
+                }
+            });
         }
 
         // İki cihazı aynı timestamp'e göre senkronize başlatır

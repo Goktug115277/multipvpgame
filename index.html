@@ -981,6 +981,7 @@
 
                 matchmakingActive = false;
                 roomRef.off('value');
+                db.ref('lobby').off('value'); // Lobby dinlemeyi de kapat
                 if (myLobbyRef) myLobbyRef.remove();
 
                 const startAt = Date.now() + 5000;
@@ -990,26 +991,10 @@
                 });
             });
 
-            // Lobby'de başka host çıkarsa onu da kontrol et (aynı anda başlama durumu)
-            db.ref('lobby').on('value', lobbySnap => {
-                if (!matchmakingActive) return;
-                const lobby = lobbySnap.val();
-                if (!lobby) return;
-                const myTs = lobby[myPlayerId] ? lobby[myPlayerId].ts : Date.now();
-                for (const [id, data] of Object.entries(lobby)) {
-                    if (id === myPlayerId) continue;
-                    if ((Date.now() - (data.ts || 0)) > 90000) continue;
-                    if (data.ts < myTs) {
-                        // Daha önce gelen biri var - ben guest oluyorum
-                        matchmakingActive = false;
-                        db.ref('lobby').off('value');
-                        roomRef.off('value');
-                        matchmakingActive = true;
-                        becomeGuest({ id, ...data });
-                        return;
-                    }
-                }
-            });
+            // NOT: Lobby re-scan kaldırıldı. Bir kez host olarak commit edildikten sonra,
+            // room listener üzerinden guest beklenir. Önceki kodda lobby listener, 
+            // roomRef.off('value') çağırarak room listener'ı öldürüyordu ve bu da
+            // guest'in "bağlanıyor" ekranında kalmasına neden oluyordu.
         }
 
         function becomeGuest(hostInfo) {
@@ -1017,6 +1002,8 @@
             updateMatchStatus('MAÇ BULUNDU!', 'Bağlanıyor...');
 
             const hostRoomRef = db.ref('rooms/' + hostInfo.id);
+            // Local flag - transaction callback zamanında matchmakingActive değişmiş olabilir
+            let guestActive = true;
 
             // Host'un room'una transaction ile gir (aynı anda iki guest olmasın)
             hostRoomRef.transaction(room => {
@@ -1027,7 +1014,7 @@
                     guestName: playerName
                 };
             }, (err, committed) => {
-                if (!matchmakingActive) return;
+                if (!guestActive) return;
                 if (!committed) {
                     // Bu host alınmış, tekrar ara
                     updateMatchStatus('RAKİP ARANIYOR...', 'Tekrar deneniyor...');
@@ -1036,6 +1023,7 @@
                 }
 
                 // Başarılı - host'un startAt yazmasını bekle (polling)
+                matchmakingActive = false;
                 roomRef = hostRoomRef;
                 roomRef.onDisconnect().child('status').set('done');
                 if (myLobbyRef) myLobbyRef.remove();

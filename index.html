@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="tr">
 
 <head>
@@ -884,8 +884,20 @@
                         roomRef = db.ref('rooms/' + code);
                         roomRef.onDisconnect().child('status').set('done');
                         const hostName = d.hostName || 'RAKİP';
-                        // Listener ile startAt bekle
-                        listenForStartAt(roomRef, hostName, 20000);
+                        // startAt'ı listener ile bekle
+                        const duelTimeout = setTimeout(() => {
+                            roomRef.off('value');
+                            document.getElementById('invitationMessage').innerText = 'Bağlantı hatası!';
+                            setTimeout(() => location.reload(), 2000);
+                        }, 20000);
+                        roomRef.on('value', rSnap => {
+                            const r = rSnap.val();
+                            if (r && r.startAt) {
+                                roomRef.off('value');
+                                clearTimeout(duelTimeout);
+                                waitForStart(hostName, r.startAt);
+                            }
+                        });
                     } else if (d.status === 'rejected') {
                         duelRef.off('value');
                         document.getElementById('invitationMessage').innerText = 'Karşı taraf daveti reddetti.';
@@ -1023,13 +1035,52 @@
 
         function becomeGuest(hostInfo) {
             amIHost = false; myRole = 'guest';
-            updateMatchStatus('MAÇ BULUNDU!', 'Guest | Odaya yazılıyor...');
+            updateMatchStatus('MAÇ BULUNDU!', 'Guest | Hazırlanıyor...');
             console.log('[MM] Guest: Host odası:', hostInfo.id);
 
             const hostRoomRef = db.ref('rooms/' + hostInfo.id);
+            roomRef = hostRoomRef;
+            matchmakingActive = false;
+            if (myLobbyRef) myLobbyRef.remove();
+            db.ref('lobby').off('child_added');
 
-            // Transaction yerine update kullan - transaction host startAt yazdığında
-            // retry yapıp kendi guestId'sini "başkası yazmış" sanıyordu
+            // 1) ÖNCE listener kur - startAt'ı HEMEN yakalayabilmek için
+            let startAtFound = false;
+            const timeout = setTimeout(() => {
+                if (startAtFound) return;
+                // Timeout - son bir kez manuel oku
+                console.log('[MM] Guest: Timeout, son kontrol yapılıyor...');
+                hostRoomRef.once('value', snap => {
+                    if (startAtFound) return;
+                    const r = snap.val();
+                    if (r && r.startAt) {
+                        startAtFound = true;
+                        hostRoomRef.off('value');
+                        console.log('[MM] Guest: startAt manuel okumada bulundu:', r.startAt);
+                        waitForStart(hostInfo.name, r.startAt);
+                    } else {
+                        hostRoomRef.off('value');
+                        console.log('[MM] Guest: startAt bulunamadı, zaman aşımı');
+                        updateMatchStatus('BAĞLANTI HATASI', 'Host yanıt vermedi');
+                        setTimeout(() => location.reload(), 2000);
+                    }
+                });
+            }, 15000);
+
+            hostRoomRef.on('value', snap => {
+                const r = snap.val();
+                console.log('[MM] Guest: Room değişti:', JSON.stringify(r));
+                if (r && r.startAt && !startAtFound) {
+                    startAtFound = true;
+                    hostRoomRef.off('value');
+                    clearTimeout(timeout);
+                    console.log('[MM] Guest: startAt alındı:', r.startAt);
+                    waitForStart(hostInfo.name, r.startAt);
+                }
+            });
+
+            // 2) SONRA odaya yaz - listener zaten aktif, hiçbir güncellemeyi kaçırmaz
+            updateMatchStatus('MAÇ BULUNDU!', 'Guest | Odaya yazılıyor...');
             hostRoomRef.update({
                 hostId: hostInfo.id,
                 hostName: hostInfo.name,
@@ -1037,40 +1088,12 @@
                 guestName: playerName
             }).then(() => {
                 console.log('[MM] Guest: Odaya yazıldı, startAt bekleniyor');
-                matchmakingActive = false;
-                roomRef = hostRoomRef;
-                roomRef.onDisconnect().child('status').set('done');
-                if (myLobbyRef) myLobbyRef.remove();
-                db.ref('lobby').off('child_added');
-
-                // startAt'ı listener ile bekle
+                hostRoomRef.onDisconnect().child('status').set('done');
                 updateMatchStatus('MAÇ BULUNDU!', 'Guest | Host bekleniyor...');
-                listenForStartAt(roomRef, hostInfo.name, 15000);
             }).catch(err => {
                 console.log('[MM] Guest: Yazma hatası:', err);
-                updateMatchStatus('HATA', 'Bağlantı hatası');
-                setTimeout(() => location.reload(), 3000);
-            });
-        }
-
-        // Guest: startAt'ı Firebase listener ile bekle (polling yerine)
-        function listenForStartAt(ref, opponentName, timeoutMs) {
-            const timeout = setTimeout(() => {
-                ref.off('value');
-                console.log('[MM] Guest: startAt zaman aşımı!');
-                updateMatchStatus('BAĞLANTI HATASI', 'Host yanıt vermedi');
-                setTimeout(() => location.reload(), 2000);
-            }, timeoutMs || 15000);
-
-            ref.on('value', snap => {
-                const r = snap.val();
-                console.log('[MM] Guest: Room güncellendi:', JSON.stringify(r));
-                if (r && r.startAt) {
-                    ref.off('value');
-                    clearTimeout(timeout);
-                    console.log('[MM] Guest: startAt alındı:', r.startAt);
-                    waitForStart(opponentName, r.startAt);
-                }
+                // Yazma başarısız olsa bile listener aktif - belki host zaten yazdı
+                updateMatchStatus('MAÇ BULUNDU!', 'Guest | Bekleniyor...');
             });
         }
 
@@ -1450,4 +1473,4 @@
     </script>
 </body>
 
-</html>
+</html> -->

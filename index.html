@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="tr">
 
@@ -689,17 +688,17 @@
                 const groundLevel = 600;
                 this.normalizedY = groundLevel - screenY;
             }
-            update() {
+            update(deltaTime = 1) {
                 // Only update physics for local player or in offline mode
                 const shouldUpdatePhysics = (!this.isBot || !isOnline);
 
                 if (shouldUpdatePhysics) {
                     // Update normalized Y with velocity
-                    this.normalizedY -= this.vy; // Negative because screen Y increases downward
+                    this.normalizedY -= this.vy * deltaTime; // Y eksenindeki değişim fpsi ile normalize edildi
 
                     // Apply gravity and ground collision
                     if (this.normalizedY > 0) {
-                        this.vy += 1;
+                        this.vy += 1 * deltaTime; // Yerçekimi fps den bağımsız
                         this.onGround = false;
                     } else {
                         this.normalizedY = 0;
@@ -721,20 +720,14 @@
 
                 // Update action animations
                 if (this.actionState !== 'IDLE') {
-                    this.actionTimer += (this.actionState === 'DASH' ? 0.05 : 0.08);
+                    this.actionTimer += (this.actionState === 'DASH' ? 0.05 : 0.08) * deltaTime;
                     if (this.actionTimer >= 1) { this.actionState = 'IDLE'; this.actionTimer = 0; }
                 }
                 this.draw();
             }
             draw() {
-                // Device-aware character scale
-                const baseScale = 700 / 600; // ~1.17 base
-                const w = canvas.width;
-                let deviceMult;
-                if (w >= 1024) deviceMult = 0.40; // PC: %60 küçült
-                else if (w >= 768) deviceMult = 0.55; // Tablet: %25 küçült
-                else deviceMult = 0.18; // Telefon: çok daha küçük
-                const characterScale = baseScale * 1.5 * deviceMult;
+                // Her ekranda sabit alan oranı! Telefondaki kontroller vs farketmeksizin sabit hissiyat verir.
+                const characterScale = 0.55;
 
                 ctx.save();
                 ctx.translate(this.x, this.getScreenY()); // Use normalized Y position
@@ -1351,12 +1344,12 @@
             ctx.setLineDash([]);
             ctx.restore();
 
-            gameFrame++;
+            gameFrame += deltaTime; // animasyon hızını da cihazlara uygun hale getiriyoruz
 
             // Hareket: deltaTime ile normalize edilmiş (PC=mobil aynı hız)
             p1.x += moveDir * deltaTime;
-            p1.update();
-            bot.update();
+            p1.update(deltaTime);
+            bot.update(deltaTime);
 
             // Training Check
             if (currentDiff === 'TRAINING') {
@@ -1495,13 +1488,26 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
 
-            // Scale so arena fills the full width → boundary lines sit at screen edges
-            const scale = canvas.width / ARENA_WIDTH;
+            const isMobileScreen = canvas.width <= 768;
+            const uiHeight = isMobileScreen ? 160 : 220; // Joystick and UI area
+            const safeHeight = canvas.height - uiHeight;
+            
+            // Tüm cihazlarda (PC, Tablet, Telefon) aynı oyun alanının görünmesi için 
+            // yatay ve dikey ölçeklemeyi kontrol ediyoruz. 
+            // Minumum alan: 800 genişlik ve zıplama mesafesi için ~450 yükseklik
+            const scaleX = canvas.width / ARENA_WIDTH;
+            const scaleY = safeHeight / 450; 
+
+            // Hangi boyut kısıtlayıcı ise o ölçeği alarak tüm EKRANA SIĞMASINI sağla
+            const scale = Math.min(scaleX, scaleY);
             window._arenaScale = scale;
-            // Left boundary (ARENA_LEFT) maps to x=0 on screen
-            window._arenaOffsetX = -ARENA_LEFT * scale;
-            // Ground (y=600 in arena) sits at 78% of screen height, keeps chars above mobile controls
-            window._arenaOffsetY = canvas.height * 0.78 - 600 * scale;
+            
+            // Arenayı tam ekranın ortasına yatayda yerleştir (Geniş ekranlarda boşluklar orantılı kalsın)
+            window._arenaOffsetX = (canvas.width - ARENA_WIDTH * scale) / 2 - ARENA_LEFT * scale;
+            
+            // Zemin çizgisi y=600 mantıksal değerine oturacak.
+            // Karakterler alt kontrollerin altında kalmasın diye safeHeight tabanını kullan
+            window._arenaOffsetY = (safeHeight - 20) - 600 * scale;
         }
         window.onresize = resize;
     </script>

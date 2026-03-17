@@ -840,6 +840,15 @@
 
                 ctx.save();
                 ctx.translate(this.x, this.getScreenY()); // Use normalized Y position
+                
+                // --- CAN SIFIRLANINCA YERE DÜŞME (ÖLÜM ANİMASYONU EFFECTİ) ---
+                if (this.hp <= 0) {
+                    this.isDead = true;
+                    // Ölüm halinde yavaşça yana devrilir (90 derece)
+                    ctx.rotate(this.facing * Math.PI / 2);
+                    ctx.translate(-30, -50); // Yatınca merkezin yüksekliğini ayarlıyoruz
+                }
+
                 ctx.scale(this.facing * characterScale, characterScale);
                 let breath = Math.sin(gameFrame * 0.1) * 2;
                 let run = Math.sin(gameFrame * 0.4) * 15;
@@ -1532,9 +1541,9 @@
                     } else if (ad < 100 && Math.random() < aiSpeed * 0.3) {
                         // Yakınsa bazen taktiksel geri çekil (Dodge)
                         bot.x -= (d > 0 ? speed : -speed) * 1.5 * deltaTime;
-                    } else {
-                        // Üzerine Yürü (Yakın Takip)
-                        bot.x += (d > 0 ? speed : -speed) * deltaTime;
+                    } else if (ad > 120) {
+                        // Oyuncuya Yürü (Yakın Takip) - Ancak 120 birim kalana kadar! Aksi takdirde dibine çok girer.
+                        bot.x += (d > 0 ? speed : -speed) * Math.min(deltaTime, 1.5);
                     }
 
                     // Saldırı Kombosu
@@ -1581,16 +1590,22 @@
         }
 
         function updateUI() {
-            document.getElementById('p1H').style.width = (p1.hp / maxHP * 100) + "%";
-            document.getElementById('p2H').style.width = (bot.hp / maxHP * 100) + "%";
+            document.getElementById('p1H').style.width = Math.max(0, (p1.hp / maxHP * 100)) + "%";
+            document.getElementById('p2H').style.width = Math.max(0, (bot.hp / maxHP * 100)) + "%";
+            
             if ((p1.hp <= 0 || bot.hp <= 0) && isPlaying) {
                 isPlaying = false;
-                if (isOnline && roomRef && p1.hp <= 0) {
-                    // Rakibe oyunun bittiğini Firebase üzerinden bildir
-                    roomRef.child('status').set('done');
-                }
-                document.getElementById('resTitle').innerText = p1.hp > 0 ? "ZAFER!" : "BOZGUN...";
-                showMenu('resultMenu');
+                
+                // Oyun bitti, maç sonu menüsü bir kaç saniye sonra gelsin ki ölüm sahnesi anlaşılsın!
+                setTimeout(() => {
+                    if (isOnline && roomRef && p1.hp <= 0) {
+                        // Rakibe oyunun bittiğini Firebase üzerinden bildir
+                        roomRef.child('status').set('done');
+                    }
+                    document.getElementById('resTitle').innerText = p1.hp > 0 ? "ZAFER!" : "BOZGUN...";
+                    document.getElementById('resTitle').style.color = p1.hp > 0 ? "var(--green)" : "var(--red)";
+                    showMenu('resultMenu');
+                }, 1000);
             }
         }
 

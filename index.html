@@ -44,6 +44,16 @@
             justify-content: center;
             align-items: center;
             z-index: 20000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease-in-out, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: scale(0.95);
+        }
+        
+        .overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: scale(1);
         }
 
         .grid-container {
@@ -535,14 +545,14 @@
 
     <audio id="bgMusic" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"></audio>
 
-    <div id="mainMenu" class="overlay">
+    <div id="mainMenu" class="overlay active">
         <h1 style="font-size: 70px; margin-bottom: 40px; text-shadow: 0 0 25px var(--blue);">MultiPvP</h1>
         <div class="mode-card active-card" style="width:240px; height:90px" onpointerdown="showMenu('modeMenu')">
             <h3>OYNA</h3>
         </div>
     </div>
 
-    <div id="modeMenu" class="overlay" style="display:none">
+    <div id="modeMenu" class="overlay">
         <h2 style="margin-bottom: 20px;">MOD SEÇİMİ</h2>
         <div class="grid-container">
             <div class="mode-card active-card" onpointerdown="showMenu('diffMenu')"><span>OFFLINE</span>
@@ -585,7 +595,7 @@
         </div>
     </div>
 
-    <div id="matchmakingOverlay" class="overlay" style="display:none">
+    <div id="matchmakingOverlay" class="overlay">
         <h2 style="margin-bottom: 20px;">1v1 EŞLEŞTİRME</h2>
         <div class="copy-wrapper" style="width: 300px; text-align: center;">
             <div id="matchmakingStatus" style="color:var(--blue); font-size: 14px; margin-bottom:10px">ARANIYOR...</div>
@@ -597,7 +607,7 @@
         </div>
     </div>
 
-    <div id="diffMenu" class="overlay" style="display:none">
+    <div id="diffMenu" class="overlay">
         <div style="display:flex; gap:15px">
             <div class="mode-card" style="border-color:var(--green); width:120px" onpointerdown="startGame('KOLAY')">
                 <h3>KOLAY</h3>
@@ -611,7 +621,7 @@
         </div>
     </div>
 
-    <div id="invitationOverlay" class="overlay" style="display:none">
+    <div id="invitationOverlay" class="overlay">
         <h2 style="margin-bottom: 20px;">DÜELLO DAVETİ</h2>
         <div class="copy-wrapper" style="width: 320px; text-align: center;">
             <div id="invitationMessage"
@@ -677,6 +687,63 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const music = document.getElementById('bgMusic');
+
+        // --- AUDIO SOUND EFFECTS ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            const now = audioCtx.currentTime;
+            
+            if (type === 'hit') {
+                // Klasik "Tok" vuruş sesi
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.exponentialRampToValueAtTime(40, now + 0.1);
+                gain.gain.setValueAtTime(0.5, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else if (type === 'dash') {
+                // Fiyuuuv dash sesi
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(100, now + 0.3);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'swing') {
+                // Havayı yaran yumruk (ıskalama)
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.linearRampToValueAtTime(100, now + 0.1);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            }
+        }
+        
+        // --- VISUAL EFFECTS (PARTICLES) ---
+        let particles = [];
+        function createParticles(x, y, color, count) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 15,
+                    vy: (Math.random() - 0.5) * 15 - 5,
+                    life: 1.0,
+                    color: Math.random() > 0.5 ? color : '#ffffff',
+                    size: Math.random() * 5 + 2
+                });
+            }
+        }
 
         let isPlaying = false, moveDir = 0, jumpCmd = false, maxHP = 500;
         let aiSpeed = 0.05, currentDiff = "NORMAL", gameFrame = 0, animationId = null;
@@ -802,8 +869,13 @@
                 if (this.cd[type] || this.actionState !== 'IDLE' || !isPlaying) return;
                 this.cd[type] = true; this.actionState = type.toUpperCase(); this.actionTimer = 0;
                 if (!this.isBot) startCD(type === 'punch' ? 'btnPunch' : (type === 'kick' ? 'btnKick' : 'btnDash'), type === 'punch' ? 1 : (type === 'kick' ? 3 : 7), type.toUpperCase());
-                if (type === 'dash') this.x += this.facing * 300;
-                else {
+                
+                if (type === 'dash') {
+                    this.x += this.facing * 300;
+                    playSound('dash');
+                    createParticles(this.x, this.normalizedY, '#ffffff', 10);
+                } else {
+                    playSound('swing');
                     setTimeout(() => {
                         let target = this.isBot ? p1 : bot;
                         // Online'da gerçek pozisyonu kullan (interpolated değil)
@@ -818,18 +890,27 @@
                         // Online'da daha sıkı mesafe kontrolü
                         const hitRangeX = isOnline ? 80 : 110;
                         const hitRangeY = isOnline ? 100 : 150;
+                        
                         if (dx < hitRangeX && dy < hitRangeY) {
+                            const dmg = (type === 'kick' ? 35 : 15);
+                            const pX = (this.x + targetX) / 2;
+                            const pY = Math.max(this.normalizedY, targetNY) + 50; 
+                            
+                            playSound('hit');
+                            createParticles(pX, pY, type === 'kick' ? '#ff3333' : '#ffaa00', type === 'kick' ? 20 : 10);
+                            
                             if (isOnline && roomRef && !this.isBot) {
                                 const tRole = myRole === 'host' ? 'guest' : 'host';
-                                const dmg = (type === 'kick' ? 35 : 15);
                                 roomRef.child('hits/' + tRole).push({ damage: dmg, ts: Date.now() });
                                 
                                 // CLIENT-SIDE PREDICTION: GECİKMEYİ ÖNLEMEK İÇİN ANINDA LOKAL EKRANA YANSIT
                                 target.hp -= dmg; 
-                                shake = 15; 
+                                shake = type === 'kick' ? 25 : 15; 
                                 updateUI();
                             } else {
-                                shake = 15; target.hp -= (type === 'kick' ? 35 : 15); updateUI();
+                                shake = type === 'kick' ? 25 : 15; 
+                                target.hp -= dmg; 
+                                updateUI();
                             }
 
                             // Training mode hit counting
@@ -1202,7 +1283,11 @@
                 const hit = snap.val(); if (!hit) return;
                 if (processedHits.has(snap.key)) return;
                 processedHits.add(snap.key);
-                p1.hp -= hit.damage; shake = 15; updateUI();
+                p1.hp -= hit.damage; 
+                shake = hit.damage > 20 ? 25 : 15; 
+                playSound('hit');
+                createParticles(p1.x, p1.normalizedY + 50, '#ff3333', 15);
+                updateUI();
             });
             // Rakip ayrılınca
             roomRef.child('status').on('value', snap => {
@@ -1315,15 +1400,20 @@
 
         // --- GAME CORE ---
         function showMenu(id) {
-            document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none');
-            document.getElementById(id).style.display = 'flex';
+            document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active'));
+            const targetEl = document.getElementById(id);
+            if(targetEl) targetEl.classList.add('active');
+            
+            // Kullanıcı oyuna ilk tıkladığında audio context başlatılması gerek(tarayıcı politikası)
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
             if (id === 'modeMenu') music.play().catch(() => { });
         }
 
         function startGame(diff) {
             if (animationId) cancelAnimationFrame(animationId);
             currentDiff = diff;
-            document.querySelectorAll('.overlay').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active'));
             document.getElementById('gameUI').style.display = 'flex';
             document.getElementById('controls').style.display = 'flex';
             document.getElementById('playerNameDisplay').innerText = playerName;
@@ -1434,6 +1524,29 @@
             p1.x = Math.max(ARENA_LEFT + 20, Math.min(ARENA_RIGHT - 20, p1.x));
             bot.x = Math.max(ARENA_LEFT + 20, Math.min(ARENA_RIGHT - 20, bot.x));
 
+            // Draw Particles
+            for(let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx * deltaTime;
+                p.y += p.vy * deltaTime;
+                p.vy += 0.5 * deltaTime; // gravity for particle
+                p.life -= 0.03 * deltaTime;
+                
+                if(p.life <= 0) {
+                    particles.splice(i, 1);
+                } else {
+                    ctx.save();
+                    // Y pozisyonunu arena koordinatına çevir (Fighter sınıfına benzer)
+                    ctx.translate(p.x, 600 - p.y); 
+                    ctx.globalAlpha = p.life;
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+            }
+
             animationId = requestAnimationFrame(animate);
         }
 
@@ -1447,7 +1560,7 @@
                     roomRef.child('status').set('done');
                 }
                 document.getElementById('resTitle').innerText = p1.hp > 0 ? "ZAFER!" : "BOZGUN...";
-                document.getElementById('resultMenu').style.display = 'flex';
+                showMenu('resultMenu');
             }
         }
 

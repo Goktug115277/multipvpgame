@@ -49,7 +49,7 @@
             transition: opacity 0.3s ease-in-out, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             transform: scale(0.95);
         }
-        
+
         .overlay.active {
             opacity: 1;
             pointer-events: auto;
@@ -499,39 +499,134 @@
 
         /* YATAY TELEFON MODU (LANDSCAPE) */
         @media (max-height: 500px) {
-            .overlay { justify-content: center; padding-top: 5px; }
-            .overlay h1 { font-size: 32px !important; margin-bottom: 5px !important; text-shadow: 0 0 10px var(--blue); }
-            .overlay h2 { font-size: 16px !important; margin-bottom: 5px !important; }
-            .grid-container { gap: 6px; width: 90%; max-width: 600px; grid-template-columns: repeat(3, 1fr); }
-            .mode-card { height: 50px; font-size: 10px; transform: skew(-3deg); }
-            .mode-card h3 { font-size: 13px; margin: 2px 0; }
-            #onlinePanel { margin-top: 5px; padding: 8px; width: 80%; }
-            #onlinePanel input { margin: 5px 0; padding: 6px; }
-            
+            .overlay {
+                justify-content: center;
+                padding-top: 5px;
+            }
+
+            .overlay h1 {
+                font-size: 32px !important;
+                margin-bottom: 5px !important;
+                text-shadow: 0 0 10px var(--blue);
+            }
+
+            .overlay h2 {
+                font-size: 16px !important;
+                margin-bottom: 5px !important;
+            }
+
+            .grid-container {
+                gap: 6px;
+                width: 90%;
+                max-width: 600px;
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .mode-card {
+                height: 50px;
+                font-size: 10px;
+                transform: skew(-3deg);
+            }
+
+            .mode-card h3 {
+                font-size: 13px;
+                margin: 2px 0;
+            }
+
+            #onlinePanel {
+                margin-top: 5px;
+                padding: 8px;
+                width: 80%;
+            }
+
+            #onlinePanel input {
+                margin: 5px 0;
+                padding: 6px;
+            }
+
             /* Kontrolleri daha derli toplu ve kenarlara yapıştırıyoruz */
-            #controls { bottom: 5px; height: 90px; padding: 0 40px; }
-            #joyBase { width: 80px; height: 80px; }
-            #joyStick { width: 36px; height: 36px; top: 22px; left: 22px; }
-            .act-btn { width: 55px; height: 55px; font-size: 9px; }
-            .dash-btn { height: 30px; font-size: 11px; }
-            .btn-container { gap: 6px; }
-            
-            #gameUI { top: 2px; }
-            .bar-bg { height: 16px; width: 130px; }
+            #controls {
+                bottom: 5px;
+                height: 90px;
+                padding: 0 40px;
+            }
+
+            #joyBase {
+                width: 80px;
+                height: 80px;
+            }
+
+            #joyStick {
+                width: 36px;
+                height: 36px;
+                top: 22px;
+                left: 22px;
+            }
+
+            .act-btn {
+                width: 55px;
+                height: 55px;
+                font-size: 9px;
+            }
+
+            .dash-btn {
+                height: 30px;
+                font-size: 11px;
+            }
+
+            .btn-container {
+                gap: 6px;
+            }
+
+            #gameUI {
+                top: 2px;
+            }
+
+            .bar-bg {
+                height: 16px;
+                width: 130px;
+            }
         }
 
         /* DİKEY TELEFON UYARISI */
         #portraitWarning {
             display: none;
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #000; z-index: 99999;
-            color: white; font-size: 20px; text-align: center;
-            flex-direction: column; justify-content: center; align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 99999;
+            color: white;
+            font-size: 20px;
+            text-align: center;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
-        #portraitWarning h1 { font-size: 80px; margin: 0 0 10px 0; color: var(--blue); animation: rotatePhone 1.5s infinite ease-in-out alternate; }
-        @keyframes rotatePhone { from { transform: rotate(0deg); } to { transform: rotate(-90deg); } }
+
+        #portraitWarning h1 {
+            font-size: 80px;
+            margin: 0 0 10px 0;
+            color: var(--blue);
+            animation: rotatePhone 1.5s infinite ease-in-out alternate;
+        }
+
+        @keyframes rotatePhone {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(-90deg);
+            }
+        }
+
         @media (max-width: 900px) and (orientation: portrait) {
-            #portraitWarning { display: flex; }
+            #portraitWarning {
+                display: flex;
+            }
         }
     </style>
 </head>
@@ -696,9 +791,9 @@
             const gain = audioCtx.createGain();
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-            
+
             const now = audioCtx.currentTime;
-            
+
             if (type === 'hit') {
                 // Klasik "Tok" vuruş sesi
                 osc.type = 'square';
@@ -728,7 +823,7 @@
                 osc.stop(now + 0.1);
             }
         }
-        
+
         // --- VISUAL EFFECTS (PARTICLES) ---
         let particles = [];
         function createParticles(x, y, color, count) {
@@ -840,7 +935,7 @@
 
                 ctx.save();
                 ctx.translate(this.x, this.getScreenY()); // Use normalized Y position
-                
+
                 // --- CAN SIFIRLANINCA YERE DÜŞME (ÖLÜM ANİMASYONU EFFECTİ) ---
                 if (this.hp <= 0) {
                     this.isDead = true;
@@ -878,7 +973,7 @@
                 if (this.cd[type] || this.actionState !== 'IDLE' || !isPlaying) return;
                 this.cd[type] = true; this.actionState = type.toUpperCase(); this.actionTimer = 0;
                 if (!this.isBot) startCD(type === 'punch' ? 'btnPunch' : (type === 'kick' ? 'btnKick' : 'btnDash'), type === 'punch' ? 1 : (type === 'kick' ? 3 : 7), type.toUpperCase());
-                
+
                 if (type === 'dash') {
                     this.x += this.facing * 300;
                     playSound('dash');
@@ -899,26 +994,26 @@
                         // Online'da daha sıkı mesafe kontrolü
                         const hitRangeX = isOnline ? 80 : 110;
                         const hitRangeY = isOnline ? 100 : 150;
-                        
+
                         if (dx < hitRangeX && dy < hitRangeY) {
                             const dmg = (type === 'kick' ? 35 : 15);
                             const pX = (this.x + targetX) / 2;
-                            const pY = Math.max(this.normalizedY, targetNY) + 50; 
-                            
+                            const pY = Math.max(this.normalizedY, targetNY) + 50;
+
                             playSound('hit');
                             createParticles(pX, pY, type === 'kick' ? '#ff3333' : '#ffaa00', type === 'kick' ? 20 : 10);
-                            
+
                             if (isOnline && roomRef && !this.isBot) {
                                 const tRole = myRole === 'host' ? 'guest' : 'host';
                                 roomRef.child('hits/' + tRole).push({ damage: dmg, ts: Date.now() });
-                                
+
                                 // CLIENT-SIDE PREDICTION: GECİKMEYİ ÖNLEMEK İÇİN ANINDA LOKAL EKRANA YANSIT
-                                target.hp -= dmg; 
-                                shake = type === 'kick' ? 25 : 15; 
+                                target.hp -= dmg;
+                                shake = type === 'kick' ? 25 : 15;
                                 updateUI();
                             } else {
-                                shake = type === 'kick' ? 25 : 15; 
-                                target.hp -= dmg; 
+                                shake = type === 'kick' ? 25 : 15;
+                                target.hp -= dmg;
                                 updateUI();
                             }
 
@@ -1292,8 +1387,8 @@
                 const hit = snap.val(); if (!hit) return;
                 if (processedHits.has(snap.key)) return;
                 processedHits.add(snap.key);
-                p1.hp -= hit.damage; 
-                shake = hit.damage > 20 ? 25 : 15; 
+                p1.hp -= hit.damage;
+                shake = hit.damage > 20 ? 25 : 15;
                 playSound('hit');
                 createParticles(p1.x, p1.normalizedY + 50, '#ff3333', 15);
                 updateUI();
@@ -1411,11 +1506,11 @@
         function showMenu(id) {
             document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active'));
             const targetEl = document.getElementById(id);
-            if(targetEl) targetEl.classList.add('active');
-            
+            if (targetEl) targetEl.classList.add('active');
+
             // Kullanıcı oyuna ilk tıkladığında audio context başlatılması gerek(tarayıcı politikası)
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            
+
             if (id === 'modeMenu') music.play().catch(() => { });
         }
 
@@ -1450,7 +1545,7 @@
 
         function animate(timestamp) {
             // Oyun bitse de Canvas animasyon döngüsü durmasın, görsel partiküller ve yerçekimi akmaya devam etsin.
-            
+
             // DeltaTime hesapla - PC ve mobil aynı hızda hareket etsin
             if (!lastFrameTime) lastFrameTime = timestamp;
             const deltaTime = Math.min((timestamp - lastFrameTime) / 16.67, 3); // 60fps = 1.0, max 3x
@@ -1497,7 +1592,7 @@
             if (isPlaying) {
                 p1.x += moveDir * deltaTime;
             }
-            
+
             // Fizikler ve Partiküller oyun dursa da aksın
             p1.update(deltaTime);
             bot.update(deltaTime);
@@ -1532,7 +1627,7 @@
                     // --- GELİŞMİŞ DİNAMİK BOT ZEKA (AI) SİSTEMİ ---
                     let d = p1.x - bot.x; let ad = Math.abs(d);
                     let speed = currentDiff === 'ZOR' ? 7 : (currentDiff === 'NORMAL' ? 5 : 3.5);
-                    
+
                     // Mesafe ve Hareket Yönetimi
                     if (ad > 280) {
                         bot.x += (d > 0 ? speed : -speed) * deltaTime;
@@ -1550,7 +1645,7 @@
                     if (Math.random() < aiSpeed && ad < 180) {
                         Math.random() < 0.6 ? bot.doAction('punch') : bot.doAction('kick');
                     }
-                    
+
                     // Zıplama / Havada Yakalama Mantığı
                     if (bot.onGround && Math.random() < aiSpeed * 0.2) {
                         // Oyuncu havadaysa veya rastgele zamanlamayla bot da zıplar
@@ -1564,19 +1659,19 @@
             bot.x = Math.max(ARENA_LEFT + 20, Math.min(ARENA_RIGHT - 20, bot.x));
 
             // Draw Particles
-            for(let i = particles.length - 1; i >= 0; i--) {
+            for (let i = particles.length - 1; i >= 0; i--) {
                 let p = particles[i];
                 p.x += p.vx * deltaTime;
                 p.y += p.vy * deltaTime;
                 p.vy += 0.5 * deltaTime; // gravity for particle
                 p.life -= 0.03 * deltaTime;
-                
-                if(p.life <= 0) {
+
+                if (p.life <= 0) {
                     particles.splice(i, 1);
                 } else {
                     ctx.save();
                     // Y pozisyonunu arena koordinatına çevir (Fighter sınıfına benzer)
-                    ctx.translate(p.x, 600 - p.y); 
+                    ctx.translate(p.x, 600 - p.y);
                     ctx.globalAlpha = p.life;
                     ctx.fillStyle = p.color;
                     ctx.beginPath();
@@ -1592,10 +1687,10 @@
         function updateUI() {
             document.getElementById('p1H').style.width = Math.max(0, (p1.hp / maxHP * 100)) + "%";
             document.getElementById('p2H').style.width = Math.max(0, (bot.hp / maxHP * 100)) + "%";
-            
+
             if ((p1.hp <= 0 || bot.hp <= 0) && isPlaying) {
                 isPlaying = false;
-                
+
                 // Oyun bitti, maç sonu menüsü bir kaç saniye sonra gelsin ki ölüm sahnesi anlaşılsın!
                 setTimeout(() => {
                     if (isOnline && roomRef && p1.hp <= 0) {
@@ -1696,27 +1791,27 @@
 
             // Yatay modda mı dikey modda mıyız (Kullanıcının ekran yönünü ölçüyoruz)
             const isLandscape = canvas.width > canvas.height;
-            
+
             // Eskiden canvas.width ile mobile tespiti yapılırdı ama yatay telefonda genişlik 800'ü geçiyor.
             // Zaten kodda global isMobile ('ontouchstart' in window) var. Bunu kullanıyoruz.
             // Eğer mobilde yataydaysak, kontroller sağa sola yayılacağı için yüksekliğe bindirmez, alt boşluk sadece çok az bırakılır (60px).
             // Eğer dikeydeysek kontroller tam aşağıda yer kaplıyor, 160px boşluk lazım.
-            const uiHeight = isMobile ? (isLandscape ? 60 : 160) : 40; 
+            const uiHeight = isMobile ? (isLandscape ? 60 : 160) : 40;
             const safeHeight = Math.max(canvas.height - uiHeight, 150);
-            
+
             // Tüm cihazlarda (PC, Tablet, Telefon) aynı oyun alanının görünmesi için 
             // yatay ve dikey ölçeklemeyi kontrol ediyoruz. 
             // Minumum alan: 800 genişlik ve zıplama mesafesi için ~450 yükseklik
             const scaleX = canvas.width / ARENA_WIDTH;
-            const scaleY = safeHeight / 450; 
+            const scaleY = safeHeight / 450;
 
             // Hangi boyut kısıtlayıcı ise o ölçeği alarak tüm EKRANA SIĞMASINI sağla
             const scale = Math.min(scaleX, scaleY);
             window._arenaScale = scale;
-            
+
             // Arenayı tam ekranın ortasına yatayda yerleştir (Geniş ekranlarda boşluklar orantılı kalsın)
             window._arenaOffsetX = (canvas.width - ARENA_WIDTH * scale) / 2 - ARENA_LEFT * scale;
-            
+
             // Zemin çizgisi y=600 mantıksal değerine oturacak.
             window._arenaOffsetY = (canvas.height - uiHeight) - 600 * scale;
         }

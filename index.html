@@ -509,10 +509,29 @@
             #gameUI { top: 2px; }
             .bar-bg { height: 16px; width: 130px; }
         }
+
+        /* DİKEY TELEFON UYARISI */
+        #portraitWarning {
+            display: none;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000; z-index: 99999;
+            color: white; font-size: 20px; text-align: center;
+            flex-direction: column; justify-content: center; align-items: center;
+        }
+        #portraitWarning h1 { font-size: 80px; margin: 0 0 10px 0; color: var(--blue); animation: rotatePhone 1.5s infinite ease-in-out alternate; }
+        @keyframes rotatePhone { from { transform: rotate(0deg); } to { transform: rotate(-90deg); } }
+        @media (max-width: 900px) and (orientation: portrait) {
+            #portraitWarning { display: flex; }
+        }
     </style>
 </head>
 
 <body>
+    <div id="portraitWarning">
+        <h1>📱</h1>
+        <h2>CİHAZI YAN ÇEVİRİN</h2>
+        <p style="color:#aaa; font-size: 14px;">Oyun dikey ekranda oynanamaz</p>
+    </div>
 
     <audio id="bgMusic" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"></audio>
 
@@ -802,7 +821,13 @@
                         if (dx < hitRangeX && dy < hitRangeY) {
                             if (isOnline && roomRef && !this.isBot) {
                                 const tRole = myRole === 'host' ? 'guest' : 'host';
-                                roomRef.child('hits/' + tRole).push({ damage: (type === 'kick' ? 35 : 15), ts: Date.now() });
+                                const dmg = (type === 'kick' ? 35 : 15);
+                                roomRef.child('hits/' + tRole).push({ damage: dmg, ts: Date.now() });
+                                
+                                // CLIENT-SIDE PREDICTION: GECİKMEYİ ÖNLEMEK İÇİN ANINDA LOKAL EKRANA YANSIT
+                                target.hp -= dmg; 
+                                shake = 15; 
+                                updateUI();
                             } else {
                                 shake = 15; target.hp -= (type === 'kick' ? 35 : 15); updateUI();
                             }

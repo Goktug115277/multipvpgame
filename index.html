@@ -1440,8 +1440,8 @@
 
 
         function animate(timestamp) {
-            if (!isPlaying) return;
-
+            // Oyun bitse de Canvas animasyon döngüsü durmasın, görsel partiküller ve yerçekimi akmaya devam etsin.
+            
             // DeltaTime hesapla - PC ve mobil aynı hızda hareket etsin
             if (!lastFrameTime) lastFrameTime = timestamp;
             const deltaTime = Math.min((timestamp - lastFrameTime) / 16.67, 3); // 60fps = 1.0, max 3x
@@ -1484,40 +1484,70 @@
 
             gameFrame += deltaTime; // animasyon hızını da cihazlara uygun hale getiriyoruz
 
-            // Hareket: deltaTime ile normalize edilmiş (PC=mobil aynı hız)
-            p1.x += moveDir * deltaTime;
+            // Hareket: Sadece oyun oynanıyorsa p1 hareket edebilir
+            if (isPlaying) {
+                p1.x += moveDir * deltaTime;
+            }
+            
+            // Fizikler ve Partiküller oyun dursa da aksın
             p1.update(deltaTime);
             bot.update(deltaTime);
 
-            // Training Check
-            if (currentDiff === 'TRAINING') {
-                updateTutorial();
-            }
-
-            // Network / AI Logic
-            if (isOnline && roomRef) {
-                // Rakip pozisyonunu interpolate et (hızlı + akıcı)
-                bot.x += (botTargetX - bot.x) * 0.5;
-                bot.normalizedY += (botTargetY - bot.normalizedY) * 0.5;
-
-                // Firebase senkronizasyonu (her 50ms = 20fps - hızlı ama kuyruk oluşturmaz)
-                const now = Date.now();
-                if (now - lastStateSend >= 50) {
-                    lastStateSend = now;
-                    roomRef.child(myRole).set({
-                        x: Math.round(p1.x),
-                        normalizedY: Math.round(p1.normalizedY),
-                        hp: p1.hp,
-                        actionState: p1.actionState,
-                        actionTimer: Math.round(p1.actionTimer * 100) / 100,
-                        facing: p1.facing
-                    });
+            // Oyunun aktif olduğu durumdaki aksiyonlar (Eğitim, Online Senkron, Bot Zekası)
+            if (isPlaying) {
+                // Training Check
+                if (currentDiff === 'TRAINING') {
+                    updateTutorial();
                 }
-            } else if (!isOnline && !bot.isDead && currentDiff !== 'TRAINING') {
-                // Normal Bot AI (deltaTime ile)
-                let d = p1.x - bot.x; let ad = Math.abs(d);
-                if (ad > 250) bot.x += (d > 0 ? 6 : -6) * deltaTime;
-                if (Math.random() < aiSpeed && ad < 220) Math.random() < 0.7 ? bot.doAction('punch') : bot.doAction('kick');
+
+                // Network / AI Logic
+                if (isOnline && roomRef) {
+                    // Rakip pozisyonunu interpolate et (hızlı + akıcı)
+                    bot.x += (botTargetX - bot.x) * 0.5;
+                    bot.normalizedY += (botTargetY - bot.normalizedY) * 0.5;
+
+                    // Firebase senkronizasyonu (her 50ms = 20fps - hızlı ama kuyruk oluşturmaz)
+                    const now = Date.now();
+                    if (now - lastStateSend >= 50) {
+                        lastStateSend = now;
+                        roomRef.child(myRole).set({
+                            x: Math.round(p1.x),
+                            normalizedY: Math.round(p1.normalizedY),
+                            hp: p1.hp,
+                            actionState: p1.actionState,
+                            actionTimer: Math.round(p1.actionTimer * 100) / 100,
+                            facing: p1.facing
+                        });
+                    }
+                } else if (!isOnline && !bot.isDead && currentDiff !== 'TRAINING') {
+                    // --- GELİŞMİŞ DİNAMİK BOT ZEKA (AI) SİSTEMİ ---
+                    let d = p1.x - bot.x; let ad = Math.abs(d);
+                    let speed = currentDiff === 'ZOR' ? 7 : (currentDiff === 'NORMAL' ? 5 : 3.5);
+                    
+                    // Mesafe ve Hareket Yönetimi
+                    if (ad > 280) {
+                        bot.x += (d > 0 ? speed : -speed) * deltaTime;
+                        // Çok uzaksa dash (atılma) yeteneği kullan
+                        if (Math.random() < aiSpeed * 0.1) bot.doAction('dash');
+                    } else if (ad < 100 && Math.random() < aiSpeed * 0.3) {
+                        // Yakınsa bazen taktiksel geri çekil (Dodge)
+                        bot.x -= (d > 0 ? speed : -speed) * 1.5 * deltaTime;
+                    } else {
+                        // Üzerine Yürü (Yakın Takip)
+                        bot.x += (d > 0 ? speed : -speed) * deltaTime;
+                    }
+
+                    // Saldırı Kombosu
+                    if (Math.random() < aiSpeed && ad < 180) {
+                        Math.random() < 0.6 ? bot.doAction('punch') : bot.doAction('kick');
+                    }
+                    
+                    // Zıplama / Havada Yakalama Mantığı
+                    if (bot.onGround && Math.random() < aiSpeed * 0.2) {
+                        // Oyuncu havadaysa veya rastgele zamanlamayla bot da zıplar
+                        if (p1.normalizedY > 50 || Math.random() < 0.5) bot.vy = -16;
+                    }
+                }
             }
 
             // Boundaries - clamp to arena

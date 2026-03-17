@@ -486,6 +486,29 @@
                 font-size: 35px !important;
             }
         }
+
+        /* YATAY TELEFON MODU (LANDSCAPE) */
+        @media (max-height: 500px) {
+            .overlay { justify-content: center; padding-top: 5px; }
+            .overlay h1 { font-size: 32px !important; margin-bottom: 5px !important; text-shadow: 0 0 10px var(--blue); }
+            .overlay h2 { font-size: 16px !important; margin-bottom: 5px !important; }
+            .grid-container { gap: 6px; width: 90%; max-width: 600px; grid-template-columns: repeat(3, 1fr); }
+            .mode-card { height: 50px; font-size: 10px; transform: skew(-3deg); }
+            .mode-card h3 { font-size: 13px; margin: 2px 0; }
+            #onlinePanel { margin-top: 5px; padding: 8px; width: 80%; }
+            #onlinePanel input { margin: 5px 0; padding: 6px; }
+            
+            /* Kontrolleri daha derli toplu ve kenarlara yapıştırıyoruz */
+            #controls { bottom: 5px; height: 90px; padding: 0 40px; }
+            #joyBase { width: 80px; height: 80px; }
+            #joyStick { width: 36px; height: 36px; top: 22px; left: 22px; }
+            .act-btn { width: 55px; height: 55px; font-size: 9px; }
+            .dash-btn { height: 30px; font-size: 11px; }
+            .btn-container { gap: 6px; }
+            
+            #gameUI { top: 2px; }
+            .bar-bg { height: 16px; width: 130px; }
+        }
     </style>
 </head>
 
@@ -1488,9 +1511,15 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
 
-            const isMobileScreen = canvas.width <= 768;
-            const uiHeight = isMobileScreen ? 160 : 220; // Joystick and UI area
-            const safeHeight = canvas.height - uiHeight;
+            // Yatay modda mı dikey modda mıyız (Kullanıcının ekran yönünü ölçüyoruz)
+            const isLandscape = canvas.width > canvas.height;
+            
+            // Eskiden canvas.width ile mobile tespiti yapılırdı ama yatay telefonda genişlik 800'ü geçiyor.
+            // Zaten kodda global isMobile ('ontouchstart' in window) var. Bunu kullanıyoruz.
+            // Eğer mobilde yataydaysak, kontroller sağa sola yayılacağı için yüksekliğe bindirmez, alt boşluk sadece çok az bırakılır (60px).
+            // Eğer dikeydeysek kontroller tam aşağıda yer kaplıyor, 160px boşluk lazım.
+            const uiHeight = isMobile ? (isLandscape ? 60 : 160) : 40; 
+            const safeHeight = Math.max(canvas.height - uiHeight, 150);
             
             // Tüm cihazlarda (PC, Tablet, Telefon) aynı oyun alanının görünmesi için 
             // yatay ve dikey ölçeklemeyi kontrol ediyoruz. 
@@ -1506,8 +1535,7 @@
             window._arenaOffsetX = (canvas.width - ARENA_WIDTH * scale) / 2 - ARENA_LEFT * scale;
             
             // Zemin çizgisi y=600 mantıksal değerine oturacak.
-            // Karakterler alt kontrollerin altında kalmasın diye safeHeight tabanını kullan
-            window._arenaOffsetY = (safeHeight - 20) - 600 * scale;
+            window._arenaOffsetY = (canvas.height - uiHeight) - 600 * scale;
         }
         window.onresize = resize;
     </script>

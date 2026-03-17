@@ -1688,19 +1688,21 @@
             document.getElementById('p1H').style.width = Math.max(0, (p1.hp / maxHP * 100)) + "%";
             document.getElementById('p2H').style.width = Math.max(0, (bot.hp / maxHP * 100)) + "%";
 
-            if ((p1.hp <= 0 || bot.hp <= 0) && isPlaying) {
-                isPlaying = false;
-
-                // Oyun bitti, maç sonu menüsü bir kaç saniye sonra gelsin ki ölüm sahnesi anlaşılsın!
-                setTimeout(() => {
-                    if (isOnline && roomRef && p1.hp <= 0) {
-                        // Rakibe oyunun bittiğini Firebase üzerinden bildir
-                        roomRef.child('status').set('done');
-                    }
-                    document.getElementById('resTitle').innerText = p1.hp > 0 ? "ZAFER!" : "BOZGUN...";
-                    document.getElementById('resTitle').style.color = p1.hp > 0 ? "var(--green)" : "var(--red)";
-                    showMenu('resultMenu');
-                }, 1000);
+            if (p1.hp <= 0 || bot.hp <= 0) {
+                if (isPlaying) { // Sadece ilk kez (oyun bitiş anında) tetiklensin
+                    isPlaying = false;
+                    
+                    // Oyun bitti, maç sonu menüsü bir kaç saniye sonra gelsin ki ölüm sahnesi anlaşılsın!
+                    setTimeout(() => {
+                        if (isOnline && roomRef && p1.hp <= 0) {
+                            // Rakibe oyunun bittiğini Firebase üzerinden bildir
+                            roomRef.child('status').set('done');
+                        }
+                        document.getElementById('resTitle').innerText = p1.hp > 0 ? "ZAFER!" : "BOZGUN...";
+                        document.getElementById('resTitle').style.color = p1.hp > 0 ? "var(--green)" : "var(--red)";
+                        showMenu('resultMenu');
+                    }, 1500); // Havada ölürse yere düşüp ölmesi için gecikmeyi biraz daha artırdım
+                }
             }
         }
 

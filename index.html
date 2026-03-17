@@ -1694,14 +1694,33 @@
                     
                     // Oyun bitti, maç sonu menüsü bir kaç saniye sonra gelsin ki ölüm sahnesi anlaşılsın!
                     setTimeout(() => {
-                        if (isOnline && roomRef && p1.hp <= 0) {
-                            // Rakibe oyunun bittiğini Firebase üzerinden bildir
-                            roomRef.child('status').set('done');
+                        try {
+                            if (isOnline && roomRef && p1.hp <= 0) {
+                                // Rakibe oyunun bittiğini Firebase üzerinden bildir
+                                roomRef.child('status').set('done');
+                            }
+                            
+                            // Kullanıcı arayüzünü karıştırmaması için tamamen sakla
+                            document.getElementById('gameUI').style.display = 'none';
+                            document.getElementById('controls').style.display = 'none';
+                            
+                            const isWin = p1.hp > 0;
+                            const resTitleObj = document.getElementById('resTitle');
+                            resTitleObj.innerText = isWin ? "ZAFER!" : "BOZGUN...";
+                            resTitleObj.style.color = isWin ? "#44ff44" : "#ff3333";
+                            
+                            // Vanilla Javascript ile DOM'u garantili şekilde ekranda göster!
+                            const resultMenuObj = document.getElementById('resultMenu');
+                            resultMenuObj.style.display = 'flex';
+                            resultMenuObj.style.opacity = '1';
+                            resultMenuObj.style.pointerEvents = 'auto';
+                            resultMenuObj.style.zIndex = '999999';
+                            resultMenuObj.classList.add('active'); // Orijinal fonksiyon
+                            
+                        } catch(e) {
+                            console.error("Menü Gösterim Hatası: ", e);
                         }
-                        document.getElementById('resTitle').innerText = p1.hp > 0 ? "ZAFER!" : "BOZGUN...";
-                        document.getElementById('resTitle').style.color = p1.hp > 0 ? "var(--green)" : "var(--red)";
-                        showMenu('resultMenu');
-                    }, 1500); // Havada ölürse yere düşüp ölmesi için gecikmeyi biraz daha artırdım
+                    }, 1500); 
                 }
             }
         }

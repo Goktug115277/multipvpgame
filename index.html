@@ -822,6 +822,9 @@
     </div>
 
     <div id="modeMenu" class="overlay">
+        <div style="position: absolute; top: 25px; left: 25px; font-size: 22px; font-weight: bold; color: var(--red); cursor: pointer; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; border: 2px solid var(--red);" onpointerdown="showMenu('mainMenu')">
+            &#9664; GERİ
+        </div>
         <h2 style="margin-bottom: 20px;">MOD SEÇİMİ</h2>
         <div class="grid-container">
             <div class="mode-card active-card" onpointerdown="showMenu('diffMenu')"><span>OFFLINE</span>
@@ -840,9 +843,7 @@
                 <h3>BAŞLA</h3>
             </div>
             <div class="mode-card locked"><span>ETKİNLİK</span><small>YAKINDA</small></div>
-            <div class="mode-card active-card" style="border-color:var(--red)" onpointerdown="showMenu('mainMenu')">
-                <h3>GERİ</h3>
-            </div>
+            <div class="mode-card locked"><span>TURNUVA</span><small>YAKINDA</small></div>
         </div>
 
         <div style="margin-top: 20px; width: 300px; text-align: center;">
@@ -877,6 +878,9 @@
     </div>
 
     <div id="diffMenu" class="overlay">
+        <div style="position: absolute; top: 25px; left: 25px; font-size: 22px; font-weight: bold; color: var(--red); cursor: pointer; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; border: 2px solid var(--red);" onpointerdown="showMenu('mainMenu')">
+            &#9664; GERİ
+        </div>
         <div style="display:flex; gap:15px">
             <div class="mode-card" style="border-color:var(--green); width:120px" onpointerdown="startGame('KOLAY')">
                 <h3>KOLAY</h3>

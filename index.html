@@ -783,6 +783,22 @@
         const ctx = canvas.getContext('2d');
         const music = document.getElementById('bgMusic');
 
+        // --- MOBİL YAKINLAŞTIRMA KORUMASI ---
+        // iOS Safari gibi tarayıcılarda çift dokunarak yakınlaştırmayı (double tap to zoom) engelle
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, { passive: false });
+
+        // Parmakla çimdikleyerek yakınlaştırmayı (pinch to zoom) engelle
+        document.addEventListener('gesturestart', function (e) {
+            e.preventDefault();
+        });
+
         // --- AUDIO SOUND EFFECTS ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playSound(type) {

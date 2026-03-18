@@ -776,7 +776,7 @@
             <p class="web-subtitle">Tarayıcı üzerinden oynayarak veya Windows uygulamasını indirerek dünyanın her yerinden arkadaşlarınla gerçek zamanlı, gecikmesiz ve yeteneğe dayalı online maçlara katıl.</p>
             
             <div class="web-buttons">
-                <button class="web-btn web-btn-play" onclick="showMenu('modeMenu')">
+                <button class="web-btn web-btn-play" onclick="startPlaySequence()">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                     TARAYICIDA OYNA
                 </button>
@@ -806,6 +806,21 @@
         </div>
     </div>
 
+    <div id="loadingOverlay" class="overlay">
+        <h1 style="font-size: 40px; margin-bottom: 20px; color: var(--blue);">YÜKLENİYOR...</h1>
+        <p style="color:#aaa; font-size:16px;">Oyun motoru hazırlanıyor</p>
+    </div>
+
+    <div id="mainMenu" class="overlay">
+        <h1 style="font-size: 70px; margin-bottom: 40px; text-shadow: 0 0 25px var(--blue);">MultiPvP</h1>
+        <div class="mode-card active-card" style="width:240px; height:90px" onpointerdown="showMenu('modeMenu')">
+            <h3>OYNA</h3>
+        </div>
+        <div class="mode-card active-card" style="width:240px; height:50px; margin-top:20px; border-color:var(--red)" onpointerdown="showMenu('websiteOverlay')">
+            <h3 style="font-size: 14px;">WEBSİTESİNE DÖN</h3>
+        </div>
+    </div>
+
     <div id="modeMenu" class="overlay">
         <h2 style="margin-bottom: 20px;">MOD SEÇİMİ</h2>
         <div class="grid-container">
@@ -825,7 +840,7 @@
                 <h3>BAŞLA</h3>
             </div>
             <div class="mode-card locked"><span>ETKİNLİK</span><small>YAKINDA</small></div>
-            <div class="mode-card active-card" style="border-color:var(--red)" onpointerdown="showMenu('websiteOverlay')">
+            <div class="mode-card active-card" style="border-color:var(--red)" onpointerdown="showMenu('mainMenu')">
                 <h3>GERİ</h3>
             </div>
         </div>
@@ -1697,15 +1712,25 @@
 
 
         // --- GAME CORE ---
+        function startPlaySequence() {
+            showMenu('loadingOverlay');
+            try {
+                if (audioCtx.state === 'suspended') {
+                    let p = audioCtx.resume();
+                    if (p !== undefined) p.catch(e => console.warn(e));
+                }
+            } catch(e) {}
+            setTimeout(() => {
+                showMenu('mainMenu');
+            }, 3000);
+        }
+
         function showMenu(id) {
             document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active'));
             const targetEl = document.getElementById(id);
             if (targetEl) targetEl.classList.add('active');
 
-            // Kullanıcı oyuna ilk tıkladığında audio context başlatılması gerek(tarayıcı politikası)
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-
-            if (id === 'modeMenu') music.play().catch(() => { });
+            if (id === 'modeMenu') { music.play().catch(() => { }); }
         }
 
         function startGame(diff) {

@@ -1366,48 +1366,62 @@
         }
 
         function connectToFriend() {
+            // Düello Hatası Tam Çözüm (Polling Update Garantisi)
             const code = document.getElementById('targetPeerId').value.trim().toUpperCase();
             if (!code) return;
             myPlayerId = generateGameId();
             amIHost = false; myRole = 'guest';
             showMenu('invitationOverlay');
             document.getElementById('invitationButtons').style.display = 'none';
-            document.getElementById('invitationMessage').innerText = 'Karşı tarafın onayı bekleniyor...';
-            const duelRef = db.ref('duels/' + code);
+            document.getElementById('invitationMessage').innerText = 'Sunucuya bağlanılıyor...';
             
-            // Firebase asenkron onay bug'ını aşmak için direkt odanın açılış kanalını dinle (Host kabul edince burası yanar)
+            const duelRef = db.ref('duels/' + code);
             let joined = false;
-            const tempRoomRef = db.ref('rooms/' + code);
-            tempRoomRef.on('value', rSnap => {
-                const r = rSnap.val();
-                if (r && r.status === 'playing' && r.startAt && !joined) {
-                    joined = true;
-                    tempRoomRef.off('value');
-                    duelRef.off('value');
-                    roomRef = db.ref('rooms/' + code);
-                    roomRef.onDisconnect().child('status').set('done');
-                    waitForStart(r.hostName || 'RAKİP', r.startAt);
-                }
-            });
-
-            duelRef.once('value', snap => {
-                if (joined) return;
+            
+            duelRef.get().then((snap) => {
                 if (!snap.exists()) {
-                    document.getElementById('invitationMessage').innerText = 'Kod bulunamadı!';
-                    setTimeout(() => returnToMenu(), 2000); return;
+                    document.getElementById('invitationMessage').innerText = 'HATA: Kod geçersiz veya bulunamadı!';
+                    setTimeout(() => returnToMenu(), 3000); 
+                    return;
                 }
+                
+                document.getElementById('invitationMessage').innerText = 'Bağlantı kuruldu. Karşı tarafın onayı bekleniyor...';
                 duelRef.update({ guestId: myPlayerId, guestName: playerName });
-                duelRef.on('value', snap2 => {
-                    if (joined) return;
-                    const d = snap2.val(); if (!d) return;
-                    if (d.status === 'rejected') {
-                        duelRef.off('value');
-                        tempRoomRef.off('value');
-                        document.getElementById('invitationMessage').innerText = 'Karşı taraf daveti reddetti.';
-                        setTimeout(() => returnToMenu(), 2000);
-                    }
-                    // Accepted adımı başarılıca tempRoomRef tarafından bypass garantisiyle ele alınır!
-                });
+                
+                // Güvence 1: Saniyede iki kez doğrudan veritabanını darlayan (polling) Interval (Asla askıda kalmaz)
+                const checkInt = setInterval(() => {
+                    if (joined) { clearInterval(checkInt); return; }
+                    
+                    db.ref('rooms/' + code).get().then(rSnap => {
+                        const r = rSnap.val();
+                        if (r && r.status === 'playing' && r.startAt && !joined) {
+                            joined = true;
+                            clearInterval(checkInt);
+                            roomRef = db.ref('rooms/' + code);
+                            roomRef.onDisconnect().child('status').set('done');
+                            waitForStart(r.hostName || 'RAKİP', r.startAt);
+                        }
+                    });
+                    
+                    duelRef.get().then(dSnap => {
+                        const d = dSnap.val();
+                        if (!d && !joined) {
+                             joined = true;
+                             clearInterval(checkInt);
+                             document.getElementById('invitationMessage').innerText = 'Oda kapatıldı!';
+                             setTimeout(() => returnToMenu(), 2000);
+                        }
+                        else if (d && d.status === 'rejected' && !joined) {
+                            joined = true;
+                            clearInterval(checkInt);
+                            document.getElementById('invitationMessage').innerText = 'Karşı taraf daveti reddetti.';
+                            setTimeout(() => returnToMenu(), 2000);
+                        }
+                    });
+                }, 500);
+            }).catch(() => {
+                document.getElementById('invitationMessage').innerText = 'Bağlantı zaman aşımına uğradı.';
+                setTimeout(() => returnToMenu(), 2000);
             });
         }
 
@@ -1433,7 +1447,7 @@
             duelRef.update({ status: 'rejected' });
             setTimeout(() => duelRef.remove(), 2000);
             document.getElementById('invitationMessage').innerText = 'Davet reddedildi.';
-            setTimeout(() => location.reload(), 2000);
+            setTimeout(() => returnToMenu(), 2000);
         }
 
         // --- MATCHMAKING (1v1 BUL) ---

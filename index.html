@@ -1090,6 +1090,7 @@
                 this.isDead = false;
                 this.onGround = true;
                 this.facing = 1;
+                this.trails = [];
             }
             getScreenY() {
                 // Convert normalized Y to arena Y position (fixed 700-unit tall arena, ground at y=600)
@@ -1136,11 +1137,41 @@
                     this.actionTimer += (this.actionState === 'DASH' ? 0.05 : 0.08) * deltaTime;
                     if (this.actionTimer >= 1) { this.actionState = 'IDLE'; this.actionTimer = 0; }
                 }
+
+                // --- GHOST TRAIL Yavaş Yavaş Silinme ---
+                if (this.trails && this.trails.length > 0) {
+                    for(let i = this.trails.length - 1; i >= 0; i--) {
+                        this.trails[i].life -= 0.04 * deltaTime;
+                        if (this.trails[i].life <= 0) this.trails.splice(i, 1);
+                    }
+                }
+
                 this.draw();
             }
             draw() {
                 // Her ekranda sabit alan oranı! Telefondaki kontroller vs farketmeksizin sabit hissiyat verir.
                 const characterScale = 0.55;
+
+                // --- DASH İZLERİ (GHOST TRAILS) ÇİZİMİ ---
+                if (this.trails && this.trails.length > 0) {
+                    this.trails.forEach(t => {
+                        ctx.save();
+                        ctx.translate(t.x, t.y);
+                        ctx.scale(t.facing * characterScale, characterScale);
+                        ctx.globalAlpha = Math.max(0, t.life * 0.4); // max %40'tan başlayıp silinir
+                        
+                        ctx.fillStyle = this.color;
+                        ctx.beginPath(); ctx.ellipse(0, -70, 25, 50, 0, 0, Math.PI * 2); ctx.fill();
+                        let hY = -130;
+                        ctx.beginPath(); ctx.arc(0, hY, 22, 0, Math.PI * 2); ctx.fill();
+                        ctx.fillRect(-22, hY - 12, 44, 12);
+                        ctx.beginPath(); ctx.moveTo(-20, hY - 5); ctx.lineTo(-60, hY - 5); ctx.lineTo(-60, hY + 5); ctx.fill();
+                        this.drawPart(20, -80, 14, this.color);
+                        this.drawPart(15, -10, 12, this.color);
+                        this.drawPart(-15, -10, 12, this.color);
+                        ctx.restore();
+                    });
+                }
 
                 ctx.save();
                 ctx.translate(this.x, this.getScreenY()); // Use normalized Y position
@@ -1184,9 +1215,16 @@
                 if (!this.isBot) startCD(type === 'punch' ? 'btnPunch' : (type === 'kick' ? 'btnKick' : 'btnDash'), type === 'punch' ? 1 : (type === 'kick' ? 3 : 7), type.toUpperCase());
 
                 if (type === 'dash') {
+                    let startX = this.x;
                     this.x += this.facing * 300;
                     playSound('dash');
                     createParticles(this.x, this.normalizedY, '#ffffff', 10);
+                    
+                    // --- ARKAYA İZ BIRAKMA (GHOST TRAILS) ---
+                    for (let i = 1; i <= 6; i++) {
+                        let tx = startX + (this.facing * 300 * (i / 6)); // Noktaları aralara dengeli bölüştür
+                        this.trails.push({ x: tx, y: this.getScreenY(), facing: this.facing, life: 1.0 - (i * 0.08) });
+                    }
                 } else {
                     playSound('swing');
                     setTimeout(() => {

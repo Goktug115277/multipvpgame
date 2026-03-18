@@ -1366,62 +1366,58 @@
         }
 
         function connectToFriend() {
-            // Düello Hatası Tam Çözüm (Polling Update Garantisi)
             const code = document.getElementById('targetPeerId').value.trim().toUpperCase();
             if (!code) return;
             myPlayerId = generateGameId();
             amIHost = false; myRole = 'guest';
             showMenu('invitationOverlay');
             document.getElementById('invitationButtons').style.display = 'none';
-            document.getElementById('invitationMessage').innerText = 'Sunucuya bağlanılıyor...';
+            document.getElementById('invitationMessage').innerText = 'Bağlantı aranıyor...';
             
             const duelRef = db.ref('duels/' + code);
             let joined = false;
-            
-            duelRef.get().then((snap) => {
+
+            duelRef.once('value').then(snap => {
                 if (!snap.exists()) {
                     document.getElementById('invitationMessage').innerText = 'HATA: Kod geçersiz veya bulunamadı!';
                     setTimeout(() => returnToMenu(), 3000); 
                     return;
                 }
                 
-                document.getElementById('invitationMessage').innerText = 'Bağlantı kuruldu. Karşı tarafın onayı bekleniyor...';
+                // --- 1. GÜVENCE: HOST ODAYI KURDUĞU GİBİ GEÇİŞ YAP ---
+                roomRef = db.ref('rooms/' + code);
+                roomRef.on('value', rSnap => {
+                    if (joined) return;
+                    const r = rSnap.val();
+                    if (r && r.status === 'playing' && r.startAt) {
+                        joined = true;
+                        roomRef.off('value');     // Odaya girerken dinlemeyi bırak
+                        duelRef.off('value');     // Düello talebini dinlemeyi bırak
+                        roomRef.onDisconnect().child('status').set('done');
+                        document.getElementById('invitationMessage').innerText = 'Oda bulundu! Giriliyor...';
+                        waitForStart(r.hostName || 'RAKİP', r.startAt);
+                    }
+                });
+
+                // --- 2. ADIM: HOST'A DAVETİ GÖREBİLMESİ İÇİN KİMLİĞİNİ YAZ ---
+                document.getElementById('invitationMessage').innerText = 'Karşı tarafın onayı bekleniyor...';
                 duelRef.update({ guestId: myPlayerId, guestName: playerName });
                 
-                // Güvence 1: Saniyede iki kez doğrudan veritabanını darlayan (polling) Interval (Asla askıda kalmaz)
-                const checkInt = setInterval(() => {
-                    if (joined) { clearInterval(checkInt); return; }
-                    
-                    db.ref('rooms/' + code).get().then(rSnap => {
-                        const r = rSnap.val();
-                        if (r && r.status === 'playing' && r.startAt && !joined) {
-                            joined = true;
-                            clearInterval(checkInt);
-                            roomRef = db.ref('rooms/' + code);
-                            roomRef.onDisconnect().child('status').set('done');
-                            waitForStart(r.hostName || 'RAKİP', r.startAt);
-                        }
-                    });
-                    
-                    duelRef.get().then(dSnap => {
-                        const d = dSnap.val();
-                        if (!d && !joined) {
-                             joined = true;
-                             clearInterval(checkInt);
-                             document.getElementById('invitationMessage').innerText = 'Oda kapatıldı!';
-                             setTimeout(() => returnToMenu(), 2000);
-                        }
-                        else if (d && d.status === 'rejected' && !joined) {
-                            joined = true;
-                            clearInterval(checkInt);
-                            document.getElementById('invitationMessage').innerText = 'Karşı taraf daveti reddetti.';
-                            setTimeout(() => returnToMenu(), 2000);
-                        }
-                    });
-                }, 500);
-            }).catch(() => {
-                document.getElementById('invitationMessage').innerText = 'Bağlantı zaman aşımına uğradı.';
-                setTimeout(() => returnToMenu(), 2000);
+                // --- 3. ADIM: DÜELLO DURUMUNU EŞ ZAMANLI DİNLE ---
+                duelRef.on('value', dSnap => {
+                    if (joined) return;
+                    const d = dSnap.val();
+                    if (!d) return;
+
+                    if (d.status === 'rejected') {
+                        duelRef.off('value');
+                        roomRef.off('value');
+                        document.getElementById('invitationMessage').innerText = 'Karşı taraf daveti reddetti.';
+                        setTimeout(() => returnToMenu(), 2500);
+                    } else if (d.status === 'accepted') {
+                        document.getElementById('invitationMessage').innerText = 'Onaylandı! Sunucudan maç ayarı bekleniyor...';
+                    }
+                });
             });
         }
 

@@ -552,15 +552,15 @@
             }
 
             #joyBase {
-                width: 80px;
-                height: 80px;
+                width: 110px;
+                height: 110px;
             }
 
             #joyStick {
-                width: 36px;
-                height: 36px;
-                top: 22px;
-                left: 22px;
+                width: 44px;
+                height: 44px;
+                top: 33px;
+                left: 33px;
             }
 
             .act-btn {
@@ -811,6 +811,16 @@
         <p style="color:#aaa; font-size:16px;">Oyun motoru hazırlanıyor</p>
     </div>
 
+    <div id="pauseMenu" class="overlay" style="z-index:99999;">
+        <h2 id="pauseTitle" style="margin-bottom: 20px; color:var(--red); font-size: 30px; text-shadow: 0 0 15px red;">OYUN DURAKLATILDI</h2>
+        <div class="mode-card active-card" style="width:200px; height:60px; border-color:var(--blue); margin-bottom:15px;" onpointerdown="resumeGame()">
+            <h3>DEVAM ET</h3>
+        </div>
+        <div class="mode-card active-card" style="width:200px; height:60px; border-color:var(--red);" onpointerdown="returnToMenu()">
+            <h3>MENÜYE ÇIK</h3>
+        </div>
+    </div>
+
     <div id="mainMenu" class="overlay">
         <h1 style="font-size: 70px; margin-bottom: 40px; text-shadow: 0 0 25px var(--blue);">MultiPvP</h1>
         <div class="mode-card active-card" style="width:240px; height:90px" onpointerdown="showMenu('modeMenu')">
@@ -931,9 +941,13 @@
     </div>
 
     <div id="gameUI">
-        <div><span id="playerNameDisplay">OYUNCU</span>
+        <div style="position:relative;"><span id="playerNameDisplay">OYUNCU</span>
             <div class="bar-bg">
                 <div id="p1H" class="bar-fill" style="background:var(--blue)"></div>
+            </div>
+            <!-- OYUNU DURDUR BUTONU -->
+            <div id="pauseBtnBtn" onpointerdown="togglePause()" style="position: absolute; top: 60px; left: 0; font-size: 13px; font-weight: bold; background: rgba(0,0,0,0.8); border: 2px solid var(--red); border-radius: 5px; padding: 4px 10px; cursor: pointer; pointer-events: auto;">
+                ❚❚ ÇIK / DURDUR
             </div>
         </div>
         <div style="text-align:right"><span id="botNameDisplay">BOT</span>
@@ -1034,7 +1048,7 @@
             }
         }
 
-        let isPlaying = false, moveDir = 0, jumpCmd = false, maxHP = 500;
+        let isPlaying = false, isPaused = false, moveDir = 0, jumpCmd = false, maxHP = 500;
         let aiSpeed = 0.05, currentDiff = "NORMAL", gameFrame = 0, animationId = null;
         let lastFrameTime = 0; // deltaTime için
         let shake = 0, isOnline = false, amIHost = false, currentPeerId = "";
@@ -1360,38 +1374,39 @@
             document.getElementById('invitationButtons').style.display = 'none';
             document.getElementById('invitationMessage').innerText = 'Karşı tarafın onayı bekleniyor...';
             const duelRef = db.ref('duels/' + code);
+            
+            // Firebase asenkron onay bug'ını aşmak için direkt odanın açılış kanalını dinle (Host kabul edince burası yanar)
+            let joined = false;
+            const tempRoomRef = db.ref('rooms/' + code);
+            tempRoomRef.on('value', rSnap => {
+                const r = rSnap.val();
+                if (r && r.status === 'playing' && r.startAt && !joined) {
+                    joined = true;
+                    tempRoomRef.off('value');
+                    duelRef.off('value');
+                    roomRef = db.ref('rooms/' + code);
+                    roomRef.onDisconnect().child('status').set('done');
+                    waitForStart(r.hostName || 'RAKİP', r.startAt);
+                }
+            });
+
             duelRef.once('value', snap => {
+                if (joined) return;
                 if (!snap.exists()) {
                     document.getElementById('invitationMessage').innerText = 'Kod bulunamadı!';
-                    setTimeout(() => location.reload(), 2000); return;
+                    setTimeout(() => returnToMenu(), 2000); return;
                 }
                 duelRef.update({ guestId: myPlayerId, guestName: playerName });
                 duelRef.on('value', snap2 => {
+                    if (joined) return;
                     const d = snap2.val(); if (!d) return;
-                    if (d.status === 'accepted') {
+                    if (d.status === 'rejected') {
                         duelRef.off('value');
-                        roomRef = db.ref('rooms/' + code);
-                        roomRef.onDisconnect().child('status').set('done');
-                        const hostName = d.hostName || 'RAKİP';
-                        // startAt'ı listener ile bekle
-                        const duelTimeout = setTimeout(() => {
-                            roomRef.off('value');
-                            document.getElementById('invitationMessage').innerText = 'Bağlantı hatası!';
-                            setTimeout(() => location.reload(), 2000);
-                        }, 20000);
-                        roomRef.on('value', rSnap => {
-                            const r = rSnap.val();
-                            if (r && r.startAt) {
-                                roomRef.off('value');
-                                clearTimeout(duelTimeout);
-                                waitForStart(hostName, r.startAt);
-                            }
-                        });
-                    } else if (d.status === 'rejected') {
-                        duelRef.off('value');
+                        tempRoomRef.off('value');
                         document.getElementById('invitationMessage').innerText = 'Karşı taraf daveti reddetti.';
-                        setTimeout(() => location.reload(), 2000);
+                        setTimeout(() => returnToMenu(), 2000);
                     }
+                    // Accepted adımı başarılıca tempRoomRef tarafından bypass garantisiyle ele alınır!
                 });
             });
         }
@@ -1754,6 +1769,22 @@
 
 
         // --- GAME CORE ---
+        function togglePause() {
+            if (isOnline) {
+                document.getElementById('pauseTitle').innerText = "OYUN (CANLI) DURMAZ!";
+                showMenu('pauseMenu');
+            } else {
+                isPaused = true;
+                document.getElementById('pauseTitle').innerText = "OYUN DURAKLATILDI";
+                showMenu('pauseMenu');
+            }
+        }
+
+        function resumeGame() {
+            isPaused = false;
+            document.getElementById('pauseMenu').classList.remove('active');
+        }
+
         function startPlaySequence() {
             showMenu('loadingOverlay');
             try {
@@ -1847,19 +1878,20 @@
             ctx.setLineDash([]);
             ctx.restore();
 
-            gameFrame += deltaTime; // animasyon hızını da cihazlara uygun hale getiriyoruz
+            if (!isPaused) {
+                gameFrame += deltaTime; // animasyon hızını da cihazlara uygun hale getiriyoruz
 
-            // Hareket: Sadece oyun oynanıyorsa p1 hareket edebilir
-            if (isPlaying) {
-                p1.x += moveDir * deltaTime;
-            }
+                // Hareket: Sadece oyun oynanıyorsa p1 hareket edebilir
+                if (isPlaying) {
+                    p1.x += moveDir * deltaTime;
+                }
 
-            // Fizikler ve Partiküller oyun dursa da aksın
-            p1.update(deltaTime);
-            bot.update(deltaTime);
+                // Fizikler ve Partiküller oyun dursa da aksın
+                p1.update(deltaTime);
+                bot.update(deltaTime);
 
-            // Oyunun aktif olduğu durumdaki aksiyonlar (Eğitim, Online Senkron, Bot Zekası)
-            if (isPlaying) {
+                // Oyunun aktif olduğu durumdaki aksiyonlar (Eğitim, Online Senkron, Bot Zekası)
+                if (isPlaying) {
                 // Training Check
                 if (currentDiff === 'TRAINING') {
                     updateTutorial();
@@ -1913,6 +1945,11 @@
                         if (p1.normalizedY > 50 || Math.random() < 0.5) bot.vy = -16;
                     }
                 }
+            }
+            } else {
+                // Oyun duraklatıldığında donuk haller çizilsin ama arkaplan/partiküller aksın
+                p1.draw();
+                bot.draw();
             }
 
             // Boundaries - clamp to arena

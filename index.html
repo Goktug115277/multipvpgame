@@ -628,6 +628,136 @@
                 display: flex;
             }
         }
+        
+        /* --- WEB SITE LANDING PAGE CSS --- */
+        #websiteOverlay {
+            background: linear-gradient(135deg, #050a0e, #112233, #02070a);
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+        }
+
+        .web-hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 25px;
+            padding: 20px;
+        }
+
+        .web-title {
+            font-size: 80px;
+            font-weight: 900;
+            background: linear-gradient(to right, #00f2fe, #4facfe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+            filter: drop-shadow(0px 8px 15px rgba(0, 242, 254, 0.3));
+            letter-spacing: -2px;
+        }
+
+        .web-subtitle {
+            font-size: 20px;
+            color: #d1d5db;
+            font-weight: 300;
+            max-width: 700px;
+            line-height: 1.6;
+        }
+
+        .web-buttons {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+        }
+
+        .web-btn {
+            padding: 16px 40px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .web-btn-play {
+            background: linear-gradient(135deg, #00C9FF, #92FE9D);
+            color: #000;
+            border: none;
+            box-shadow: 0 10px 25px rgba(0, 201, 255, 0.4);
+        }
+
+        .web-btn-play:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(0, 201, 255, 0.6);
+        }
+
+        .web-btn-download {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .web-btn-download:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-5px) scale(1.05);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 50px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 25px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .feature-icon {
+            font-size: 35px;
+            margin-bottom: 15px;
+        }
+
+        .feature-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .feature-desc {
+            font-size: 14px;
+            color: #aaa;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .web-title { font-size: 50px; }
+            .web-subtitle { font-size: 16px; width: 90%; }
+            .web-buttons { flex-direction: column; width: 80%; }
+            .web-btn { width: 100%; justify-content: center; }
+            .features-grid { grid-template-columns: 1fr; margin-top: 30px; width: 90%; gap: 10px;}
+            .feature-card { padding: 15px; }
+        }
     </style>
 </head>
 
@@ -640,10 +770,39 @@
 
     <audio id="bgMusic" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"></audio>
 
-    <div id="mainMenu" class="overlay active">
-        <h1 style="font-size: 70px; margin-bottom: 40px; text-shadow: 0 0 25px var(--blue);">MultiPvP</h1>
-        <div class="mode-card active-card" style="width:240px; height:90px" onpointerdown="showMenu('modeMenu')">
-            <h3>OYNA</h3>
+    <div id="websiteOverlay" class="overlay active">
+        <div class="web-hero">
+            <h1 class="web-title">MultiPvP</h1>
+            <p class="web-subtitle">Tarayıcı üzerinden oynayarak veya Windows uygulamasını indirerek dünyanın her yerinden arkadaşlarınla gerçek zamanlı, gecikmesiz ve yeteneğe dayalı online maçlara katıl.</p>
+            
+            <div class="web-buttons">
+                <button class="web-btn web-btn-play" onclick="showMenu('modeMenu')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    TARAYICIDA OYNA
+                </button>
+                <a href="javascript:void(0)" class="web-btn web-btn-download" onclick="alert('Windows sürümü yakında eklenecektir!')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    WİNDOWS İÇİN İNDİR
+                </a>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-title">Sıfır Gecikme</div>
+                    <div class="feature-desc">İstemci tarafı tahminleme ile online maçlarda herhangi bir lag problemi yaşamadan pürüzsüzce atak yapın.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📱</div>
+                    <div class="feature-title">Cross-Platform</div>
+                    <div class="feature-desc">İster telefondan, isterseniz PC'den aynı hesaba bağlanarak arkadaşlarınızla platform bağımsız kapışın.</div>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <div class="feature-title">Gelişmiş Yapay Zeka</div>
+                    <div class="feature-desc">Arkadaşınız yoksa bile dert etmeyin; zıplayıp combo yapabilen 3 farklı zorluk seviyesindeki rekabetçi AI botlarla eğlenin.</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -666,7 +825,7 @@
                 <h3>BAŞLA</h3>
             </div>
             <div class="mode-card locked"><span>ETKİNLİK</span><small>YAKINDA</small></div>
-            <div class="mode-card active-card" style="border-color:var(--red)" onpointerdown="location.reload()">
+            <div class="mode-card active-card" style="border-color:var(--red)" onpointerdown="showMenu('websiteOverlay')">
                 <h3>GERİ</h3>
             </div>
         </div>
@@ -697,7 +856,7 @@
             <div style="font-size: 10px; color: #666;">ODA: <span id="roomDebug"></span></div>
         </div>
         <div class="mode-card active-card" style="border-color:var(--red); width: 200px; height: 50px;"
-            onpointerdown="location.reload()">
+            onpointerdown="returnToMenu()">
             <h3>İPTAL</h3>
         </div>
     </div>
@@ -738,7 +897,7 @@
 
     <div id="resultMenu" class="overlay">
         <div id="resTitle" style="font-size: 60px; margin-bottom: 20px;">ZAFER!</div>
-        <div class="mode-card active-card" style="width:150px; height:70px" onpointerdown="location.reload()">
+        <div class="mode-card active-card" style="width:150px; height:70px" onpointerdown="returnToMenu()">
             <h3>MENÜ</h3>
         </div>
     </div>
@@ -878,6 +1037,25 @@
         let myPlayerId = "", roomRef = null, myRole = "host";
         let lastStateSend = 0, currentDuelCode = "";
         const processedHits = new Set();
+
+        if (sessionStorage.getItem('openModeMenu') === 'true') {
+            sessionStorage.removeItem('openModeMenu');
+            document.addEventListener("DOMContentLoaded", () => {
+                setTimeout(() => showMenu('modeMenu'), 50);
+            });
+            // Eğer DOMContentLoaded çoktan bittiyse anında çalıştır
+            setTimeout(() => showMenu('modeMenu'), 100);
+        }
+
+        window.returnToMenu = function() {
+            sessionStorage.setItem('openModeMenu', 'true');
+            try {
+                if (window.myLobbyRef) window.myLobbyRef.remove();
+                if (amIHost && roomRef) roomRef.remove();
+                else if (roomRef) roomRef.off();
+            } catch(e) {}
+            location.reload();
+        };
 
         // --- FIGHTER CLASS (Moved Up) ---
         class Fighter {
@@ -1316,7 +1494,7 @@
                         hostRoomRef.off('value');
                         console.log('[MM] Guest: startAt bulunamadı, zaman aşımı');
                         updateMatchStatus('BAĞLANTI HATASI', 'Host yanıt vermedi');
-                        setTimeout(() => location.reload(), 2000);
+                        setTimeout(() => returnToMenu(), 2000);
                     }
                 });
             }, 15000);
@@ -1473,7 +1651,7 @@
                 document.getElementById('tutTitle').innerText = "TEBRİKLER!";
                 document.getElementById('tutText').innerText = "Eğitim Tamamlandı.";
                 document.getElementById('tutProgress').innerText = "Menüye dönülüyor...";
-                setTimeout(() => location.reload(), 3000);
+                setTimeout(() => returnToMenu(), 3000);
                 return;
             }
 

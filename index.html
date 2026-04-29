@@ -628,7 +628,7 @@
                 display: flex;
             }
         }
-
+        
         /* --- WEB SITE LANDING PAGE CSS --- */
         #websiteOverlay {
             background: linear-gradient(135deg, #050a0e, #112233, #02070a);
@@ -751,35 +751,12 @@
         }
 
         @media (max-width: 768px) {
-            .web-title {
-                font-size: 50px;
-            }
-
-            .web-subtitle {
-                font-size: 16px;
-                width: 90%;
-            }
-
-            .web-buttons {
-                flex-direction: column;
-                width: 80%;
-            }
-
-            .web-btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
-                margin-top: 30px;
-                width: 90%;
-                gap: 10px;
-            }
-
-            .feature-card {
-                padding: 15px;
-            }
+            .web-title { font-size: 50px; }
+            .web-subtitle { font-size: 16px; width: 90%; }
+            .web-buttons { flex-direction: column; width: 80%; }
+            .web-btn { width: 100%; justify-content: center; }
+            .features-grid { grid-template-columns: 1fr; margin-top: 30px; width: 90%; gap: 10px;}
+            .feature-card { padding: 15px; }
         }
     </style>
 </head>
@@ -796,47 +773,34 @@
     <div id="websiteOverlay" class="overlay active">
         <div class="web-hero">
             <h1 class="web-title">MultiPvP</h1>
-            <p class="web-subtitle">Tarayıcı üzerinden oynayarak veya Windows uygulamasını indirerek dünyanın her
-                yerinden arkadaşlarınla gerçek zamanlı, gecikmesiz ve yeteneğe dayalı online maçlara katıl.</p>
-
+            <p class="web-subtitle">Tarayıcı üzerinden oynayarak veya Windows uygulamasını indirerek dünyanın her yerinden arkadaşlarınla gerçek zamanlı, gecikmesiz ve yeteneğe dayalı online maçlara katıl.</p>
+            
             <div class="web-buttons">
                 <button class="web-btn web-btn-play" onclick="startPlaySequence()">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                    </svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                     TARAYICIDA OYNA
                 </button>
-                <a href="javascript:void(0)" class="web-btn web-btn-download"
-                    onclick="alert('Windows sürümü yakında eklenecektir!')">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7 10 12 15 17 10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
+                <a href="javascript:void(0)" class="web-btn web-btn-download" onclick="alert('Windows sürümü yakında eklenecektir!')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                     WİNDOWS İÇİN İNDİR
                 </a>
             </div>
-
+            
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">⚡</div>
                     <div class="feature-title">Sıfır Gecikme</div>
-                    <div class="feature-desc">İstemci tarafı tahminleme ile online maçlarda herhangi bir lag problemi
-                        yaşamadan pürüzsüzce atak yapın.</div>
+                    <div class="feature-desc">İstemci tarafı tahminleme ile online maçlarda herhangi bir lag problemi yaşamadan pürüzsüzce atak yapın.</div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">📱</div>
                     <div class="feature-title">Cross-Platform</div>
-                    <div class="feature-desc">İster telefondan, isterseniz PC'den aynı hesaba bağlanarak
-                        arkadaşlarınızla platform bağımsız kapışın.</div>
+                    <div class="feature-desc">İster telefondan, isterseniz PC'den aynı hesaba bağlanarak arkadaşlarınızla platform bağımsız kapışın.</div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🤖</div>
                     <div class="feature-title">Gelişmiş Yapay Zeka</div>
-                    <div class="feature-desc">Arkadaşınız yoksa bile dert etmeyin; zıplayıp combo yapabilen 3 farklı
-                        zorluk seviyesindeki rekabetçi AI botlarla eğlenin.</div>
+                    <div class="feature-desc">Arkadaşınız yoksa bile dert etmeyin; zıplayıp combo yapabilen 3 farklı zorluk seviyesindeki rekabetçi AI botlarla eğlenin.</div>
                 </div>
             </div>
         </div>
@@ -848,15 +812,11 @@
     </div>
 
     <div id="pauseMenu" class="overlay" style="z-index:99999;">
-        <h2 id="pauseTitle" style="margin-bottom: 20px; color:var(--red); font-size: 30px; text-shadow: 0 0 15px red;">
-            OYUN DURAKLATILDI</h2>
-        <div class="mode-card active-card"
-            style="width:200px; height:60px; border-color:var(--blue); margin-bottom:15px;"
-            onpointerdown="resumeGame()">
+        <h2 id="pauseTitle" style="margin-bottom: 20px; color:var(--red); font-size: 30px; text-shadow: 0 0 15px red;">OYUN DURAKLATILDI</h2>
+        <div class="mode-card active-card" style="width:200px; height:60px; border-color:var(--blue); margin-bottom:15px;" onpointerdown="resumeGame()">
             <h3>DEVAM ET</h3>
         </div>
-        <div class="mode-card active-card" style="width:200px; height:60px; border-color:var(--red);"
-            onpointerdown="returnToMenu()">
+        <div class="mode-card active-card" style="width:200px; height:60px; border-color:var(--red);" onpointerdown="returnToMenu()">
             <h3>MENÜYE ÇIK</h3>
         </div>
     </div>
@@ -866,15 +826,13 @@
         <div class="mode-card active-card" style="width:240px; height:90px" onpointerdown="showMenu('modeMenu')">
             <h3>OYNA</h3>
         </div>
-        <div class="mode-card active-card" style="width:240px; height:50px; margin-top:20px; border-color:var(--red)"
-            onpointerdown="showMenu('websiteOverlay')">
+        <div class="mode-card active-card" style="width:240px; height:50px; margin-top:20px; border-color:var(--red)" onpointerdown="showMenu('websiteOverlay')">
             <h3 style="font-size: 14px;">WEBSİTESİNE DÖN</h3>
         </div>
     </div>
 
     <div id="modeMenu" class="overlay">
-        <div style="position: absolute; top: 25px; left: 25px; font-size: 22px; font-weight: bold; color: var(--red); cursor: pointer; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; border: 2px solid var(--red);"
-            onpointerdown="showMenu('mainMenu')">
+        <div style="position: absolute; top: 25px; left: 25px; font-size: 22px; font-weight: bold; color: var(--red); cursor: pointer; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; border: 2px solid var(--red);" onpointerdown="showMenu('mainMenu')">
             &#9664; GERİ
         </div>
         <h2 style="margin-bottom: 20px;">MOD SEÇİMİ</h2>
@@ -930,8 +888,7 @@
     </div>
 
     <div id="diffMenu" class="overlay">
-        <div style="position: absolute; top: 25px; left: 25px; font-size: 22px; font-weight: bold; color: var(--red); cursor: pointer; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; border: 2px solid var(--red);"
-            onpointerdown="showMenu('mainMenu')">
+        <div style="position: absolute; top: 25px; left: 25px; font-size: 22px; font-weight: bold; color: var(--red); cursor: pointer; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; border: 2px solid var(--red);" onpointerdown="showMenu('mainMenu')">
             &#9664; GERİ
         </div>
         <div style="display:flex; gap:15px">
@@ -989,8 +946,7 @@
                 <div id="p1H" class="bar-fill" style="background:var(--blue)"></div>
             </div>
             <!-- OYUNU DURDUR BUTONU -->
-            <div id="pauseBtnBtn" onpointerdown="togglePause()"
-                style="position: absolute; top: 60px; left: 0; font-size: 13px; font-weight: bold; background: rgba(0,0,0,0.8); border: 2px solid var(--red); border-radius: 5px; padding: 4px 10px; cursor: pointer; pointer-events: auto;">
+            <div id="pauseBtnBtn" onpointerdown="togglePause()" style="position: absolute; top: 60px; left: 0; font-size: 13px; font-weight: bold; background: rgba(0,0,0,0.8); border: 2px solid var(--red); border-radius: 5px; padding: 4px 10px; cursor: pointer; pointer-events: auto;">
                 ❚❚ ÇIK / DURDUR
             </div>
         </div>
@@ -1020,7 +976,6 @@
         const music = document.getElementById('bgMusic');
 
         // --- MOBİL YAKINLAŞTIRMA KORUMASI ---
-        // iOS Safari gibi tarayıcılarda çift dokunarak yakınlaştırmayı (double tap to zoom) engelle
         let lastTouchEnd = 0;
         document.addEventListener('touchend', function (event) {
             const now = (new Date()).getTime();
@@ -1030,7 +985,6 @@
             lastTouchEnd = now;
         }, { passive: false });
 
-        // Parmakla çimdikleyerek yakınlaştırmayı (pinch to zoom) engelle
         document.addEventListener('gesturestart', function (e) {
             e.preventDefault();
         });
@@ -1047,7 +1001,6 @@
             const now = audioCtx.currentTime;
 
             if (type === 'hit') {
-                // Klasik "Tok" vuruş sesi
                 osc.type = 'square';
                 osc.frequency.setValueAtTime(150, now);
                 osc.frequency.exponentialRampToValueAtTime(40, now + 0.1);
@@ -1056,7 +1009,6 @@
                 osc.start(now);
                 osc.stop(now + 0.1);
             } else if (type === 'dash') {
-                // Fiyuuuv dash sesi
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(400, now);
                 osc.frequency.exponentialRampToValueAtTime(100, now + 0.3);
@@ -1065,7 +1017,6 @@
                 osc.start(now);
                 osc.stop(now + 0.3);
             } else if (type === 'swing') {
-                // Havayı yaran yumruk (ıskalama)
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(200, now);
                 osc.frequency.linearRampToValueAtTime(100, now + 0.1);
@@ -1081,8 +1032,7 @@
         function createParticles(x, y, color, count) {
             for (let i = 0; i < count; i++) {
                 particles.push({
-                    x: x,
-                    y: y,
+                    x: x, y: y,
                     vx: (Math.random() - 0.5) * 15,
                     vy: (Math.random() - 0.5) * 15 - 5,
                     life: 1.0,
@@ -1094,7 +1044,7 @@
 
         let isPlaying = false, isPaused = false, moveDir = 0, jumpCmd = false, maxHP = 500;
         let aiSpeed = 0.05, currentDiff = "NORMAL", gameFrame = 0, animationId = null;
-        let lastFrameTime = 0; // deltaTime için
+        let lastFrameTime = 0; 
         let shake = 0, isOnline = false, amIHost = false, currentPeerId = "";
         let playerName = localStorage.getItem('playerName') || "OYUNCU";
         const GROUND_Y = 100;
@@ -1120,220 +1070,110 @@
             document.addEventListener("DOMContentLoaded", () => {
                 setTimeout(() => showMenu('modeMenu'), 50);
             });
-            // Eğer DOMContentLoaded çoktan bittiyse anında çalıştır
             setTimeout(() => showMenu('modeMenu'), 100);
         }
 
-        window.returnToMenu = function () {
+        window.returnToMenu = function() {
             sessionStorage.setItem('openModeMenu', 'true');
             try {
                 if (window.myLobbyRef) window.myLobbyRef.remove();
                 if (amIHost && roomRef) roomRef.remove();
                 else if (roomRef) roomRef.off();
-            } catch (e) { }
+            } catch(e) {}
             location.reload();
         };
 
-        // --- FIGHTER CLASS (Moved Up) ---
+        // --- FIGHTER CLASS ---
         class Fighter {
             constructor(color, isBot) {
                 this.color = color; this.isBot = isBot;
-                this.normalizedY = 0; // Normalized Y position (0 = ground, positive = in air)
+                this.normalizedY = 0; 
                 this.reset(0);
             }
             reset(x) {
-                this.x = x;
-                this.normalizedY = 0; // Start on ground
-                this.hp = maxHP;
-                this.vy = 0;
-                this.actionState = "IDLE";
-                this.actionTimer = 0;
+                this.x = x; this.normalizedY = 0; this.hp = maxHP; this.vy = 0;
+                this.actionState = "IDLE"; this.actionTimer = 0;
                 this.cd = { punch: false, kick: false, dash: false };
-                this.isDead = false;
-                this.onGround = true;
-                this.facing = 1;
-                this.trails = [];
+                this.isDead = false; this.onGround = true; this.facing = 1; this.trails = [];
             }
-            getScreenY() {
-                // Convert normalized Y to arena Y position (fixed 700-unit tall arena, ground at y=600)
-                const groundLevel = 600;
-                return groundLevel - this.normalizedY;
-            }
-            setFromScreenY(screenY) {
-                // Convert arena Y to normalized Y
-                const groundLevel = 600;
-                this.normalizedY = groundLevel - screenY;
-            }
+            getScreenY() { return 600 - this.normalizedY; }
             update(deltaTime = 1) {
-                // Only update physics for local player or in offline mode
                 const shouldUpdatePhysics = (!this.isBot || !isOnline);
-
                 if (shouldUpdatePhysics) {
-                    // Update normalized Y with velocity
-                    this.normalizedY -= this.vy * deltaTime; // Y eksenindeki değişim fpsi ile normalize edildi
-
-                    // Apply gravity and ground collision
-                    if (this.normalizedY > 0) {
-                        this.vy += 1 * deltaTime; // Yerçekimi fps den bağımsız
-                        this.onGround = false;
-                    } else {
-                        this.normalizedY = 0;
-                        this.vy = 0;
-                        this.onGround = true;
-                    }
-
-                    // Jump logic - reduced height so chars stay on screen
+                    this.normalizedY -= this.vy * deltaTime;
+                    if (this.normalizedY > 0) { this.vy += 1 * deltaTime; this.onGround = false; }
+                    else { this.normalizedY = 0; this.vy = 0; this.onGround = true; }
                     if (!this.isBot && jumpCmd && this.onGround) this.vy = -15;
-                    // Hard ceiling: max jump height = 350 arena units
                     if (this.normalizedY > 350) { this.normalizedY = 350; this.vy = 0; }
-
-                    // Facing direction (only in offline mode)
                     if (!isOnline) {
                         let target = this.isBot ? p1 : bot;
                         this.facing = (this.x < target.x) ? 1 : -1;
                     }
                 }
-
-                // Update action animations
                 if (this.actionState !== 'IDLE') {
                     this.actionTimer += (this.actionState === 'DASH' ? 0.05 : 0.08) * deltaTime;
                     if (this.actionTimer >= 1) { this.actionState = 'IDLE'; this.actionTimer = 0; }
                 }
-
-                // --- GHOST TRAIL Yavaş Yavaş Silinme ---
                 if (this.trails && this.trails.length > 0) {
-                    for (let i = this.trails.length - 1; i >= 0; i--) {
+                    for(let i = this.trails.length - 1; i >= 0; i--) {
                         this.trails[i].life -= 0.04 * deltaTime;
                         if (this.trails[i].life <= 0) this.trails.splice(i, 1);
                     }
                 }
-
                 this.draw();
             }
             draw() {
-                // Her ekranda sabit alan oranı! Telefondaki kontroller vs farketmeksizin sabit hissiyat verir.
                 const characterScale = 0.55;
-
-                // --- DASH İZLERİ (GHOST TRAILS) ÇİZİMİ ---
                 if (this.trails && this.trails.length > 0) {
                     this.trails.forEach(t => {
-                        ctx.save();
-                        ctx.translate(t.x, t.y);
-                        ctx.scale(t.facing * characterScale, characterScale);
-                        ctx.globalAlpha = Math.max(0, t.life * 0.4); // max %40'tan başlayıp silinir
-
-                        ctx.fillStyle = this.color;
-                        ctx.beginPath(); ctx.ellipse(0, -70, 25, 50, 0, 0, Math.PI * 2); ctx.fill();
-                        let hY = -130;
-                        ctx.beginPath(); ctx.arc(0, hY, 22, 0, Math.PI * 2); ctx.fill();
-                        ctx.fillRect(-22, hY - 12, 44, 12);
-                        ctx.beginPath(); ctx.moveTo(-20, hY - 5); ctx.lineTo(-60, hY - 5); ctx.lineTo(-60, hY + 5); ctx.fill();
-                        this.drawPart(20, -80, 14, this.color);
-                        this.drawPart(15, -10, 12, this.color);
-                        this.drawPart(-15, -10, 12, this.color);
+                        ctx.save(); ctx.translate(t.x, t.y); ctx.scale(t.facing * characterScale, characterScale); ctx.globalAlpha = Math.max(0, t.life * 0.4);
+                        ctx.fillStyle = this.color; ctx.beginPath(); ctx.ellipse(0, -70, 25, 50, 0, 0, Math.PI * 2); ctx.fill();
                         ctx.restore();
                     });
                 }
-
-                ctx.save();
-                ctx.translate(this.x, this.getScreenY()); // Use normalized Y position
-
-                // --- CAN SIFIRLANINCA YERE DÜŞME (ÖLÜM ANİMASYONU EFFECTİ) ---
-                if (this.hp <= 0) {
-                    this.isDead = true;
-                    // Ölüm halinde yavaşça yana devrilir (90 derece)
-                    ctx.rotate(this.facing * Math.PI / 2);
-                    ctx.translate(-30, -50); // Yatınca merkezin yüksekliğini ayarlıyoruz
-                }
-
+                ctx.save(); ctx.translate(this.x, this.getScreenY());
+                if (this.hp <= 0) { this.isDead = true; ctx.rotate(this.facing * Math.PI / 2); ctx.translate(-30, -50); }
                 ctx.scale(this.facing * characterScale, characterScale);
                 let breath = Math.sin(gameFrame * 0.1) * 2;
-                let run = Math.sin(gameFrame * 0.4) * 15;
-                let isMoving = Math.abs(this.isBot ? 0 : moveDir) > 0 && this.onGround;
-
                 ctx.fillStyle = this.color; ctx.strokeStyle = "#fff"; ctx.lineWidth = 2;
                 ctx.beginPath(); ctx.ellipse(0, -70 + breath, 25, 50, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
                 let hY = -130 + breath;
                 ctx.fillStyle = "#ffccaa"; ctx.beginPath(); ctx.arc(0, hY, 22, 0, Math.PI * 2); ctx.fill();
                 ctx.fillStyle = this.color; ctx.fillRect(-22, hY - 12, 44, 12);
-                ctx.beginPath(); ctx.moveTo(-20, hY - 5); ctx.lineTo(-60, hY - 5 + Math.sin(gameFrame * 0.2) * 15); ctx.lineTo(-60, hY + 5 + Math.sin(gameFrame * 0.2) * 15); ctx.fill();
-                ctx.fillStyle = "white"; ctx.beginPath(); ctx.moveTo(5, hY - 2); ctx.lineTo(18, hY - 5); ctx.lineTo(12, hY + 4); ctx.fill();
-
                 let fH_X = 20, fL_X = 15;
                 if (this.actionState === 'PUNCH') fH_X += 60 * Math.sin(this.actionTimer * Math.PI);
                 if (this.actionState === 'KICK') fL_X += 50 * Math.sin(this.actionTimer * Math.PI);
-                else if (isMoving) fL_X += run;
-
                 this.drawPart(fH_X, -80 + breath, 14, "#fff");
                 this.drawPart(fL_X, -10, 12, "#111");
-                this.drawPart(-15 + (isMoving ? -run : 0), -10, 12, "#111");
+                this.drawPart(-15, -10, 12, "#111");
                 ctx.restore();
             }
-
             drawPart(x, y, r, c) { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }
             doAction(type) {
                 if (this.cd[type] || this.actionState !== 'IDLE' || !isPlaying) return;
                 this.cd[type] = true; this.actionState = type.toUpperCase(); this.actionTimer = 0;
                 if (!this.isBot) startCD(type === 'punch' ? 'btnPunch' : (type === 'kick' ? 'btnKick' : 'btnDash'), type === 'punch' ? 1 : (type === 'kick' ? 3 : 7), type.toUpperCase());
-
                 if (type === 'dash') {
-                    let startX = this.x;
-                    this.x += this.facing * 300;
-                    playSound('dash');
-                    createParticles(this.x, this.normalizedY, '#ffffff', 10);
-
-                    // --- ARKAYA İZ BIRAKMA (GHOST TRAILS) ---
+                    let startX = this.x; this.x += this.facing * 300; playSound('dash');
                     for (let i = 1; i <= 6; i++) {
-                        let tx = startX + (this.facing * 300 * (i / 6)); // Noktaları aralara dengeli bölüştür
+                        let tx = startX + (this.facing * 300 * (i / 6));
                         this.trails.push({ x: tx, y: this.getScreenY(), facing: this.facing, life: 1.0 - (i * 0.08) });
                     }
                 } else {
                     playSound('swing');
                     setTimeout(() => {
                         let target = this.isBot ? p1 : bot;
-                        // Online'da gerçek pozisyonu kullan (interpolated değil)
-                        let targetX = target.x;
-                        let targetNY = target.normalizedY;
-                        if (isOnline && !this.isBot) {
-                            targetX = botTargetX;
-                            targetNY = botTargetY;
-                        }
-                        const dx = Math.abs(this.x - targetX);
-                        const dy = Math.abs(this.normalizedY - targetNY);
-                        // Online'da daha sıkı mesafe kontrolü
-                        const hitRangeX = isOnline ? 80 : 110;
-                        const hitRangeY = isOnline ? 100 : 150;
-
-                        if (dx < hitRangeX && dy < hitRangeY) {
+                        let targetX = target.x, targetNY = target.normalizedY;
+                        if (isOnline && !this.isBot) { targetX = botTargetX; targetNY = botTargetY; }
+                        const dx = Math.abs(this.x - targetX), dy = Math.abs(this.normalizedY - targetNY);
+                        if (dx < (isOnline ? 80 : 110) && dy < (isOnline ? 100 : 150)) {
                             const dmg = (type === 'kick' ? 35 : 15);
-                            const pX = (this.x + targetX) / 2;
-                            const pY = Math.max(this.normalizedY, targetNY) + 50;
-
-                            playSound('hit');
-                            createParticles(pX, pY, type === 'kick' ? '#ff3333' : '#ffaa00', type === 'kick' ? 20 : 10);
-
+                            playSound('hit'); createParticles((this.x + targetX) / 2, Math.max(this.normalizedY, targetNY) + 50, type === 'kick' ? '#ff3333' : '#ffaa00', 15);
                             if (isOnline && roomRef && !this.isBot) {
-                                const tRole = myRole === 'host' ? 'guest' : 'host';
-                                roomRef.child('hits/' + tRole).push({ damage: dmg, ts: Date.now() });
-
-                                // CLIENT-SIDE PREDICTION: GECİKMEYİ ÖNLEMEK İÇİN ANINDA LOKAL EKRANA YANSIT
-                                target.hp -= dmg;
-                                shake = type === 'kick' ? 25 : 15;
-                                updateUI();
-                            } else {
-                                shake = type === 'kick' ? 25 : 15;
-                                target.hp -= dmg;
-                                updateUI();
-                            }
-
-                            // Training mode hit counting
-                            if (currentDiff === 'TRAINING' && !this.isBot && tutorialStep < T_STEPS.length) {
-                                let s = T_STEPS[tutorialStep];
-                                if (s && s.id === type) {
-                                    trainHits++;
-                                    updateTutorialUI();
-                                }
-                            }
+                                roomRef.child('hits/' + (myRole === 'host' ? 'guest' : 'host')).push({ damage: dmg, ts: Date.now() });
+                                target.hp -= dmg; updateUI();
+                            } else { target.hp -= dmg; updateUI(); }
+                            shake = type === 'kick' ? 25 : 15;
                         }
                     }, 150);
                 }
@@ -1344,65 +1184,27 @@
         let p1 = new Fighter(getComputedStyle(document.documentElement).getPropertyValue('--blue'), false);
         let bot = new Fighter(getComputedStyle(document.documentElement).getPropertyValue('--orange'), true);
 
-        // --- HELPER FUNCTIONS ---
-        function generateShortCode() {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            let code = '';
-            for (let i = 0; i < 6; i++) {
-                code += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return 'DUEL_' + code;
-        }
-
-        // --- COPY FUNCTION ---
-        function copyMyId() {
-            if (!currentPeerId) return;
-            // Extract just the 6-letter code for display
-            const displayCode = currentPeerId.replace('DUEL_', '');
-            navigator.clipboard.writeText(displayCode).then(() => {
-                const btn = document.getElementById('copyBtn');
-                const oldText = btn.innerText;
-                btn.innerText = "KOPYALANDI! ✅";
-                btn.style.background = "var(--green)";
-                setTimeout(() => {
-                    btn.innerText = oldText;
-                    btn.style.background = "var(--blue)";
-                }, 2000);
-            });
-        }
-
-        // --- FIREBASE ONLINE LOGIC ---
-        function generateGameId() {
-            return Math.random().toString(36).substring(2, 8).toUpperCase();
-        }
+        // --- ONLINE LOGIC ---
+        function generateGameId() { return Math.random().toString(36).substring(2, 8).toUpperCase(); }
         function updateMatchStatus(status, detail) {
-            const el = document.getElementById('matchmakingStatus');
-            const dbg = document.getElementById('roomDebug');
-            if (el) el.innerText = status;
-            if (dbg) dbg.innerText = detail;
+            const el = document.getElementById('matchmakingStatus'), dbg = document.getElementById('roomDebug');
+            if (el) el.innerText = status; if (dbg) dbg.innerText = detail;
         }
 
-        // --- DUEL (Arkadaş Daveti) ---
         function openOnlinePanel() {
             document.getElementById('onlinePanel').style.display = 'block';
             if (!myPlayerId) {
-                myPlayerId = generateGameId();
-                currentPeerId = myPlayerId;
-                currentDuelCode = myPlayerId;
-                const duelRef = db.ref('duels/' + myPlayerId);
-                duelRef.set({ hostId: myPlayerId, hostName: playerName, status: 'waiting', ts: Date.now() });
-                duelRef.onDisconnect().remove();
+                myPlayerId = generateGameId(); currentDuelCode = myPlayerId; amIHost = true; myRole = 'host';
+                roomRef = db.ref('rooms/' + myPlayerId);
+                roomRef.set({ hostId: myPlayerId, hostName: playerName, status: 'waiting_invitation', ts: firebase.database.ServerValue.TIMESTAMP });
+                roomRef.onDisconnect().remove();
                 document.getElementById('myIdDisplay').innerText = myPlayerId;
-                document.getElementById('myIdDisplay').style.color = 'var(--green)';
-                // Misafir bağlanınca davet göster
-                duelRef.on('value', snap => {
+                roomRef.on('value', snap => {
                     const d = snap.val();
-                    if (d && d.guestId && d.status === 'waiting') {
-                        duelRef.off('value');
+                    if (d && d.guestId && d.status === 'waiting_invitation') {
                         showMenu('invitationOverlay');
                         document.getElementById('invitationButtons').style.display = 'flex';
-                        document.getElementById('invitationMessage').innerText =
-                            `${d.guestName} sizin kodunuzla maça katılmak istiyor.`;
+                        document.getElementById('invitationMessage').innerText = `${d.guestName} seninle düello yapmak istiyor!`;
                         document.getElementById('invitationButtons').dataset.guestName = d.guestName;
                     }
                 });
@@ -1412,55 +1214,23 @@
         function connectToFriend() {
             const code = document.getElementById('targetPeerId').value.trim().toUpperCase();
             if (!code) return;
-            myPlayerId = generateGameId();
-            amIHost = false; myRole = 'guest';
+            myPlayerId = generateGameId(); amIHost = false; myRole = 'guest'; currentDuelCode = code;
             showMenu('invitationOverlay');
             document.getElementById('invitationButtons').style.display = 'none';
-            document.getElementById('invitationMessage').innerText = 'Bağlantı aranıyor...';
-
-            const duelRef = db.ref('duels/' + code);
-            let joined = false;
-
-            duelRef.once('value').then(snap => {
-                if (!snap.exists()) {
-                    document.getElementById('invitationMessage').innerText = 'HATA: Kod geçersiz veya bulunamadı!';
-                    setTimeout(() => returnToMenu(), 3000);
-                    return;
+            document.getElementById('invitationMessage').innerText = 'Odaya bağlanılıyor...';
+            roomRef = db.ref('rooms/' + code);
+            roomRef.once('value').then(snap => {
+                const roomData = snap.val();
+                if (!snap.exists() || (roomData.status !== 'waiting_invitation' && roomData.status !== 'playing')) {
+                    document.getElementById('invitationMessage').innerText = 'HATA: Kod geçersiz veya oda dolu!';
+                    setTimeout(() => returnToMenu(), 3000); return;
                 }
-
-                // --- 1. GÜVENCE: HOST ODAYI KURDUĞU GİBİ GEÇİŞ YAP ---
-                roomRef = db.ref('rooms/' + code);
-                roomRef.on('value', rSnap => {
-                    if (joined) return;
-                    const r = rSnap.val();
-                    if (r && r.status === 'playing' && r.startAt) {
-                        joined = true;
-                        roomRef.off('value');     // Odaya girerken dinlemeyi bırak
-                        duelRef.off('value');     // Düello talebini dinlemeyi bırak
-                        roomRef.onDisconnect().child('status').set('done');
-                        document.getElementById('invitationMessage').innerText = 'Oda bulundu! Giriliyor...';
-                        waitForStart(r.hostName || 'RAKİP', r.startAt);
-                    }
-                });
-
-                // --- 2. ADIM: HOST'A DAVETİ GÖREBİLMESİ İÇİN KİMLİĞİNİ YAZ ---
-                document.getElementById('invitationMessage').innerText = 'Karşı tarafın onayı bekleniyor...';
-                duelRef.update({ guestId: myPlayerId, guestName: playerName });
-
-                // --- 3. ADIM: DÜELLO DURUMUNU EŞ ZAMANLI DİNLE ---
-                duelRef.on('value', dSnap => {
-                    if (joined) return;
-                    const d = dSnap.val();
-                    if (!d) return;
-
-                    if (d.status === 'rejected') {
-                        duelRef.off('value');
-                        roomRef.off('value');
-                        document.getElementById('invitationMessage').innerText = 'Karşı taraf daveti reddetti.';
-                        setTimeout(() => returnToMenu(), 2500);
-                    } else if (d.status === 'accepted') {
-                        document.getElementById('invitationMessage').innerText = 'Onaylandı! Sunucudan maç ayarı bekleniyor...';
-                    }
+                document.getElementById('invitationMessage').innerText = 'Davet gönderildi, onay bekleniyor...';
+                roomRef.update({ guestId: myPlayerId, guestName: playerName });
+                roomRef.on('value', dSnap => {
+                    const d = dSnap.val(); if (!d) return;
+                    if (d.status === 'rejected') { roomRef.off('value'); document.getElementById('invitationMessage').innerText = 'Düello reddedildi.'; setTimeout(() => returnToMenu(), 2500); }
+                    else if (d.status === 'playing' && d.startAt) { roomRef.off('value'); document.getElementById('invitationMessage').innerText = 'Kabul edildi! Hazırlan...'; waitForStart(d.hostName || 'RAKİP', d.startAt); }
                 });
             });
         }
@@ -1468,396 +1238,131 @@
         function acceptInvitation() {
             document.getElementById('invitationButtons').style.display = 'none';
             const guestName = document.getElementById('invitationButtons').dataset.guestName || 'RAKİP';
-            amIHost = true; myRole = 'host';
-            const duelRef = db.ref('duels/' + currentDuelCode);
-            duelRef.update({ status: 'accepted' });
-            roomRef = db.ref('rooms/' + currentDuelCode);
-            const startAt = Date.now() + 5000; // 5sn - guest'e Firebase'e yazma süresi tanı
-            document.getElementById('invitationMessage').innerText = 'Davet kabul edildi! Maç başlıyor...';
-            // Önce room verisini yaz, yazıldıktan SONRA başlat (race condition önleme)
-            roomRef.set({ hostName: playerName, status: 'playing', startAt: startAt }).then(() => {
-                roomRef.onDisconnect().remove();
-                waitForStart(guestName, startAt);
-            });
+            const startAt = Date.now() + 3000;
+            document.getElementById('invitationMessage').innerText = 'Kabul edildi! Başlıyor...';
+            if (roomRef) {
+                roomRef.update({ status: 'playing', startAt: startAt, hostName: playerName }).then(() => { waitForStart(guestName, startAt); });
+            }
         }
 
         function rejectInvitation() {
             document.getElementById('invitationButtons').style.display = 'none';
-            const duelRef = db.ref('duels/' + currentDuelCode);
-            duelRef.update({ status: 'rejected' });
-            setTimeout(() => duelRef.remove(), 2000);
+            if (roomRef) roomRef.update({ status: 'rejected' });
             document.getElementById('invitationMessage').innerText = 'Davet reddedildi.';
-            setTimeout(() => returnToMenu(), 2000);
+            setTimeout(() => returnToMenu(), 1500);
         }
 
-        // --- MATCHMAKING (1v1 BUL) ---
-        let matchmakingActive = false;
-        let myLobbyRef = null;
-        function startMatchmaking() {
-            showMenu('matchmakingOverlay');
-            updateMatchStatus('RAKİP ARANIYOR...', 'Lobi hazırlanıyor...');
-            matchmakingActive = true;
-            myPlayerId = generateGameId();
-            console.log('[MM] Matchmaking başladı, ID:', myPlayerId);
+        function copyMyId() {
+            const id = document.getElementById('myIdDisplay').innerText;
+            navigator.clipboard.writeText(id).then(() => {
+                const btn = document.getElementById('copyBtn');
+                btn.innerText = "KOPYALANDI!";
+                setTimeout(() => btn.innerText = "ID KOPYALA", 2000);
+            });
+        }
 
-            // Her oyuncu kendi lobby kaydını yazar
+        // --- MATCHMAKING ---
+        let matchmakingActive = false, myLobbyRef = null;
+        function startMatchmaking() {
+            showMenu('matchmakingOverlay'); updateMatchStatus('RAKİP ARANIYOR...', 'Lobi hazırlanıyor...');
+            matchmakingActive = true; myPlayerId = generateGameId();
             myLobbyRef = db.ref('lobby/' + myPlayerId);
             myLobbyRef.set({ name: playerName, ts: firebase.database.ServerValue.TIMESTAMP });
             myLobbyRef.onDisconnect().remove();
-
-            // 2sn bekle - diğer oyuncunun da yazması için
             setTimeout(() => scanForPartner(), 2000);
         }
 
         function scanForPartner() {
             if (!matchmakingActive) return;
-            console.log('[MM] Lobby taranıyor...');
             db.ref('lobby').once('value', snap => {
                 if (!matchmakingActive) return;
                 const lobby = snap.val();
-                if (!lobby) {
-                    console.log('[MM] Lobby boş, host olarak bekliyorum');
-                    updateMatchStatus('RAKİP BEKLENİYOR...', 'Host | ID: ' + myPlayerId);
-                    watchForPartner();
-                    return;
-                }
-
-                // Kendimden farklı, son 90sn içinde eklenmiş oyuncuları bul
-                let partner = null;
-                const myTs = lobby[myPlayerId] ? lobby[myPlayerId].ts : Date.now();
+                if (!lobby) { updateMatchStatus('RAKİP BEKLENİYOR...', 'Host | ID: ' + myPlayerId); watchForPartner(); return; }
+                let partner = null; const myTs = lobby[myPlayerId] ? lobby[myPlayerId].ts : Date.now();
                 for (const [id, data] of Object.entries(lobby)) {
                     if (id === myPlayerId) continue;
                     if ((Date.now() - (data.ts || 0)) > 90000) continue;
                     if (!partner || data.ts < partner.ts) partner = { id, ...data };
                 }
-
-                if (!partner) {
-                    console.log('[MM] Lobide başka oyuncu yok, host olarak bekliyorum');
-                    updateMatchStatus('RAKİP BEKLENİYOR...', 'Host | ID: ' + myPlayerId);
-                    watchForPartner();
-                    return;
-                }
-
-                // Deterministik rol: timestamp küçük olan host.
-                // Timestamp eşitse ID küçük olan host.
-                const iShouldBeGuest = (partner.ts < myTs) ||
-                    (partner.ts === myTs && partner.id < myPlayerId);
-
-                console.log('[MM] Partner bulundu:', partner.id, 'ts:', partner.ts, 'myTs:', myTs, 'iShouldBeGuest:', iShouldBeGuest);
-
-                if (iShouldBeGuest) {
-                    becomeGuest(partner);
-                } else {
-                    updateMatchStatus('RAKİP BEKLENİYOR...', 'Host | ID: ' + myPlayerId);
-                    watchForPartner();
-                }
+                if (!partner) { updateMatchStatus('RAKİP BEKLENİYOR...', 'Host | ID: ' + myPlayerId); watchForPartner(); return; }
+                const iShouldBeGuest = (partner.ts < myTs) || (partner.ts === myTs && partner.id < myPlayerId);
+                if (iShouldBeGuest) becomeGuest(partner);
+                else { updateMatchStatus('RAKİP BEKLENİYOR...', 'Host | ID: ' + myPlayerId); watchForPartner(); }
             });
         }
 
         function watchForPartner() {
-            if (!matchmakingActive) return;
-            amIHost = true; myRole = 'host';
-            roomRef = db.ref('rooms/' + myPlayerId);
-            roomRef.onDisconnect().remove();
-            console.log('[MM] Host: rooms/' + myPlayerId + ' dinleniyor');
-
-            // Guest gelince room'a guestId yazar, onu izle
+            if (!matchmakingActive) return; amIHost = true; myRole = 'host';
+            roomRef = db.ref('rooms/' + myPlayerId); roomRef.onDisconnect().remove();
             roomRef.on('value', snap => {
                 if (!matchmakingActive) return;
-                const room = snap.val();
-                if (!room || !room.guestId) return;
-                console.log('[MM] Host: Guest bulundu!', room.guestName);
-
-                matchmakingActive = false;
-                roomRef.off('value');
-                if (myLobbyRef) myLobbyRef.remove();
-
-                const startAt = Date.now() + 1000; // Sadece sinyal, geri sayım lokal
+                const room = snap.val(); if (!room || !room.guestId) return;
+                matchmakingActive = false; roomRef.off('value'); if (myLobbyRef) myLobbyRef.remove();
+                const startAt = Date.now() + 1000;
                 updateMatchStatus('MAÇ BULUNDU!', 'Başlatılıyor...');
-                roomRef.update({ hostName: playerName, status: 'playing', startAt }).then(() => {
-                    console.log('[MM] Host: startAt yazıldı:', startAt);
-                    roomRef.onDisconnect().remove();
-                    waitForStart(room.guestName, startAt);
-                });
-            });
-
-            // Lobby'de yeni oyuncu gelirse tekrar kontrol et (sadece child_added ile)
-            db.ref('lobby').on('child_added', snap => {
-                if (!matchmakingActive) return;
-                if (snap.key === myPlayerId) return;
-                // Yeni bir oyuncu geldi - room dinlemeye devam, guest zaten odama yazacak
-                console.log('[MM] Host: Yeni oyuncu lobide:', snap.key);
-                updateMatchStatus('RAKİP BEKLENİYOR...', 'Host | Oyuncu algılandı...');
+                roomRef.update({ hostName: playerName, status: 'playing', startAt }).then(() => { waitForStart(room.guestName, startAt); });
             });
         }
 
         function becomeGuest(hostInfo) {
-            amIHost = false; myRole = 'guest';
-            updateMatchStatus('MAÇ BULUNDU!', 'Guest | Hazırlanıyor...');
-            console.log('[MM] Guest: Host odası:', hostInfo.id);
-
-            const hostRoomRef = db.ref('rooms/' + hostInfo.id);
-            roomRef = hostRoomRef;
-            matchmakingActive = false;
-            if (myLobbyRef) myLobbyRef.remove();
-            db.ref('lobby').off('child_added');
-
-            // 1) ÖNCE listener kur - startAt'ı HEMEN yakalayabilmek için
+            amIHost = false; myRole = 'guest'; updateMatchStatus('MAÇ BULUNDU!', 'Host bekleniyor...');
+            const hostRoomRef = db.ref('rooms/' + hostInfo.id); roomRef = hostRoomRef;
+            matchmakingActive = false; if (myLobbyRef) myLobbyRef.remove();
             let startAtFound = false;
-            const timeout = setTimeout(() => {
-                if (startAtFound) return;
-                // Timeout - son bir kez manuel oku
-                console.log('[MM] Guest: Timeout, son kontrol yapılıyor...');
-                hostRoomRef.once('value', snap => {
-                    if (startAtFound) return;
-                    const r = snap.val();
-                    if (r && r.startAt) {
-                        startAtFound = true;
-                        hostRoomRef.off('value');
-                        console.log('[MM] Guest: startAt manuel okumada bulundu:', r.startAt);
-                        waitForStart(hostInfo.name, r.startAt);
-                    } else {
-                        hostRoomRef.off('value');
-                        console.log('[MM] Guest: startAt bulunamadı, zaman aşımı');
-                        updateMatchStatus('BAĞLANTI HATASI', 'Host yanıt vermedi');
-                        setTimeout(() => returnToMenu(), 2000);
-                    }
-                });
-            }, 15000);
-
             hostRoomRef.on('value', snap => {
                 const r = snap.val();
-                console.log('[MM] Guest: Room değişti:', JSON.stringify(r));
                 if (r && r.startAt && !startAtFound) {
-                    startAtFound = true;
-                    hostRoomRef.off('value');
-                    clearTimeout(timeout);
-                    console.log('[MM] Guest: startAt alındı:', r.startAt);
+                    startAtFound = true; hostRoomRef.off('value');
                     waitForStart(hostInfo.name, r.startAt);
                 }
             });
-
-            // 2) SONRA odaya yaz - listener zaten aktif, hiçbir güncellemeyi kaçırmaz
-            updateMatchStatus('MAÇ BULUNDU!', 'Guest | Odaya yazılıyor...');
-            hostRoomRef.update({
-                hostId: hostInfo.id,
-                hostName: hostInfo.name,
-                guestId: myPlayerId,
-                guestName: playerName
-            }).then(() => {
-                console.log('[MM] Guest: Odaya yazıldı, startAt bekleniyor');
-                hostRoomRef.onDisconnect().child('status').set('done');
-                updateMatchStatus('MAÇ BULUNDU!', 'Guest | Host bekleniyor...');
-            }).catch(err => {
-                console.log('[MM] Guest: Yazma hatası:', err);
-                // Yazma başarısız olsa bile listener aktif - belki host zaten yazdı
-                updateMatchStatus('MAÇ BULUNDU!', 'Guest | Bekleniyor...');
-            });
+            hostRoomRef.update({ hostId: hostInfo.id, hostName: hostInfo.name, guestId: myPlayerId, guestName: playerName });
         }
 
-        // Her cihaz kendi lokal geri sayımını yapar (3 saniye)
         function waitForStart(opponentName, startAt) {
-            const ms = document.getElementById('matchmakingStatus');
-            const dbg = document.getElementById('roomDebug');
-            const inv = document.getElementById('invitationMessage');
-            if (ms) ms.innerText = 'MAÇ BULUNDU!';
-
-            // Lokal geri sayım - her cihaz 3 saniye sayar
-            const localStart = Date.now() + 3000;
-            console.log('[MM] waitForStart çağrıldı, 3sn geri sayım başlıyor');
-
+            const targetTime = startAt || (Date.now() + 3000);
             const tick = () => {
-                const remaining = Math.ceil((localStart - Date.now()) / 1000);
+                const remaining = Math.ceil((targetTime - Date.now()) / 1000);
                 if (remaining > 0) {
                     const txt = remaining + '...';
-                    if (dbg) dbg.innerText = txt;
-                    if (inv) inv.innerText = 'Maç başlıyor... ' + txt;
-                    setTimeout(tick, 250);
-                } else {
-                    if (dbg) dbg.innerText = 'BAŞLIYOR!';
-                    if (inv) inv.innerText = 'BAŞLIYOR!';
-                    setupFirebaseGame(opponentName);
-                }
+                    if (document.getElementById('matchmakingStatus')) document.getElementById('matchmakingStatus').innerText = 'MAÇ BAŞLIYOR: ' + txt;
+                    if (document.getElementById('invitationMessage')) document.getElementById('invitationMessage').innerText = 'HAZIR OL! ' + txt;
+                    setTimeout(tick, 100);
+                } else { setupFirebaseGame(opponentName); }
             };
             tick();
         }
 
-
-        // --- FIREBASE GAME SYNC ---
-        let botTargetX = 0, botTargetY = 0; // Interpolation hedefleri
-
-        function setupFirebaseGame(opponentName) {
-            isOnline = true;
-            startGame('ONLINE');
-            document.getElementById('botNameDisplay').innerText = opponentName || 'RAKİP';
-            const oppRole = myRole === 'host' ? 'guest' : 'host';
-            botTargetX = bot.x;
-            botTargetY = bot.normalizedY;
-
-            // Rakip durumunu dinle
-            roomRef.child(oppRole).on('value', snap => {
-                const d = snap.val(); if (!d) return;
-                botTargetX = d.x; botTargetY = d.normalizedY;
-                bot.hp = d.hp;
-                bot.actionState = d.actionState; bot.actionTimer = d.actionTimer; bot.facing = d.facing;
-                updateUI();
-            });
-            // Gelen vuruşları dinle
-            roomRef.child('hits/' + myRole).on('child_added', snap => {
-                const hit = snap.val(); if (!hit) return;
-                if (processedHits.has(snap.key)) return;
-                processedHits.add(snap.key);
-                p1.hp -= hit.damage;
-                shake = hit.damage > 20 ? 25 : 15;
-                playSound('hit');
-                createParticles(p1.x, p1.normalizedY + 50, '#ff3333', 15);
-                updateUI();
-            });
-            // Rakip ayrılınca
-            roomRef.child('status').on('value', snap => {
-                if (snap.val() === 'done' && isPlaying) { bot.hp = 0; updateUI(); }
-            });
-        }
-
-        // --- TRAINING CONSTANTS ---
-        let tutorialStep = 0;
-        let trainHits = 0;
-        let isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
-
-        const T_STEPS = [
-            {
-                id: 'move',
-                pc: "Hareket et (A / D)",
-                mob: "Hareket et (Joystick)",
-                check: () => Math.abs(p1.x - 150) > 200, // Moved significantly
-                done: false
-            },
-            {
-                id: 'jump',
-                pc: "Zıpla (Space veya W)",
-                mob: "Zıpla (Joystick Yukarı)",
-                check: () => jumpCmd,
-                done: false
-            },
-            {
-                id: 'dash',
-                pc: "Dash At (L veya Shift)",
-                mob: "Dash At (DASH Tuşu)",
-                check: () => p1.actionState === 'DASH',
-                done: false
-            },
-            {
-                id: 'punch',
-                pc: "Yumruk At (J)",
-                mob: "Yumruk At (YUMRUK Tuşu)",
-                count: 3,
-                check: () => p1.actionState === 'PUNCH' && Math.abs(p1.x - bot.x) < 200, // Simple hit check
-                done: false
-            },
-            {
-                id: 'kick',
-                pc: "Tekme At (K)",
-                mob: "Tekme At (TEKME Tuşu)",
-                count: 3,
-                check: () => p1.actionState === 'KICK' && Math.abs(p1.x - bot.x) < 200,
-                done: false
-            }
-        ];
-
-        function startTraining() {
-            tutorialStep = 0;
-            trainHits = 0;
-            T_STEPS.forEach(s => s.done = false);
-            document.getElementById('tutorialOverlay').style.display = 'flex';
-            updateTutorialUI();
-        }
-
-        function updateTutorialUI() {
-            if (tutorialStep >= T_STEPS.length) {
-                document.getElementById('tutTitle').innerText = "TEBRİKLER!";
-                document.getElementById('tutText').innerText = "Eğitim Tamamlandı.";
-                document.getElementById('tutProgress').innerText = "Menüye dönülüyor...";
-                setTimeout(() => returnToMenu(), 3000);
-                return;
-            }
-
-            let s = T_STEPS[tutorialStep];
-            document.getElementById('tutTitle').innerText = "GÖREV " + (tutorialStep + 1);
-            let msg = isMobile ? s.mob : s.pc;
-            if (s.count) msg += ` (${trainHits}/${s.count})`;
-            document.getElementById('tutText').innerText = msg;
-            document.getElementById('tutProgress').innerText = "";
-        }
-
-        function updateTutorial() {
-            if (tutorialStep >= T_STEPS.length) return;
-
-            let s = T_STEPS[tutorialStep];
-
-            // Special hit counting for punch/kick
-            if (s.id === 'punch' || s.id === 'kick') {
-                // Logic handled in doAction mainly via flags, 
-                // but here we just check if step is done.
-                if (trainHits >= s.count) {
-                    nextStep();
-                }
-            } else {
-                if (s.check()) {
-                    nextStep();
-                }
-            }
-        }
-
-        function nextStep() {
-            trainHits = 0;
-            tutorialStep++;
-            updateTutorialUI();
-
-            // Small celebration effect?
-            ctx.save();
-            ctx.fillStyle = "rgba(0,255,0,0.3)";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.restore();
-        }
-
-
-
         // --- GAME CORE ---
-        function togglePause() {
-            if (isOnline) {
-                document.getElementById('pauseTitle').innerText = "OYUN (CANLI) DURMAZ!";
-                showMenu('pauseMenu');
-            } else {
-                isPaused = true;
-                document.getElementById('pauseTitle').innerText = "OYUN DURAKLATILDI";
-                showMenu('pauseMenu');
-            }
+        let botTargetX = 0, botTargetY = 0;
+        function setupFirebaseGame(opponentName) {
+            isOnline = true; startGame('ONLINE');
+            document.getElementById('botNameDisplay').innerText = opponentName || 'RAKİP';
+            roomRef.child(myRole === 'host' ? 'guest' : 'host').on('value', snap => {
+                const d = snap.val(); if (!d) return;
+                botTargetX = d.x; botTargetY = d.normalizedY; bot.hp = d.hp;
+            });
+            roomRef.child('hits/' + myRole).on('child_added', snap => {
+                const hit = snap.val(); if (!hit || processedHits.has(snap.key)) return;
+                processedHits.add(snap.key); p1.hp -= hit.damage; updateUI();
+                playSound('hit'); createParticles(p1.x, 600 - p1.normalizedY, '#ff3333', 15);
+            });
         }
 
-        function resumeGame() {
-            isPaused = false;
-            document.getElementById('pauseMenu').classList.remove('active');
+        function togglePause() {
+            if (isOnline) showMenu('pauseMenu');
+            else { isPaused = true; showMenu('pauseMenu'); }
         }
+        function resumeGame() { isPaused = false; document.getElementById('pauseMenu').classList.remove('active'); }
 
         function startPlaySequence() {
             showMenu('loadingOverlay');
-            try {
-                if (audioCtx.state === 'suspended') {
-                    let p = audioCtx.resume();
-                    if (p !== undefined) p.catch(e => console.warn(e));
-                }
-            } catch (e) { }
-            setTimeout(() => {
-                showMenu('mainMenu');
-            }, 3000);
+            setTimeout(() => showMenu('mainMenu'), 3000);
         }
 
         function showMenu(id) {
             document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active'));
-            const targetEl = document.getElementById(id);
-            if (targetEl) targetEl.classList.add('active');
-
-            if (id === 'modeMenu') { music.play().catch(() => { }); }
+            if (document.getElementById(id)) document.getElementById(id).classList.add('active');
         }
 
         function startGame(diff) {
@@ -1867,219 +1372,57 @@
             document.getElementById('gameUI').style.display = 'flex';
             document.getElementById('controls').style.display = 'flex';
             document.getElementById('playerNameDisplay').innerText = playerName;
-            document.getElementById('botNameDisplay').innerText = isOnline ? "RAKİP" : `BOT (${diff})`;
-
-            if (diff === 'TRAINING') {
-                startTraining();
-                aiSpeed = 0; // Passive
-            } else {
-                aiSpeed = diff === 'KOLAY' ? 0.02 : (diff === 'NORMAL' ? 0.05 : 0.1);
-            }
-
-            resize();
-            // Use fixed spawn positions for consistent cross-platform play
-            const leftSpawn = 200;
-            const rightSpawn = 800;
+            const leftSpawn = 200, rightSpawn = 800;
             p1.reset(amIHost ? leftSpawn : rightSpawn);
             bot.reset(amIHost ? rightSpawn : leftSpawn);
-            isPlaying = true;
-            lastFrameTime = 0;
+            isPlaying = true; lastFrameTime = 0;
             requestAnimationFrame(animate);
         }
 
-
-
         function animate(timestamp) {
-            // Oyun bitse de Canvas animasyon döngüsü durmasın, görsel partiküller ve yerçekimi akmaya devam etsin.
-
-            // DeltaTime hesapla - PC ve mobil aynı hızda hareket etsin
             if (!lastFrameTime) lastFrameTime = timestamp;
-            const deltaTime = Math.min((timestamp - lastFrameTime) / 16.67, 3); // 60fps = 1.0, max 3x
+            const deltaTime = Math.min((timestamp - lastFrameTime) / 16.67, 3);
             lastFrameTime = timestamp;
-
-            let sx = (Math.random() - 0.5) * shake; let sy = (Math.random() - 0.5) * shake; shake *= 0.9;
-
-            // Clear canvas
             ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.fillStyle = "#0a0a0a";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Apply fixed arena viewport (no camera follow)
-            const arenaScale = window._arenaScale || 1;
-            const arenaOffsetX = window._arenaOffsetX || 0;
-            const arenaOffsetY = window._arenaOffsetY || 0;
-            ctx.setTransform(arenaScale, 0, 0, arenaScale, arenaOffsetX + sx, arenaOffsetY + sy);
-
-            // Draw arena background
-            ctx.fillStyle = "#0a0a0a";
-            ctx.fillRect(ARENA_LEFT - 20, 0, ARENA_WIDTH + 40, canvas.height / arenaScale + 100);
-
-            // Draw arena boundary lines (white)
-            ctx.save();
-            ctx.strokeStyle = 'rgba(255,255,255,0.85)';
-            ctx.lineWidth = 4 / arenaScale;
-            ctx.setLineDash([12 / arenaScale, 6 / arenaScale]);
-            // Left boundary
-            ctx.beginPath();
-            ctx.moveTo(ARENA_LEFT, 0);
-            ctx.lineTo(ARENA_LEFT, canvas.height / arenaScale);
-            ctx.stroke();
-            // Right boundary
-            ctx.beginPath();
-            ctx.moveTo(ARENA_RIGHT, 0);
-            ctx.lineTo(ARENA_RIGHT, canvas.height / arenaScale);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            ctx.restore();
-
+            ctx.fillStyle = "#0a0a0a"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            const scale = window._arenaScale || 1;
+            ctx.setTransform(scale, 0, 0, scale, (window._arenaOffsetX || 0), (window._arenaOffsetY || 0));
             if (!isPaused) {
-                gameFrame += deltaTime; // animasyon hızını da cihazlara uygun hale getiriyoruz
-
-                // Hareket: Sadece oyun oynanıyorsa p1 hareket edebilir
-                if (isPlaying) {
-                    p1.x += moveDir * deltaTime;
-                }
-
-                // Fizikler ve Partiküller oyun dursa da aksın
-                p1.update(deltaTime);
-                bot.update(deltaTime);
-
-                // Oyunun aktif olduğu durumdaki aksiyonlar (Eğitim, Online Senkron, Bot Zekası)
-                if (isPlaying) {
-                    // Training Check
-                    if (currentDiff === 'TRAINING') {
-                        updateTutorial();
+                gameFrame += deltaTime;
+                if (isPlaying) p1.x += moveDir * deltaTime;
+                p1.update(deltaTime); bot.update(deltaTime);
+                if (isPlaying && isOnline && roomRef) {
+                    bot.x += (botTargetX - bot.x) * 0.5;
+                    bot.normalizedY += (botTargetY - bot.normalizedY) * 0.5;
+                    if (Date.now() - lastStateSend >= 50) {
+                        lastStateSend = Date.now();
+                        roomRef.child(myRole).set({ x: Math.round(p1.x), normalizedY: Math.round(p1.normalizedY), hp: p1.hp });
                     }
-
-                    // Network / AI Logic
-                    if (isOnline && roomRef) {
-                        // Rakip pozisyonunu interpolate et (hızlı + akıcı)
-                        bot.x += (botTargetX - bot.x) * 0.5;
-                        bot.normalizedY += (botTargetY - bot.normalizedY) * 0.5;
-
-                        // Firebase senkronizasyonu (her 50ms = 20fps - hızlı ama kuyruk oluşturmaz)
-                        const now = Date.now();
-                        if (now - lastStateSend >= 50) {
-                            lastStateSend = now;
-                            roomRef.child(myRole).set({
-                                x: Math.round(p1.x),
-                                normalizedY: Math.round(p1.normalizedY),
-                                hp: p1.hp,
-                                actionState: p1.actionState,
-                                actionTimer: Math.round(p1.actionTimer * 100) / 100,
-                                facing: p1.facing
-                            });
-                        }
-                    } else if (!isOnline && !bot.isDead && currentDiff !== 'TRAINING') {
-                        // --- GELİŞMİŞ DİNAMİK BOT ZEKA (AI) SİSTEMİ ---
-                        let d = p1.x - bot.x; let ad = Math.abs(d);
-                        let speed = currentDiff === 'ZOR' ? 7 : (currentDiff === 'NORMAL' ? 5 : 3.5);
-
-                        // Mesafe ve Hareket Yönetimi
-                        if (ad > 280) {
-                            bot.x += (d > 0 ? speed : -speed) * deltaTime;
-                            // Çok uzaksa dash (atılma) yeteneği kullan
-                            if (Math.random() < aiSpeed * 0.1) bot.doAction('dash');
-                        } else if (ad < 100 && Math.random() < aiSpeed * 0.3) {
-                            // Yakınsa bazen taktiksel geri çekil (Dodge)
-                            bot.x -= (d > 0 ? speed : -speed) * 1.5 * deltaTime;
-                        } else if (ad > 120) {
-                            // Oyuncuya Yürü (Yakın Takip) - Ancak 120 birim kalana kadar! Aksi takdirde dibine çok girer.
-                            bot.x += (d > 0 ? speed : -speed) * Math.min(deltaTime, 1.5);
-                        }
-
-                        // Saldırı Kombosu
-                        if (Math.random() < aiSpeed && ad < 180) {
-                            Math.random() < 0.6 ? bot.doAction('punch') : bot.doAction('kick');
-                        }
-
-                        // Zıplama / Havada Yakalama Mantığı
-                        if (bot.onGround && Math.random() < aiSpeed * 0.2) {
-                            // Oyuncu havadaysa veya rastgele zamanlamayla bot da zıplar
-                            if (p1.normalizedY > 50 || Math.random() < 0.5) bot.vy = -16;
-                        }
-                    }
-                }
-            } else {
-                // Oyun duraklatıldığında donuk haller çizilsin ama arkaplan/partiküller aksın
-                p1.draw();
-                bot.draw();
-            }
-
-            // Boundaries - clamp to arena
-            p1.x = Math.max(ARENA_LEFT + 20, Math.min(ARENA_RIGHT - 20, p1.x));
-            bot.x = Math.max(ARENA_LEFT + 20, Math.min(ARENA_RIGHT - 20, bot.x));
-
-            // Draw Particles
-            for (let i = particles.length - 1; i >= 0; i--) {
-                let p = particles[i];
-                p.x += p.vx * deltaTime;
-                p.y += p.vy * deltaTime;
-                p.vy += 0.5 * deltaTime; // gravity for particle
-                p.life -= 0.03 * deltaTime;
-
-                if (p.life <= 0) {
-                    particles.splice(i, 1);
-                } else {
-                    ctx.save();
-                    // Y pozisyonunu arena koordinatına çevir (Fighter sınıfına benzer)
-                    ctx.translate(p.x, 600 - p.y);
-                    ctx.globalAlpha = p.life;
-                    ctx.fillStyle = p.color;
-                    ctx.beginPath();
-                    ctx.arc(0, 0, p.size, 0, Math.PI * 2);
-                    ctx.fill();
-                    ctx.restore();
+                } else if (isPlaying && !isOnline && !bot.isDead) {
+                    let d = p1.x - bot.x; bot.x += (d > 0 ? 5 : -5) * deltaTime;
+                    if (Math.random() < 0.05 && Math.abs(d) < 150) bot.doAction(Math.random() > 0.5 ? 'punch' : 'kick');
                 }
             }
-
+            p1.x = Math.max(120, Math.min(880, p1.x)); bot.x = Math.max(120, Math.min(880, bot.x));
             animationId = requestAnimationFrame(animate);
         }
 
         function updateUI() {
-            document.getElementById('p1H').style.width = Math.max(0, (p1.hp / maxHP * 100)) + "%";
-            document.getElementById('p2H').style.width = Math.max(0, (bot.hp / maxHP * 100)) + "%";
-
-            if (p1.hp <= 0 || bot.hp <= 0) {
-                if (isPlaying) { // Sadece ilk kez (oyun bitiş anında) tetiklensin
-                    isPlaying = false;
-
-                    // Oyun bitti, maç sonu menüsü bir kaç saniye sonra gelsin ki ölüm sahnesi anlaşılsın!
-                    setTimeout(() => {
-                        try {
-                            if (isOnline && roomRef && p1.hp <= 0) {
-                                // Rakibe oyunun bittiğini Firebase üzerinden bildir
-                                roomRef.child('status').set('done');
-                            }
-
-                            // Kullanıcı arayüzünü karıştırmaması için tamamen sakla
-                            document.getElementById('gameUI').style.display = 'none';
-                            document.getElementById('controls').style.display = 'none';
-
-                            const isWin = p1.hp > 0;
-                            const resTitleObj = document.getElementById('resTitle');
-                            resTitleObj.innerText = isWin ? "ZAFER!" : "BOZGUN...";
-                            resTitleObj.style.color = isWin ? "#44ff44" : "#ff3333";
-
-                            // Vanilla Javascript ile DOM'u garantili şekilde ekranda göster!
-                            const resultMenuObj = document.getElementById('resultMenu');
-                            resultMenuObj.style.display = 'flex';
-                            resultMenuObj.style.opacity = '1';
-                            resultMenuObj.style.pointerEvents = 'auto';
-                            resultMenuObj.style.zIndex = '999999';
-                            resultMenuObj.classList.add('active'); // Orijinal fonksiyon
-
-                        } catch (e) {
-                            console.error("Menü Gösterim Hatası: ", e);
-                        }
-                    }, 1500);
-                }
+            document.getElementById('p1H').style.width = (p1.hp / 5) + "%";
+            document.getElementById('p2H').style.width = (bot.hp / 5) + "%";
+            if ((p1.hp <= 0 || bot.hp <= 0) && isPlaying) {
+                isPlaying = false;
+                setTimeout(() => {
+                    document.getElementById('gameUI').style.display = 'none';
+                    document.getElementById('controls').style.display = 'none';
+                    document.getElementById('resTitle').innerText = p1.hp > 0 ? "ZAFER!" : "BOZGUN...";
+                    showMenu('resultMenu');
+                }, 1500);
             }
         }
 
         function startCD(id, sec, label) {
             const btn = document.getElementById(id); let time = sec; btn.classList.add('cd');
-            btn.innerHTML = `<span class="cd-num">${time}</span>`;
             const itv = setInterval(() => { time--; if (time > 0) btn.innerHTML = `<span class="cd-num">${time}</span>`; else { clearInterval(itv); btn.classList.remove('cd'); btn.innerHTML = label; } }, 1000);
         }
 
@@ -2087,109 +1430,29 @@
         const jBase = document.getElementById('joyBase'), jStick = document.getElementById('joyStick');
         jBase.onpointermove = (e) => {
             if (!e.buttons || !isPlaying) return;
-            const r = jBase.getBoundingClientRect();
-            const centerX = r.width / 2;
-            const centerY = r.height / 2;
-            const maxDist = r.width / 2 - 20; // Dynamic max distance based on size
-            const dx = e.clientX - (r.left + centerX), dy = e.clientY - (r.top + centerY);
-            const ang = Math.atan2(dy, dx), dist = Math.min(maxDist, Math.sqrt(dx * dx + dy * dy));
-            jStick.style.transform = `translate(${Math.cos(ang) * dist}px, ${Math.sin(ang) * dist}px)`;
-            const threshold = r.width / 7; // Dynamic threshold
-            moveDir = dx > threshold ? 6 : (dx < -threshold ? -6 : 0);
-            jumpCmd = dy < -threshold * 1.5;
+            const r = jBase.getBoundingClientRect(), dx = e.clientX - (r.left + r.width/2), dy = e.clientY - (r.top + r.height/2);
+            const ang = Math.atan2(dy, dx), dist = Math.min(r.width/2-20, Math.sqrt(dx*dx+dy*dy));
+            jStick.style.transform = `translate(${Math.cos(ang)*dist}px, ${Math.sin(ang)*dist}px)`;
+            moveDir = dx > 20 ? 6 : (dx < -20 ? -6 : 0); jumpCmd = dy < -30;
         };
         jBase.onpointerup = () => { jStick.style.transform = 'none'; moveDir = 0; jumpCmd = false; };
 
-        // --- KEYBOARD CONTROLS ---
-        const pressedKeys = new Set();
-
-        window.addEventListener('keydown', (e) => {
-            if (e.target.tagName === 'INPUT') return;
-
-            pressedKeys.add(e.code);
-            updateMoveDir();
-
-            if (!e.repeat) {
-                switch (e.code) {
-                    case 'KeyJ': window.triggerAction('punch'); break;
-                    case 'KeyK': window.triggerAction('kick'); break;
-                    case 'KeyL':
-                    case 'ShiftLeft':
-                    case 'ShiftRight':
-                        window.triggerAction('dash');
-                        break;
-                }
-            }
-        });
-
-        window.addEventListener('keyup', (e) => {
-            pressedKeys.delete(e.code);
-            updateMoveDir();
-        });
-
-        function updateMoveDir() {
-            const left = pressedKeys.has('KeyA') || pressedKeys.has('ArrowLeft');
-            const right = pressedKeys.has('KeyD') || pressedKeys.has('ArrowRight');
-            const up = pressedKeys.has('KeyW') || pressedKeys.has('ArrowUp') || pressedKeys.has('Space');
-
-            if (left && !right) moveDir = -6;
-            else if (right && !left) moveDir = 6;
-            else moveDir = 0;
-
-            jumpCmd = up;
-        }
-
-        // --- PLAYER NAME MANAGEMENT ---
-        const playerNameInput = document.getElementById('playerNameInput');
-        const currentNameSpan = document.getElementById('currentNameSpan');
-        playerNameInput.value = playerName;
-        currentNameSpan.innerText = playerName;
-
-        playerNameInput.addEventListener('input', (e) => {
+        document.getElementById('playerNameInput').addEventListener('input', (e) => {
             playerName = e.target.value.trim() || "OYUNCU";
             localStorage.setItem('playerName', playerName);
-            currentNameSpan.innerText = playerName;
+            document.getElementById('currentNameSpan').innerText = playerName;
         });
 
-        // Arena constants: center at 500, left boundary at 100, right at 900 (±400)
-        const ARENA_CENTER = 500;
-        const ARENA_HALF = 400;
-        const ARENA_LEFT = ARENA_CENTER - ARENA_HALF;  // 100
-        const ARENA_RIGHT = ARENA_CENTER + ARENA_HALF;  // 900
-        const ARENA_WIDTH = ARENA_HALF * 2;             // 800
-
         function resize() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-
-            // Yatay modda mı dikey modda mıyız (Kullanıcının ekran yönünü ölçüyoruz)
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
             const isLandscape = canvas.width > canvas.height;
-
-            // Eskiden canvas.width ile mobile tespiti yapılırdı ama yatay telefonda genişlik 800'ü geçiyor.
-            // Zaten kodda global isMobile ('ontouchstart' in window) var. Bunu kullanıyoruz.
-            // Eğer mobilde yataydaysak, kontroller sağa sola yayılacağı için yüksekliğe bindirmez, alt boşluk sadece çok az bırakılır (60px).
-            // Eğer dikeydeysek kontroller tam aşağıda yer kaplıyor, 160px boşluk lazım.
-            const uiHeight = isMobile ? (isLandscape ? 60 : 160) : 40;
-            const safeHeight = Math.max(canvas.height - uiHeight, 150);
-
-            // Tüm cihazlarda (PC, Tablet, Telefon) aynı oyun alanının görünmesi için 
-            // yatay ve dikey ölçeklemeyi kontrol ediyoruz. 
-            // Minumum alan: 800 genişlik ve zıplama mesafesi için ~450 yükseklik
-            const scaleX = canvas.width / ARENA_WIDTH;
-            const scaleY = safeHeight / 450;
-
-            // Hangi boyut kısıtlayıcı ise o ölçeği alarak tüm EKRANA SIĞMASINI sağla
-            const scale = Math.min(scaleX, scaleY);
+            const uiHeight = ('ontouchstart' in window) ? (isLandscape ? 60 : 160) : 40;
+            const scale = Math.min(canvas.width / 800, (canvas.height - uiHeight) / 450);
             window._arenaScale = scale;
-
-            // Arenayı tam ekranın ortasına yatayda yerleştir (Geniş ekranlarda boşluklar orantılı kalsın)
-            window._arenaOffsetX = (canvas.width - ARENA_WIDTH * scale) / 2 - ARENA_LEFT * scale;
-
-            // Zemin çizgisi y=600 mantıksal değerine oturacak.
+            window._arenaOffsetX = (canvas.width - 800 * scale) / 2 - 100 * scale;
             window._arenaOffsetY = (canvas.height - uiHeight) - 600 * scale;
         }
-        window.onresize = resize;
+        window.onresize = resize; resize();
     </script>
 </body>
-
 </html>

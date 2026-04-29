@@ -1205,7 +1205,10 @@
                     setTimeout(() => returnToMenu(), 3000); return;
                 }
                 document.getElementById('invitationMessage').innerText = 'Davet gönderildi, onay bekleniyor...';
-                roomRef.update({ guestId: myPlayerId, guestName: playerName });
+                roomRef.update({ guestId: myPlayerId, guestName: playerName })
+                    .catch(err => {
+                        document.getElementById('invitationMessage').innerText = 'HATA: Firebase Yetki Reddedildi!';
+                    });
                 roomRef.on('value', dSnap => {
                     const d = dSnap.val(); if (!d) return;
                     if (d.status === 'rejected') { roomRef.off('value'); document.getElementById('invitationMessage').innerText = 'Düello reddedildi.'; setTimeout(() => returnToMenu(), 2500); }
@@ -1246,7 +1249,11 @@
             showMenu('matchmakingOverlay'); updateMatchStatus('RAKİP ARANIYOR...', 'Lobi hazırlanıyor...');
             matchmakingActive = true; myPlayerId = generateGameId();
             myLobbyRef = db.ref('lobby/' + myPlayerId);
-            myLobbyRef.set({ name: playerName, ts: firebase.database.ServerValue.TIMESTAMP });
+            myLobbyRef.set({ name: playerName, ts: firebase.database.ServerValue.TIMESTAMP })
+                .catch(err => {
+                    updateMatchStatus('BAĞLANTI HATASI', 'Firebase Yetki Reddedildi (Rules kontrol et!)');
+                    console.error(err);
+                });
             myLobbyRef.onDisconnect().remove();
             setTimeout(() => scanForPartner(), 2000);
         }

@@ -1429,6 +1429,28 @@
             document.getElementById('currentNameSpan').innerText = playerName;
         });
 
+        // --- KLAVYE KONTROLLERİ ---
+        const keys = {};
+        window.addEventListener('keydown', e => {
+            keys[e.code] = true;
+            if (e.code === 'KeyJ' || e.code === 'KeyZ') triggerAction('punch');
+            if (e.code === 'KeyK' || e.code === 'KeyX') triggerAction('kick');
+            if (e.code === 'KeyL' || e.code === 'KeyC') triggerAction('dash');
+            updateKeyboardMovement();
+        });
+        window.addEventListener('keyup', e => {
+            keys[e.code] = false;
+            updateKeyboardMovement();
+        });
+
+        function updateKeyboardMovement() {
+            if (!isPlaying) return;
+            moveDir = 0;
+            if (keys['KeyA'] || keys['ArrowLeft']) moveDir = -6;
+            if (keys['KeyD'] || keys['ArrowRight']) moveDir = 6;
+            jumpCmd = (keys['KeyW'] || keys['ArrowUp'] || keys['Space']);
+        }
+
         function resize() {
             canvas.width = window.innerWidth; canvas.height = window.innerHeight;
             const isLandscape = canvas.width > canvas.height;

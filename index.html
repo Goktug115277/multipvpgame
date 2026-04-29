@@ -628,7 +628,7 @@
                 display: flex;
             }
         }
-        
+
         /* --- WEB SITE LANDING PAGE CSS --- */
         #websiteOverlay {
             background: linear-gradient(135deg, #050a0e, #112233, #02070a);
@@ -751,12 +751,35 @@
         }
 
         @media (max-width: 768px) {
-            .web-title { font-size: 50px; }
-            .web-subtitle { font-size: 16px; width: 90%; }
-            .web-buttons { flex-direction: column; width: 80%; }
-            .web-btn { width: 100%; justify-content: center; }
-            .features-grid { grid-template-columns: 1fr; margin-top: 30px; width: 90%; gap: 10px;}
-            .feature-card { padding: 15px; }
+            .web-title {
+                font-size: 50px;
+            }
+
+            .web-subtitle {
+                font-size: 16px;
+                width: 90%;
+            }
+
+            .web-buttons {
+                flex-direction: column;
+                width: 80%;
+            }
+
+            .web-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                margin-top: 30px;
+                width: 90%;
+                gap: 10px;
+            }
+
+            .feature-card {
+                padding: 15px;
+            }
         }
     </style>
 </head>
@@ -773,34 +796,47 @@
     <div id="websiteOverlay" class="overlay active">
         <div class="web-hero">
             <h1 class="web-title">MultiPvP</h1>
-            <p class="web-subtitle">Tarayıcı üzerinden oynayarak veya Windows uygulamasını indirerek dünyanın her yerinden arkadaşlarınla gerçek zamanlı, gecikmesiz ve yeteneğe dayalı online maçlara katıl.</p>
-            
+            <p class="web-subtitle">Tarayıcı üzerinden oynayarak veya Windows uygulamasını indirerek dünyanın her
+                yerinden arkadaşlarınla gerçek zamanlı, gecikmesiz ve yeteneğe dayalı online maçlara katıl.</p>
+
             <div class="web-buttons">
                 <button class="web-btn web-btn-play" onclick="startPlaySequence()">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
                     TARAYICIDA OYNA
                 </button>
-                <a href="javascript:void(0)" class="web-btn web-btn-download" onclick="alert('Windows sürümü yakında eklenecektir!')">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <a href="javascript:void(0)" class="web-btn web-btn-download"
+                    onclick="alert('Windows sürümü yakında eklenecektir!')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
                     WİNDOWS İÇİN İNDİR
                 </a>
             </div>
-            
+
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">⚡</div>
                     <div class="feature-title">Sıfır Gecikme</div>
-                    <div class="feature-desc">İstemci tarafı tahminleme ile online maçlarda herhangi bir lag problemi yaşamadan pürüzsüzce atak yapın.</div>
+                    <div class="feature-desc">İstemci tarafı tahminleme ile online maçlarda herhangi bir lag problemi
+                        yaşamadan pürüzsüzce atak yapın.</div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">📱</div>
                     <div class="feature-title">Cross-Platform</div>
-                    <div class="feature-desc">İster telefondan, isterseniz PC'den aynı hesaba bağlanarak arkadaşlarınızla platform bağımsız kapışın.</div>
+                    <div class="feature-desc">İster telefondan, isterseniz PC'den aynı hesaba bağlanarak
+                        arkadaşlarınızla platform bağımsız kapışın.</div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🤖</div>
                     <div class="feature-title">Gelişmiş Yapay Zeka</div>
-                    <div class="feature-desc">Arkadaşınız yoksa bile dert etmeyin; zıplayıp combo yapabilen 3 farklı zorluk seviyesindeki rekabetçi AI botlarla eğlenin.</div>
+                    <div class="feature-desc">Arkadaşınız yoksa bile dert etmeyin; zıplayıp combo yapabilen 3 farklı
+                        zorluk seviyesindeki rekabetçi AI botlarla eğlenin.</div>
                 </div>
             </div>
         </div>
@@ -812,11 +848,15 @@
     </div>
 
     <div id="pauseMenu" class="overlay" style="z-index:99999;">
-        <h2 id="pauseTitle" style="margin-bottom: 20px; color:var(--red); font-size: 30px; text-shadow: 0 0 15px red;">OYUN DURAKLATILDI</h2>
-        <div class="mode-card active-card" style="width:200px; height:60px; border-color:var(--blue); margin-bottom:15px;" onpointerdown="resumeGame()">
+        <h2 id="pauseTitle" style="margin-bottom: 20px; color:var(--red); font-size: 30px; text-shadow: 0 0 15px red;">
+            OYUN DURAKLATILDI</h2>
+        <div class="mode-card active-card"
+            style="width:200px; height:60px; border-color:var(--blue); margin-bottom:15px;"
+            onpointerdown="resumeGame()">
             <h3>DEVAM ET</h3>
         </div>
-        <div class="mode-card active-card" style="width:200px; height:60px; border-color:var(--red);" onpointerdown="returnToMenu()">
+        <div class="mode-card active-card" style="width:200px; height:60px; border-color:var(--red);"
+            onpointerdown="returnToMenu()">
             <h3>MENÜYE ÇIK</h3>
         </div>
     </div>
@@ -826,13 +866,15 @@
         <div class="mode-card active-card" style="width:240px; height:90px" onpointerdown="showMenu('modeMenu')">
             <h3>OYNA</h3>
         </div>
-        <div class="mode-card active-card" style="width:240px; height:50px; margin-top:20px; border-color:var(--red)" onpointerdown="showMenu('websiteOverlay')">
+        <div class="mode-card active-card" style="width:240px; height:50px; margin-top:20px; border-color:var(--red)"
+            onpointerdown="showMenu('websiteOverlay')">
             <h3 style="font-size: 14px;">WEBSİTESİNE DÖN</h3>
         </div>
     </div>
 
     <div id="modeMenu" class="overlay">
-        <div style="position: absolute; top: 25px; left: 25px; font-size: 22px; font-weight: bold; color: var(--red); cursor: pointer; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; border: 2px solid var(--red);" onpointerdown="showMenu('mainMenu')">
+        <div style="position: absolute; top: 25px; left: 25px; font-size: 22px; font-weight: bold; color: var(--red); cursor: pointer; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; border: 2px solid var(--red);"
+            onpointerdown="showMenu('mainMenu')">
             &#9664; GERİ
         </div>
         <h2 style="margin-bottom: 20px;">MOD SEÇİMİ</h2>
@@ -888,7 +930,8 @@
     </div>
 
     <div id="diffMenu" class="overlay">
-        <div style="position: absolute; top: 25px; left: 25px; font-size: 22px; font-weight: bold; color: var(--red); cursor: pointer; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; border: 2px solid var(--red);" onpointerdown="showMenu('mainMenu')">
+        <div style="position: absolute; top: 25px; left: 25px; font-size: 22px; font-weight: bold; color: var(--red); cursor: pointer; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; border: 2px solid var(--red);"
+            onpointerdown="showMenu('mainMenu')">
             &#9664; GERİ
         </div>
         <div style="display:flex; gap:15px">
@@ -946,7 +989,8 @@
                 <div id="p1H" class="bar-fill" style="background:var(--blue)"></div>
             </div>
             <!-- OYUNU DURDUR BUTONU -->
-            <div id="pauseBtnBtn" onpointerdown="togglePause()" style="position: absolute; top: 60px; left: 0; font-size: 13px; font-weight: bold; background: rgba(0,0,0,0.8); border: 2px solid var(--red); border-radius: 5px; padding: 4px 10px; cursor: pointer; pointer-events: auto;">
+            <div id="pauseBtnBtn" onpointerdown="togglePause()"
+                style="position: absolute; top: 60px; left: 0; font-size: 13px; font-weight: bold; background: rgba(0,0,0,0.8); border: 2px solid var(--red); border-radius: 5px; padding: 4px 10px; cursor: pointer; pointer-events: auto;">
                 ❚❚ ÇIK / DURDUR
             </div>
         </div>
@@ -1080,13 +1124,13 @@
             setTimeout(() => showMenu('modeMenu'), 100);
         }
 
-        window.returnToMenu = function() {
+        window.returnToMenu = function () {
             sessionStorage.setItem('openModeMenu', 'true');
             try {
                 if (window.myLobbyRef) window.myLobbyRef.remove();
                 if (amIHost && roomRef) roomRef.remove();
                 else if (roomRef) roomRef.off();
-            } catch(e) {}
+            } catch (e) { }
             location.reload();
         };
 
@@ -1158,7 +1202,7 @@
 
                 // --- GHOST TRAIL Yavaş Yavaş Silinme ---
                 if (this.trails && this.trails.length > 0) {
-                    for(let i = this.trails.length - 1; i >= 0; i--) {
+                    for (let i = this.trails.length - 1; i >= 0; i--) {
                         this.trails[i].life -= 0.04 * deltaTime;
                         if (this.trails[i].life <= 0) this.trails.splice(i, 1);
                     }
@@ -1177,7 +1221,7 @@
                         ctx.translate(t.x, t.y);
                         ctx.scale(t.facing * characterScale, characterScale);
                         ctx.globalAlpha = Math.max(0, t.life * 0.4); // max %40'tan başlayıp silinir
-                        
+
                         ctx.fillStyle = this.color;
                         ctx.beginPath(); ctx.ellipse(0, -70, 25, 50, 0, 0, Math.PI * 2); ctx.fill();
                         let hY = -130;
@@ -1237,7 +1281,7 @@
                     this.x += this.facing * 300;
                     playSound('dash');
                     createParticles(this.x, this.normalizedY, '#ffffff', 10);
-                    
+
                     // --- ARKAYA İZ BIRAKMA (GHOST TRAILS) ---
                     for (let i = 1; i <= 6; i++) {
                         let tx = startX + (this.facing * 300 * (i / 6)); // Noktaları aralara dengeli bölüştür
@@ -1373,17 +1417,17 @@
             showMenu('invitationOverlay');
             document.getElementById('invitationButtons').style.display = 'none';
             document.getElementById('invitationMessage').innerText = 'Bağlantı aranıyor...';
-            
+
             const duelRef = db.ref('duels/' + code);
             let joined = false;
 
             duelRef.once('value').then(snap => {
                 if (!snap.exists()) {
                     document.getElementById('invitationMessage').innerText = 'HATA: Kod geçersiz veya bulunamadı!';
-                    setTimeout(() => returnToMenu(), 3000); 
+                    setTimeout(() => returnToMenu(), 3000);
                     return;
                 }
-                
+
                 // --- 1. GÜVENCE: HOST ODAYI KURDUĞU GİBİ GEÇİŞ YAP ---
                 roomRef = db.ref('rooms/' + code);
                 roomRef.on('value', rSnap => {
@@ -1402,7 +1446,7 @@
                 // --- 2. ADIM: HOST'A DAVETİ GÖREBİLMESİ İÇİN KİMLİĞİNİ YAZ ---
                 document.getElementById('invitationMessage').innerText = 'Karşı tarafın onayı bekleniyor...';
                 duelRef.update({ guestId: myPlayerId, guestName: playerName });
-                
+
                 // --- 3. ADIM: DÜELLO DURUMUNU EŞ ZAMANLI DİNLE ---
                 duelRef.on('value', dSnap => {
                     if (joined) return;
@@ -1802,7 +1846,7 @@
                     let p = audioCtx.resume();
                     if (p !== undefined) p.catch(e => console.warn(e));
                 }
-            } catch(e) {}
+            } catch (e) { }
             setTimeout(() => {
                 showMenu('mainMenu');
             }, 3000);
@@ -1902,60 +1946,60 @@
 
                 // Oyunun aktif olduğu durumdaki aksiyonlar (Eğitim, Online Senkron, Bot Zekası)
                 if (isPlaying) {
-                // Training Check
-                if (currentDiff === 'TRAINING') {
-                    updateTutorial();
+                    // Training Check
+                    if (currentDiff === 'TRAINING') {
+                        updateTutorial();
+                    }
+
+                    // Network / AI Logic
+                    if (isOnline && roomRef) {
+                        // Rakip pozisyonunu interpolate et (hızlı + akıcı)
+                        bot.x += (botTargetX - bot.x) * 0.5;
+                        bot.normalizedY += (botTargetY - bot.normalizedY) * 0.5;
+
+                        // Firebase senkronizasyonu (her 50ms = 20fps - hızlı ama kuyruk oluşturmaz)
+                        const now = Date.now();
+                        if (now - lastStateSend >= 50) {
+                            lastStateSend = now;
+                            roomRef.child(myRole).set({
+                                x: Math.round(p1.x),
+                                normalizedY: Math.round(p1.normalizedY),
+                                hp: p1.hp,
+                                actionState: p1.actionState,
+                                actionTimer: Math.round(p1.actionTimer * 100) / 100,
+                                facing: p1.facing
+                            });
+                        }
+                    } else if (!isOnline && !bot.isDead && currentDiff !== 'TRAINING') {
+                        // --- GELİŞMİŞ DİNAMİK BOT ZEKA (AI) SİSTEMİ ---
+                        let d = p1.x - bot.x; let ad = Math.abs(d);
+                        let speed = currentDiff === 'ZOR' ? 7 : (currentDiff === 'NORMAL' ? 5 : 3.5);
+
+                        // Mesafe ve Hareket Yönetimi
+                        if (ad > 280) {
+                            bot.x += (d > 0 ? speed : -speed) * deltaTime;
+                            // Çok uzaksa dash (atılma) yeteneği kullan
+                            if (Math.random() < aiSpeed * 0.1) bot.doAction('dash');
+                        } else if (ad < 100 && Math.random() < aiSpeed * 0.3) {
+                            // Yakınsa bazen taktiksel geri çekil (Dodge)
+                            bot.x -= (d > 0 ? speed : -speed) * 1.5 * deltaTime;
+                        } else if (ad > 120) {
+                            // Oyuncuya Yürü (Yakın Takip) - Ancak 120 birim kalana kadar! Aksi takdirde dibine çok girer.
+                            bot.x += (d > 0 ? speed : -speed) * Math.min(deltaTime, 1.5);
+                        }
+
+                        // Saldırı Kombosu
+                        if (Math.random() < aiSpeed && ad < 180) {
+                            Math.random() < 0.6 ? bot.doAction('punch') : bot.doAction('kick');
+                        }
+
+                        // Zıplama / Havada Yakalama Mantığı
+                        if (bot.onGround && Math.random() < aiSpeed * 0.2) {
+                            // Oyuncu havadaysa veya rastgele zamanlamayla bot da zıplar
+                            if (p1.normalizedY > 50 || Math.random() < 0.5) bot.vy = -16;
+                        }
+                    }
                 }
-
-                // Network / AI Logic
-                if (isOnline && roomRef) {
-                    // Rakip pozisyonunu interpolate et (hızlı + akıcı)
-                    bot.x += (botTargetX - bot.x) * 0.5;
-                    bot.normalizedY += (botTargetY - bot.normalizedY) * 0.5;
-
-                    // Firebase senkronizasyonu (her 50ms = 20fps - hızlı ama kuyruk oluşturmaz)
-                    const now = Date.now();
-                    if (now - lastStateSend >= 50) {
-                        lastStateSend = now;
-                        roomRef.child(myRole).set({
-                            x: Math.round(p1.x),
-                            normalizedY: Math.round(p1.normalizedY),
-                            hp: p1.hp,
-                            actionState: p1.actionState,
-                            actionTimer: Math.round(p1.actionTimer * 100) / 100,
-                            facing: p1.facing
-                        });
-                    }
-                } else if (!isOnline && !bot.isDead && currentDiff !== 'TRAINING') {
-                    // --- GELİŞMİŞ DİNAMİK BOT ZEKA (AI) SİSTEMİ ---
-                    let d = p1.x - bot.x; let ad = Math.abs(d);
-                    let speed = currentDiff === 'ZOR' ? 7 : (currentDiff === 'NORMAL' ? 5 : 3.5);
-
-                    // Mesafe ve Hareket Yönetimi
-                    if (ad > 280) {
-                        bot.x += (d > 0 ? speed : -speed) * deltaTime;
-                        // Çok uzaksa dash (atılma) yeteneği kullan
-                        if (Math.random() < aiSpeed * 0.1) bot.doAction('dash');
-                    } else if (ad < 100 && Math.random() < aiSpeed * 0.3) {
-                        // Yakınsa bazen taktiksel geri çekil (Dodge)
-                        bot.x -= (d > 0 ? speed : -speed) * 1.5 * deltaTime;
-                    } else if (ad > 120) {
-                        // Oyuncuya Yürü (Yakın Takip) - Ancak 120 birim kalana kadar! Aksi takdirde dibine çok girer.
-                        bot.x += (d > 0 ? speed : -speed) * Math.min(deltaTime, 1.5);
-                    }
-
-                    // Saldırı Kombosu
-                    if (Math.random() < aiSpeed && ad < 180) {
-                        Math.random() < 0.6 ? bot.doAction('punch') : bot.doAction('kick');
-                    }
-
-                    // Zıplama / Havada Yakalama Mantığı
-                    if (bot.onGround && Math.random() < aiSpeed * 0.2) {
-                        // Oyuncu havadaysa veya rastgele zamanlamayla bot da zıplar
-                        if (p1.normalizedY > 50 || Math.random() < 0.5) bot.vy = -16;
-                    }
-                }
-            }
             } else {
                 // Oyun duraklatıldığında donuk haller çizilsin ama arkaplan/partiküller aksın
                 p1.draw();
@@ -1999,7 +2043,7 @@
             if (p1.hp <= 0 || bot.hp <= 0) {
                 if (isPlaying) { // Sadece ilk kez (oyun bitiş anında) tetiklensin
                     isPlaying = false;
-                    
+
                     // Oyun bitti, maç sonu menüsü bir kaç saniye sonra gelsin ki ölüm sahnesi anlaşılsın!
                     setTimeout(() => {
                         try {
@@ -2007,16 +2051,16 @@
                                 // Rakibe oyunun bittiğini Firebase üzerinden bildir
                                 roomRef.child('status').set('done');
                             }
-                            
+
                             // Kullanıcı arayüzünü karıştırmaması için tamamen sakla
                             document.getElementById('gameUI').style.display = 'none';
                             document.getElementById('controls').style.display = 'none';
-                            
+
                             const isWin = p1.hp > 0;
                             const resTitleObj = document.getElementById('resTitle');
                             resTitleObj.innerText = isWin ? "ZAFER!" : "BOZGUN...";
                             resTitleObj.style.color = isWin ? "#44ff44" : "#ff3333";
-                            
+
                             // Vanilla Javascript ile DOM'u garantili şekilde ekranda göster!
                             const resultMenuObj = document.getElementById('resultMenu');
                             resultMenuObj.style.display = 'flex';
@@ -2024,11 +2068,11 @@
                             resultMenuObj.style.pointerEvents = 'auto';
                             resultMenuObj.style.zIndex = '999999';
                             resultMenuObj.classList.add('active'); // Orijinal fonksiyon
-                            
-                        } catch(e) {
+
+                        } catch (e) {
                             console.error("Menü Gösterim Hatası: ", e);
                         }
-                    }, 1500); 
+                    }, 1500);
                 }
             }
         }

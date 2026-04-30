@@ -1045,6 +1045,7 @@
             <div class="bar-bg">
                 <div id="p1H" class="bar-fill" style="background:var(--blue)"></div>
             </div>
+            <div id="p1Ping" style="font-size: 10px; color: var(--green); margin-top: 2px;">PING: 0ms</div>
             <!-- OYUNU DURDUR BUTONU -->
             <div id="pauseBtnBtn" onpointerdown="togglePause()" style="position: absolute; top: 60px; left: 0; font-size: 13px; font-weight: bold; background: rgba(0,0,0,0.8); border: 2px solid var(--red); border-radius: 5px; padding: 4px 10px; cursor: pointer; pointer-events: auto;">
                 ❚❚ ÇIK / DURDUR
@@ -1054,6 +1055,7 @@
             <div class="bar-bg">
                 <div id="p2H" class="bar-fill" style="background:var(--orange)"></div>
             </div>
+            <div id="p2Ping" style="font-size: 10px; color: var(--green); margin-top: 2px;">PING: 0ms</div>
         </div>
     </div>
 
@@ -1419,14 +1421,33 @@
             tick();
         }
 
-        // --- GAME CORE ---
-        let botTargetX = 0, botTargetY = 0;
+        // --- PİNG VE BAĞLANTI TAKİBİ ---
+        let serverTimeOffset = 0;
+        db.ref('.info/serverTimeOffset').on('value', snap => {
+            serverTimeOffset = snap.val() || 0;
+        });
+
         function setupFirebaseGame(opponentName) {
             isOnline = true; startGame('ONLINE');
             document.getElementById('botNameDisplay').innerText = opponentName || 'RAKİP';
+            
+            roomRef.on('value', snap => {
+                if (!snap.exists() && isPlaying) {
+                    isPlaying = false;
+                    alert('MAÇ ADMİN TARAFINDAN VEYA RAKİP AYRILDIĞI İÇİN SONLANDIRILDI.');
+                    location.reload();
+                }
+            });
+
             roomRef.child(myRole === 'host' ? 'guest' : 'host').on('value', snap => {
                 const d = snap.val(); if (!d) return;
                 botTargetX = d.x; botTargetY = d.normalizedY; bot.hp = d.hp;
+                
+                // Rakip Ping Hesapla
+                if (d.ts) {
+                    const ping = Math.max(0, Date.now() + serverTimeOffset - d.ts);
+                    document.getElementById('p2Ping').innerText = `PING: ${ping}ms`;
+                }
             });
             roomRef.child('hits/' + myRole).on('child_added', snap => {
                 const hit = snap.val(); if (!hit || processedHits.has(snap.key)) return;
@@ -1434,6 +1455,16 @@
                 playSound('hit'); createParticles(p1.x, 600 - p1.normalizedY, '#ff3333', 15);
             });
         }
+
+        // --- GLOBAL İNTERNET KONTROLÜ ---
+        db.ref('.info/connected').on('value', snap => {
+            if (snap.val() === false && isPlaying && isOnline) {
+                // Sadece maç içindeyken bağlantı koparsa uyar
+                const statusDiv = document.getElementById('matchmakingStatus');
+                if (statusDiv) statusDiv.innerText = 'BAĞLANTI KESİLDİ...';
+                alert('İNTERNET BAĞLANTISI KESİLDİ!');
+            }
+        });
 
         function togglePause() {
             if (isOnline) showMenu('pauseMenu');
@@ -1482,7 +1513,13 @@
                     bot.normalizedY += (botTargetY - bot.normalizedY) * 0.5;
                     if (Date.now() - lastStateSend >= 50) {
                         lastStateSend = Date.now();
-                        roomRef.child(myRole).set({ x: Math.round(p1.x), normalizedY: Math.round(p1.normalizedY), hp: p1.hp });
+                        roomRef.child(myRole).set({ 
+                            x: Math.round(p1.x), 
+                            normalizedY: Math.round(p1.normalizedY), 
+                            hp: p1.hp,
+                            ts: firebase.database.ServerValue.TIMESTAMP 
+                        });
+                        document.getElementById('p1Ping').innerText = `PING: 0ms`;
                     }
                 } else if (isPlaying && !isOnline && !bot.isDead) {
                     let d = p1.x - bot.x; bot.x += (d > 0 ? 5 : -5) * deltaTime;
@@ -1605,13 +1642,17 @@
                     const guestName = data.guestName || "Bekleniyor...";
                     const hostHP = (data.host && data.host.hp !== undefined) ? data.host.hp : 500;
                     const guestHP = (data.guest && data.guest.hp !== undefined) ? data.guest.hp : 500;
+                    
+                    // Admin Panelinde Ping Hesapla
+                    const hostPing = data.host && data.host.ts ? Math.max(0, Date.now() + serverTimeOffset - data.host.ts) : 0;
+                    const guestPing = data.guest && data.guest.ts ? Math.max(0, Date.now() + serverTimeOffset - data.guest.ts) : 0;
+                    
                     const status = data.status || "Hazırlık";
                     const isPlaying = status === 'playing';
-
+                    
                     const item = document.createElement('div');
                     item.className = 'match-item';
                     
-                    // Aktif maça vurgu, bekleyene grilik ekle
                     if (isPlaying) {
                         item.style.borderColor = 'var(--green)';
                         item.style.boxShadow = '0 0 15px rgba(68, 255, 68, 0.1)';
@@ -1624,11 +1665,11 @@
                     item.innerHTML = `
                         <div style="font-family: monospace; color: ${isPlaying ? 'var(--green)' : '#666'}; font-size: 12px;">#${id.substring(0, 6)}</div>
                         <div>
-                            <div style="color: ${isPlaying ? 'var(--blue)' : '#aaa'}; font-weight: bold;">${hostName}</div>
+                            <div style="color: ${isPlaying ? 'var(--blue)' : '#aaa'}; font-weight: bold;">${hostName} <span style="font-size:10px; opacity:0.7;">(${hostPing}ms)</span></div>
                             <div class="hp-badge" style="background: rgba(0, 136, 255, 0.1); color: ${isPlaying ? 'var(--blue)' : '#888'};">HP: ${hostHP}</div>
                         </div>
                         <div>
-                            <div style="color: ${isPlaying ? 'var(--orange)' : '#aaa'}; font-weight: bold;">${guestName}</div>
+                            <div style="color: ${isPlaying ? 'var(--orange)' : '#aaa'}; font-weight: bold;">${guestName} <span style="font-size:10px; opacity:0.7;">(${guestPing}ms)</span></div>
                             <div class="hp-badge" style="background: rgba(255, 136, 0, 0.1); color: ${isPlaying ? 'var(--orange)' : '#888'};">HP: ${guestHP}</div>
                         </div>
                         <div style="text-align: right;">

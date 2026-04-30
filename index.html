@@ -1230,6 +1230,16 @@
         let myPlayerId = "", roomRef = null, myRole = "host";
         let lastStateSend = 0, currentDuelCode = "";
         const processedHits = new Set();
+        
+        // --- SUNUCU SAAT SENKRONİZASYONU ---
+        let serverTimeOffset = 0;
+        db.ref(".info/serverTimeOffset").on("value", (snap) => {
+            serverTimeOffset = snap.val() || 0;
+        });
+
+        function getSyncedTime() {
+            return Date.now() + serverTimeOffset;
+        }
 
         if (sessionStorage.getItem('openModeMenu') === 'true') {
             sessionStorage.removeItem('openModeMenu');
@@ -1446,7 +1456,7 @@
         function acceptInvitation() {
             document.getElementById('invitationButtons').style.display = 'none';
             const guestName = document.getElementById('invitationButtons').dataset.guestName || 'RAKİP';
-            const startAt = Date.now() + 3000;
+            const startAt = getSyncedTime() + 3000;
             document.getElementById('invitationMessage').innerText = 'Kabul edildi! Başlıyor...';
             if (roomRef) {
                 roomRef.update({ status: 'playing', startAt: startAt, hostName: playerName }).then(() => { waitForStart(guestName, startAt); });
@@ -1510,7 +1520,7 @@
                 if (!matchmakingActive) return;
                 const room = snap.val(); if (!room || !room.guestId) return;
                 matchmakingActive = false; roomRef.off('value'); if (myLobbyRef) myLobbyRef.remove();
-                const startAt = Date.now() + 1000;
+                const startAt = getSyncedTime() + 1000;
                 updateMatchStatus('MAÇ BULUNDU!', 'Başlatılıyor...');
                 roomRef.update({ hostName: playerName, status: 'playing', startAt }).then(() => { waitForStart(room.guestName, startAt); });
             });
@@ -1532,9 +1542,16 @@
         }
 
         function waitForStart(opponentName, startAt) {
-            const targetTime = startAt || (Date.now() + 3000);
+            let targetTime = startAt || (getSyncedTime() + 3000);
+            // GÜVENLİK: Eğer senkronizasyon hatası varsa (30sn gecikme gibi), 
+            // bekleme süresini 10 saniye ile sınırla.
+            const diff = targetTime - getSyncedTime();
+            if (diff > 10000 || diff < -5000) {
+                targetTime = getSyncedTime() + 3000;
+            }
+
             const tick = () => {
-                const remaining = Math.ceil((targetTime - Date.now()) / 1000);
+                const remaining = Math.ceil((targetTime - getSyncedTime()) / 1000);
                 if (remaining > 0) {
                     const txt = remaining + '...';
                     if (document.getElementById('matchmakingStatus')) document.getElementById('matchmakingStatus').innerText = 'MAÇ BAŞLIYOR: ' + txt;
@@ -1622,11 +1639,14 @@
         function updateUI() {
             document.getElementById('p1H').style.width = (p1.hp / 5) + "%";
             document.getElementById('p2H').style.width = (bot.hp / 5) + "%";
+            
             if ((p1.hp <= 0 || bot.hp <= 0) && isPlaying) {
                 isPlaying = false;
                 setTimeout(() => {
                     document.getElementById('gameUI').style.display = 'none';
                     document.getElementById('controls').style.display = 'none';
+                    if (currentDiff === 'TRAINING') document.getElementById('tutorialOverlay').style.display = 'none';
+                    
                     document.getElementById('resTitle').innerText = p1.hp > 0 ? "ZAFER!" : "BOZGUN...";
                     showMenu('resultMenu');
                 }, 1500);

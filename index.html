@@ -38,16 +38,12 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle, #004e92, #000428);
-            display: flex;
+            display: none;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 20000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease-in-out, transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            transform: scale(0.95);
+            z-index: 1000;
+            color: white;
         }
 
         .overlay.active {
@@ -1692,23 +1688,35 @@
         }
 
         function updateUI() {
-            if (!isPlaying) return;
+            // Can barlarını her zaman güncelle (isPlaying bağımsız)
             document.getElementById('p1H').style.width = (p1.hp / 5) + "%";
             document.getElementById('p2H').style.width = (bot.hp / 5) + "%";
+
+            if (!isPlaying) return;
             
             if (p1.hp <= 0 || bot.hp <= 0) {
                 isPlaying = false;
                 console.log("Maç Bitti! Kazanan Belirleniyor...");
                 setTimeout(() => {
-                    document.getElementById('gameUI').style.display = 'none';
-                    document.getElementById('controls').style.display = 'none';
-                    const tut = document.getElementById('tutorialOverlay');
-                    if (tut) tut.style.display = 'none';
+                    const resMenu = document.getElementById('resultMenu');
+                    const resTitle = document.getElementById('resTitle');
                     
-                    const win = p1.hp > 0;
-                    document.getElementById('resTitle').innerText = win ? "ZAFER!" : "BOZGUN...";
-                    document.getElementById('resTitle').style.color = win ? "var(--green)" : "var(--red)";
-                    showMenu('resultMenu');
+                    if (resMenu && resTitle) {
+                        const win = p1.hp > 0;
+                        resTitle.innerText = win ? "ZAFER!" : "BOZGUN...";
+                        resTitle.style.color = win ? "#44ff44" : "#ff4444";
+                        
+                        document.getElementById('gameUI').style.display = 'none';
+                        document.getElementById('controls').style.display = 'none';
+                        const tut = document.getElementById('tutorialOverlay');
+                        if (tut) tut.style.display = 'none';
+                        
+                        showMenu('resultMenu');
+                    } else {
+                        console.error("HATA: resultMenu veya resTitle bulunamadı!");
+                        alert(p1.hp > 0 ? "ZAFER!" : "BOZGUN...");
+                        returnToMenu();
+                    }
                 }, 1000);
             }
         }

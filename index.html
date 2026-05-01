@@ -1542,22 +1542,33 @@
         }
 
         function waitForStart(opponentName, startAt) {
-            let targetTime = startAt || (getSyncedTime() + 3000);
-            // GÜVENLİK: Eğer senkronizasyon hatası varsa (30sn gecikme gibi), 
-            // bekleme süresini 10 saniye ile sınırla.
-            const diff = targetTime - getSyncedTime();
+            let now = getSyncedTime();
+            let targetTime = startAt || (now + 3000);
+            
+            console.log("Maç Başlatma Zamanı:", new Date(targetTime).toLocaleTimeString());
+            console.log("Şu Anki Sunucu Saati:", new Date(now).toLocaleTimeString());
+
+            const diff = targetTime - now;
             if (diff > 10000 || diff < -5000) {
-                targetTime = getSyncedTime() + 3000;
+                console.warn("Zaman senkronizasyon hatası algılandı! Süre 3 saniyeye çekiliyor. Fark:", diff);
+                targetTime = now + 3000;
             }
 
             const tick = () => {
-                const remaining = Math.ceil((targetTime - getSyncedTime()) / 1000);
+                const currentTime = getSyncedTime();
+                const remaining = Math.ceil((targetTime - currentTime) / 1000);
+                
                 if (remaining > 0) {
                     const txt = remaining + '...';
-                    if (document.getElementById('matchmakingStatus')) document.getElementById('matchmakingStatus').innerText = 'MAÇ BAŞLIYOR: ' + txt;
-                    if (document.getElementById('invitationMessage')) document.getElementById('invitationMessage').innerText = 'HAZIR OL! ' + txt;
+                    const msg = (remaining > 10) ? "Zaman senkronize ediliyor..." : "HAZIR OL! " + txt;
+                    
+                    if (document.getElementById('matchmakingStatus')) document.getElementById('matchmakingStatus').innerText = msg;
+                    if (document.getElementById('invitationMessage')) document.getElementById('invitationMessage').innerText = msg;
                     setTimeout(tick, 100);
-                } else { setupFirebaseGame(opponentName); }
+                } else { 
+                    console.log("Maç Başlıyor!");
+                    setupFirebaseGame(opponentName); 
+                }
             };
             tick();
         }
@@ -1645,7 +1656,9 @@
                 setTimeout(() => {
                     document.getElementById('gameUI').style.display = 'none';
                     document.getElementById('controls').style.display = 'none';
-                    if (currentDiff === 'TRAINING') document.getElementById('tutorialOverlay').style.display = 'none';
+                    // Eğitim modunda olsak da olmasak da temizleyelim
+                    const tut = document.getElementById('tutorialOverlay');
+                    if (tut) tut.style.display = 'none';
                     
                     document.getElementById('resTitle').innerText = p1.hp > 0 ? "ZAFER!" : "BOZGUN...";
                     showMenu('resultMenu');

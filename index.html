@@ -1640,8 +1640,17 @@
                         roomRef.child(myRole).set({ x: Math.round(p1.x), normalizedY: Math.round(p1.normalizedY), hp: p1.hp });
                     }
                 } else if (isPlaying && !isOnline && !bot.isDead) {
-                    let d = p1.x - bot.x; bot.x += (d > 0 ? 5 : -5) * deltaTime;
-                    if (Math.random() < 0.05 && Math.abs(d) < 150) bot.doAction(Math.random() > 0.5 ? 'punch' : 'kick');
+                    // EĞİTİMDEYSEN VE SON ADIMDA DEĞİLSEN BOT SALDIRMASIN
+                    const isTutorialActive = (currentDiff === 'TRAINING' && T_STEPS[currentStep] && !T_STEPS[currentStep].final);
+                    
+                    let d = p1.x - bot.x; 
+                    if (!isTutorialActive) {
+                        bot.x += (d > 0 ? 5 : -5) * deltaTime;
+                        if (Math.random() < 0.05 && Math.abs(d) < 150) bot.doAction(Math.random() > 0.5 ? 'punch' : 'kick');
+                    } else {
+                        // Eğitimde bot sadece oyuncuya bakar ama hareket etmez/saldırmaz
+                        bot.facing = (bot.x < p1.x) ? 1 : -1;
+                    }
                 }
                 updateUI();
             }
@@ -1651,8 +1660,7 @@
 
         // --- EĞİTİM (TUTORIAL) MANTIĞI ---
         const T_STEPS = [
-            { t: "HOŞ GELDİN!", c: "MultiPvP eğitimine hoş geldin. Önce hareket etmeyi öğrenelim.", check: () => Math.abs(moveDir) > 0 },
-            { t: "ZIPLAMA", c: "Harika! Şimdi 'W' veya 'BOŞLUK' ile zıpla.", check: () => !p1.onGround },
+            { t: "HAREKET ET", c: "W-A-S-D veya Ok tuşlarını kullanarak hareket et.", check: () => Math.abs(moveDir) > 0 || !p1.onGround },
             { t: "SALDIRI: YUMRUK", c: "Şimdi 'J' veya 'Z' tuşuyla bir yumruk at.", check: () => p1.actionState === 'PUNCH' },
             { t: "SALDIRI: TEKME", c: "Şimdi 'K' veya 'X' tuşuyla tekme at.", check: () => p1.actionState === 'KICK' },
             { t: "HIZLI ATILMA (DASH)", c: "Son olarak 'L' veya 'C' ile ileri atıl.", check: () => p1.actionState === 'DASH' },
@@ -1684,21 +1692,24 @@
         }
 
         function updateUI() {
+            if (!isPlaying) return;
             document.getElementById('p1H').style.width = (p1.hp / 5) + "%";
             document.getElementById('p2H').style.width = (bot.hp / 5) + "%";
             
-            if ((p1.hp <= 0 || bot.hp <= 0) && isPlaying) {
+            if (p1.hp <= 0 || bot.hp <= 0) {
                 isPlaying = false;
+                console.log("Maç Bitti! Kazanan Belirleniyor...");
                 setTimeout(() => {
                     document.getElementById('gameUI').style.display = 'none';
                     document.getElementById('controls').style.display = 'none';
-                    // Eğitim modunda olsak da olmasak da temizleyelim
                     const tut = document.getElementById('tutorialOverlay');
                     if (tut) tut.style.display = 'none';
                     
-                    document.getElementById('resTitle').innerText = p1.hp > 0 ? "ZAFER!" : "BOZGUN...";
+                    const win = p1.hp > 0;
+                    document.getElementById('resTitle').innerText = win ? "ZAFER!" : "BOZGUN...";
+                    document.getElementById('resTitle').style.color = win ? "var(--green)" : "var(--red)";
                     showMenu('resultMenu');
-                }, 1500);
+                }, 1000);
             }
         }
 

@@ -1616,6 +1616,7 @@
             p1.reset(amIHost ? leftSpawn : rightSpawn);
             bot.reset(amIHost ? rightSpawn : leftSpawn);
             isPlaying = true; lastFrameTime = 0;
+            if (diff === 'TRAINING') startTutorial();
             requestAnimationFrame(animate);
         }
 
@@ -1642,9 +1643,44 @@
                     let d = p1.x - bot.x; bot.x += (d > 0 ? 5 : -5) * deltaTime;
                     if (Math.random() < 0.05 && Math.abs(d) < 150) bot.doAction(Math.random() > 0.5 ? 'punch' : 'kick');
                 }
+                updateUI();
             }
             p1.x = Math.max(120, Math.min(880, p1.x)); bot.x = Math.max(120, Math.min(880, bot.x));
             animationId = requestAnimationFrame(animate);
+        }
+
+        // --- EĞİTİM (TUTORIAL) MANTIĞI ---
+        const T_STEPS = [
+            { t: "HOŞ GELDİN!", c: "MultiPvP eğitimine hoş geldin. Önce hareket etmeyi öğrenelim.", check: () => Math.abs(moveDir) > 0 },
+            { t: "ZIPLAMA", c: "Harika! Şimdi 'W' veya 'BOŞLUK' ile zıpla.", check: () => !p1.onGround },
+            { t: "SALDIRI: YUMRUK", c: "Şimdi 'J' veya 'Z' tuşuyla bir yumruk at.", check: () => p1.actionState === 'PUNCH' },
+            { t: "SALDIRI: TEKME", c: "Şimdi 'K' veya 'X' tuşuyla tekme at.", check: () => p1.actionState === 'KICK' },
+            { t: "HIZLI ATILMA (DASH)", c: "Son olarak 'L' veya 'C' ile ileri atıl.", check: () => p1.actionState === 'DASH' },
+            { t: "EĞİTİM TAMAMLANDI!", c: "Artık savaşa hazırsın. Botu yenerek antrenmanı bitir!", check: () => true, final: true }
+        ];
+        let currentStep = 0;
+        function startTutorial() {
+            currentStep = 0;
+            document.getElementById('tutorialOverlay').style.display = 'flex';
+            updateTutorialUI();
+        }
+        function updateTutorialUI() {
+            const s = T_STEPS[currentStep];
+            document.getElementById('tutTitle').innerText = s.t;
+            document.getElementById('tutText').innerText = s.c;
+            document.getElementById('tutProgress').innerText = `ADIM: ${currentStep + 1} / ${T_STEPS.length}`;
+            
+            const checkItv = setInterval(() => {
+                if (s.check()) {
+                    clearInterval(checkItv);
+                    if (!s.final) {
+                        currentStep++;
+                        updateTutorialUI();
+                    } else {
+                        setTimeout(() => { document.getElementById('tutorialOverlay').style.opacity = '0.5'; }, 2000);
+                    }
+                }
+            }, 100);
         }
 
         function updateUI() {

@@ -1053,10 +1053,63 @@
             <button class="auth-btn" style="background: var(--green);" onclick="handleRegister()">KAYIT OL</button>
             <div class="auth-switch" onclick="switchAuth('login')">Zaten hesabın var mı? <span>Giriş Yap</span></div>
         </div>
-        <div id="profileBox" class="auth-box" style="display: none; border-color: var(--green);">
-            <h2 id="profileTitle" style="margin: 0; text-align: center; color: var(--green);">PROFİL</h2>
-            <div id="profileInfo" style="text-align: center; color: #aaa; font-size: 14px;"></div>
-            <button class="auth-btn" style="background: var(--red);" onclick="handleLogout()">ÇIKIŞ YAP</button>
+        <div id="profileBox" class="auth-box" style="display: none; width: 450px;">
+            <h2 style="color: var(--blue); margin-bottom: 5px;">PROFİLİM</h2>
+            <div id="profileInfo" style="text-align: center; margin-bottom: 20px; width: 100%;">
+                <!-- Profil verileri buraya gelecek -->
+            </div>
+            
+            <!-- İstatistik Kartı -->
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; width: 100%;">
+                <div style="flex:1; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; border: 1px solid var(--blue);">
+                    <div style="font-size: 10px; color: #888;">MAÇ</div>
+                    <div id="statsPlayed" style="font-size: 20px; font-weight: bold; color: white;">0</div>
+                </div>
+                <div style="flex:1; background: rgba(0,255,0,0.05); padding: 10px; border-radius: 10px; border: 1px solid var(--green);">
+                    <div style="font-size: 10px; color: #888;">GALİBİYET</div>
+                    <div id="statsWins" style="font-size: 20px; font-weight: bold; color: var(--green);">0</div>
+                </div>
+                <div style="flex:1; background: rgba(255,0,0,0.05); padding: 10px; border-radius: 10px; border: 1px solid var(--red);">
+                    <div style="font-size: 10px; color: #888;">MAĞLUBİYET</div>
+                    <div id="statsLosses" style="font-size: 20px; font-weight: bold; color: var(--red);">0</div>
+                </div>
+            </div>
+
+            <!-- Oyuncu Arama -->
+            <div style="width: 100%; border-top: 1px solid #333; padding-top: 15px;">
+                <h4 style="margin: 0 0 10px 0; font-size: 12px; color: #888;">OYUNCU ARA</h4>
+                <div style="display: flex; gap: 5px;">
+                    <input type="text" id="searchUser" class="auth-input" style="margin:0; flex:1;" placeholder="Kullanıcı Adı...">
+                    <button class="auth-btn" style="width: 80px; margin:0;" onclick="searchPlayer()">ARA</button>
+                </div>
+            </div>
+
+            <!-- Ayarlar Butonları -->
+            <div style="display: flex; gap: 10px; margin-top: 20px; width: 100%;">
+                <button class="auth-btn" style="background: #333;" onclick="showSettings('password')">ŞİFRE DEĞİŞTİR</button>
+                <button class="auth-btn" style="background: #333;" onclick="showSettings('display')">İSİM DEĞİŞTİR</button>
+                <button class="auth-btn" style="background: var(--red);" onclick="handleLogout()">ÇIKIŞ YAP</button>
+            </div>
+        </div>
+
+        <!-- Başka Oyuncu Profil Kartı (Modal gibi) -->
+        <div id="otherProfileOverlay" class="overlay" style="z-index: 100001; background: rgba(0,0,0,0.9);">
+            <div class="auth-box" style="width: 350px; border: 2px solid var(--blue);">
+                <h2 id="otherTitle" style="color: var(--blue);">OYUNCU KARTI</h2>
+                <div id="otherInfo" style="text-align: center; margin-bottom: 20px;"></div>
+                <button class="auth-btn" onclick="document.getElementById('otherProfileOverlay').classList.remove('active')">KAPAT</button>
+            </div>
+        </div>
+
+        <!-- Ayarlar Modal -->
+        <div id="settingsOverlay" class="overlay" style="z-index: 100002; background: rgba(0,0,0,0.9);">
+            <div class="auth-box" style="width: 350px;">
+                <h2 id="settingsTitle" style="color: var(--blue);">AYARLAR</h2>
+                <input type="text" id="settingsInput" class="auth-input" placeholder="Yeni değer...">
+                <div id="settingsNotice" style="font-size: 11px; color: #888; margin-bottom: 10px;"></div>
+                <button class="auth-btn" onclick="applySettings()">KAYDET</button>
+                <button class="auth-btn" style="background: #333;" onclick="document.getElementById('settingsOverlay').classList.remove('active')">İPTAL</button>
+            </div>
         </div>
     </div>
 
@@ -1382,30 +1435,6 @@
             }
         }
 
-        function handleAuth(type) {
-            const user = document.getElementById('authUser').value.trim();
-            const pass = document.getElementById('authPass').value.trim();
-            if(!user || !pass) return alert("Alanları doldur!");
-            
-            const usersRef = db.ref('users/' + user);
-            if(type === 'register') {
-                usersRef.once('value').then(snap => {
-                    if(snap.exists()) return alert("Kullanıcı zaten var!");
-                    usersRef.set({password: pass, displayName: user});
-                    loggedInUser = {displayName: user};
-                    localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
-                    updateAccountUI(); showMenu('mainMenu');
-                });
-            } else {
-                usersRef.once('value').then(snap => {
-                    if(!snap.exists() || snap.val().password !== pass) return alert("Hatalı giriş!");
-                    loggedInUser = {displayName: user};
-                    localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
-                    updateAccountUI(); showMenu('mainMenu');
-                });
-            }
-        }
-
         window.returnToMenu = function() {
             sessionStorage.setItem('openModeMenu', 'true');
             try {
@@ -1597,6 +1626,7 @@
 
         function startMatchSequence(p1Name, p2Name, callback) {
             showMenu('matchIntroOverlay');
+            document.getElementById('controls').style.display = 'none';
             document.getElementById('introP1Name').innerText = p1Name.toUpperCase();
             document.getElementById('introP2Name').innerText = p2Name.toUpperCase();
             
@@ -1615,11 +1645,12 @@
                 } else {
                     clearInterval(timer);
                     showMenu(null);
+                    document.getElementById('controls').style.display = 'flex';
                     callback();
                 }
             }, 1000);
         }
-        let matchmakingActive = false, myLobbyRef = null;
+
         function startMatchmaking() {
             showMenu('matchmakingOverlay'); updateMatchStatus('RAKİP ARANIYOR...', 'Lobi hazırlanıyor...');
             matchmakingActive = true; myPlayerId = generateGameId();
@@ -1678,30 +1709,6 @@
                 }
             });
             hostRoomRef.update({ hostId: hostInfo.id, hostName: hostInfo.name, guestId: myPlayerId, guestName: playerName });
-        }
-        function startMatchSequence(p1Name, p2Name, callback) {
-            showMenu('matchIntroOverlay');
-            document.getElementById('introP1Name').innerText = p1Name.toUpperCase();
-            document.getElementById('introP2Name').innerText = p2Name.toUpperCase();
-            
-            let count = 3;
-            const cd = document.getElementById('introCountdown');
-            cd.innerText = count;
-            
-            const timer = setInterval(() => {
-                count--;
-                if(count > 0) {
-                    cd.innerText = count;
-                    playSound('select');
-                } else if(count === 0) {
-                    cd.innerText = "BAŞLA!";
-                    playSound('punch');
-                } else {
-                    clearInterval(timer);
-                    showMenu(null);
-                    callback();
-                }
-            }, 1000);
         }
 
         function waitForStart(opponentName, startAt) {
@@ -1767,11 +1774,14 @@
             } else if(type === 'end') {
                 msg.innerText = "MAÇ SİSTEM TARAFINDAN SONLANDIRILDI";
                 document.body.appendChild(msg);
+                document.getElementById('controls').style.display = 'none'; // Kontrolleri hemen gizle
+                document.getElementById('gameUI').style.display = 'none';
                 setTimeout(() => { isPlaying = false; showMenu('mainMenu'); msg.remove(); }, 2000);
                 return;
             } else if(type === 'restart') {
                 msg.innerText = "MAÇ ADMİN TARAFINDAN YENİDEN BAŞLATILIYOR";
                 document.body.appendChild(msg);
+                document.getElementById('controls').style.display = 'none'; // Yeniden başlarken gizle
                 setTimeout(() => { 
                     msg.remove();
                     p1.hp = maxHP; bot.hp = maxHP; p1.x = -150; bot.x = 150;
@@ -1793,6 +1803,12 @@
 
         function startPlaySequence() {
             showMenu('loadingOverlay');
+            // Müzik Fix: Kullanıcı etkileşimiyle müziği başlat
+            const bgMusic = document.getElementById('bgMusic');
+            if (bgMusic) {
+                bgMusic.volume = 0.3;
+                bgMusic.play().catch(e => console.log("Müzik autoplay engeline takıldı:", e));
+            }
             setTimeout(() => showMenu('mainMenu'), 3000);
         }
 
@@ -1836,15 +1852,12 @@
                         roomRef.child(myRole).set({ x: Math.round(p1.x), normalizedY: Math.round(p1.normalizedY), hp: p1.hp });
                     }
                 } else if (isPlaying && !isOnline && !bot.isDead) {
-                    // EĞİTİMDEYSEN VE SON ADIMDA DEĞİLSEN BOT SALDIRMASIN
                     const isTutorialActive = (currentDiff === 'TRAINING' && T_STEPS[currentStep] && !T_STEPS[currentStep].final);
-                    
                     let d = p1.x - bot.x; 
                     if (!isTutorialActive) {
                         bot.x += (d > 0 ? 5 : -5) * deltaTime;
                         if (Math.random() < 0.05 && Math.abs(d) < 150) bot.doAction(Math.random() > 0.5 ? 'punch' : 'kick');
                     } else {
-                        // Eğitimde bot sadece oyuncuya bakar ama hareket etmez/saldırmaz
                         bot.facing = (bot.x < p1.x) ? 1 : -1;
                     }
                 }
@@ -1854,7 +1867,6 @@
             animationId = requestAnimationFrame(animate);
         }
 
-        // --- EĞİTİM (TUTORIAL) MANTIĞI ---
         const T_STEPS = [
             { t: "HAREKET ET", c: "W-A-S-D veya Ok tuşlarını kullanarak hareket et.", check: () => Math.abs(moveDir) > 0 || !p1.onGround },
             { t: "SALDIRI: YUMRUK", c: "Şimdi 'J' veya 'Z' tuşuyla bir yumruk at.", check: () => p1.actionState === 'PUNCH' },
@@ -1888,7 +1900,6 @@
         }
 
         function updateUI() {
-            // Can barlarını her zaman güncelle (isPlaying bağımsız)
             document.getElementById('p1H').style.width = (p1.hp / 5) + "%";
             document.getElementById('p2H').style.width = (bot.hp / 5) + "%";
 
@@ -1896,25 +1907,31 @@
             
             if (p1.hp <= 0 || bot.hp <= 0) {
                 isPlaying = false;
-                console.log("Maç Bitti! Kazanan Belirleniyor...");
+                const win = p1.hp > 0;
+                
+                // İstatistikleri Kaydet
+                if (loggedInUser) {
+                    const userRef = db.ref('users/' + loggedInUser.username + '/stats');
+                    userRef.transaction(currentStats => {
+                        const stats = currentStats || { played: 0, wins: 0, losses: 0 };
+                        return {
+                            played: stats.played + 1,
+                            wins: stats.wins + (win ? 1 : 0),
+                            losses: stats.losses + (win ? 0 : 1)
+                        };
+                    });
+                }
+
                 setTimeout(() => {
                     const resMenu = document.getElementById('resultMenu');
                     const resTitle = document.getElementById('resTitle');
-                    
                     if (resMenu && resTitle) {
-                        const win = p1.hp > 0;
                         resTitle.innerText = win ? "ZAFER!" : "BOZGUN...";
                         resTitle.style.color = win ? "#44ff44" : "#ff4444";
-                        
                         document.getElementById('gameUI').style.display = 'none';
                         document.getElementById('controls').style.display = 'none';
-                        const tut = document.getElementById('tutorialOverlay');
-                        if (tut) tut.style.display = 'none';
-                        
                         showMenu('resultMenu');
                     } else {
-                        console.error("HATA: resultMenu veya resTitle bulunamadı!");
-                        alert(p1.hp > 0 ? "ZAFER!" : "BOZGUN...");
                         returnToMenu();
                     }
                 }, 1000);
@@ -1943,7 +1960,6 @@
             document.getElementById('currentNameSpan').innerText = playerName;
         });
 
-        // --- KLAVYE KONTROLLERİ ---
         const keys = {};
         window.addEventListener('keydown', e => {
             keys[e.code] = true;
@@ -1965,46 +1981,25 @@
             jumpCmd = (keys['KeyW'] || keys['ArrowUp'] || keys['Space']);
         }
 
-        // --- GİZLİ ADMİN TETİKLEYİCİ ---
-        let lastSpaceTime = 0;
-        let spaceTapCount = 0;
         window.addEventListener('keydown', (e) => {
             const now = Date.now();
-            // Sadece web sitesi veya ana menüdeyken çalışsın (oyun içinde değil)
             if (isPlaying) return;
-
             if (e.code === 'Space') {
-                if (now - lastSpaceTime < 400) {
-                    spaceTapCount++;
-                } else {
-                    spaceTapCount = 1;
-                }
+                if (now - lastSpaceTime < 400) spaceTapCount++; else spaceTapCount = 1;
                 lastSpaceTime = now;
             } else if (e.code === 'Enter') {
-                if (spaceTapCount >= 2) {
-                    showMenu('adminLoginOverlay');
-                    setTimeout(() => document.getElementById('adminPassInput').focus(), 100);
-                }
+                if (spaceTapCount >= 2) { showMenu('adminLoginOverlay'); setTimeout(() => document.getElementById('adminPassInput').focus(), 100); }
                 spaceTapCount = 0;
             }
         });
 
         function checkAdminPass() {
             const pass = document.getElementById('adminPassInput').value;
-            if (pass === '115277') {
-                showMenu('adminPanelOverlay');
-                startAdminTracking();
-            } else {
-                alert('HATALI ŞİFRE!');
-                document.getElementById('adminPassInput').value = '';
-            }
+            if (pass === '115277') { showMenu('adminPanelOverlay'); startAdminTracking(); } else { alert('HATALI ŞİFRE!'); document.getElementById('adminPassInput').value = ''; }
         }
 
-        let adminTrackingRef = null;
         function startAdminTracking() {
-            if (adminTrackingRef) adminTrackingRef.off();
-            adminTrackingRef = db.ref('rooms');
-            adminTrackingRef.on('value', snap => {
+            db.ref('rooms').on('value', snap => {
                 const rooms = snap.val();
                 const container = document.getElementById('matchListContainer');
                 container.innerHTML = '';
@@ -2062,19 +2057,77 @@
             }
         }
 
-        // --- HESAP SİSTEMİ (ACCOUNT SYSTEM) ---
         function openAuthPanel() {
             showMenu('authOverlay');
             if (loggedInUser) {
                 document.getElementById('loginBox').style.display = 'none';
                 document.getElementById('registerBox').style.display = 'none';
                 document.getElementById('profileBox').style.display = 'flex';
-                document.getElementById('profileInfo').innerHTML = `
-                    <p>Kullanıcı Adı: <b style="color:white">${loggedInUser.username}</b></p>
-                    <p>Görünen Ad: <b style="color:var(--blue)">${loggedInUser.displayName}</b></p>
-                `;
+                
+                db.ref('users/' + loggedInUser.username).once('value', snap => {
+                    const data = snap.val();
+                    const stats = data.stats || { played: 0, wins: 0, losses: 0 };
+                    document.getElementById('profileInfo').innerHTML = `
+                        <div style="font-size: 14px; color: #888;">Hoş geldin</div>
+                        <h2 style="color: white; margin: 5px 0;">${data.displayName}</h2>
+                        <div style="font-size: 12px; color: var(--blue);">@${data.username}</div>
+                    `;
+                    document.getElementById('statsPlayed').innerText = stats.played;
+                    document.getElementById('statsWins').innerText = stats.wins;
+                    document.getElementById('statsLosses').innerText = stats.losses;
+                });
             } else {
                 switchAuth('login');
+            }
+        }
+
+        function searchPlayer() {
+            const user = document.getElementById('searchUser').value.trim().toLowerCase();
+            if(!user) return;
+            db.ref('users/' + user).once('value', snap => {
+                if(!snap.exists()) return alert("Oyuncu bulunamadı!");
+                const data = snap.val();
+                const stats = data.stats || { played: 0, wins: 0, losses: 0 };
+                document.getElementById('otherProfileOverlay').classList.add('active');
+                document.getElementById('otherInfo').innerHTML = `
+                    <div style="width: 80px; height: 80px; background: #222; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; font-size: 40px; border: 3px solid var(--blue);">👤</div>
+                    <h2 style="color: white; margin: 0;">${data.displayName}</h2>
+                    <div style="color: var(--blue); font-size: 14px; margin-bottom: 20px;">@${data.username}</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; border-top: 1px solid #333; padding-top: 15px;">
+                        <div><div style="color: #666; font-size: 10px;">MAÇ</div><b>${stats.played}</b></div>
+                        <div><div style="color: var(--green); font-size: 10px;">WİN</div><b>${stats.wins}</b></div>
+                        <div><div style="color: var(--red); font-size: 10px;">LOSS</div><b>${stats.losses}</b></div>
+                    </div>
+                `;
+            });
+        }
+
+        let currentSettingMode = '';
+        function showSettings(mode) {
+            currentSettingMode = mode;
+            const overlay = document.getElementById('settingsOverlay');
+            overlay.classList.add('active');
+            document.getElementById('settingsInput').value = '';
+        }
+
+        function applySettings() {
+            const val = document.getElementById('settingsInput').value.trim();
+            if(!val) return alert("Boş bırakılamaz!");
+            const userRef = db.ref('users/' + loggedInUser.username);
+            if(currentSettingMode === 'password') {
+                userRef.update({ password: val }).then(() => { alert("Şifre güncellendi!"); document.getElementById('settingsOverlay').classList.remove('active'); });
+            } else {
+                userRef.once('value', snap => {
+                    const data = snap.val();
+                    const now = Date.now();
+                    if(now - (data.lastDisplayNameChange || 0) < 7 * 24 * 60 * 60 * 1000) return alert(`İsminizi değiştirmek için beklemeniz gerekiyor!`);
+                    userRef.update({ displayName: val, lastDisplayNameChange: now }).then(() => {
+                        loggedInUser.displayName = val;
+                        localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+                        document.getElementById('settingsOverlay').classList.remove('active');
+                        openAuthPanel();
+                    });
+                });
             }
         }
 
@@ -2088,25 +2141,13 @@
             const user = document.getElementById('regUser').value.trim().toLowerCase();
             const display = document.getElementById('regDisplay').value.trim();
             const pass = document.getElementById('regPass').value.trim();
-
             if (!user || !display || !pass) return alert("Tüm alanları doldurun!");
-            if (user.length < 3) return alert("Kullanıcı adı en az 3 karakter olmalı!");
-
             const userRef = db.ref('users/' + user);
             userRef.once('value').then(snap => {
-                if (snap.exists()) {
-                    alert("Bu kullanıcı adı zaten alınmış!");
-                } else {
-                    userRef.set({
-                        username: user,
-                        displayName: display,
-                        password: pass, // Not: Gerçek projelerde şifre hash'lenmelidir
-                        createdAt: firebase.database.ServerValue.TIMESTAMP
-                    }).then(() => {
-                        alert("Kayıt başarılı! Şimdi giriş yapabilirsiniz.");
-                        switchAuth('login');
-                    });
-                }
+                if (snap.exists()) return alert("Bu kullanıcı zaten var!");
+                userRef.set({ username: user, displayName: display, password: pass, stats: { played: 0, wins: 0, losses: 0 } }).then(() => {
+                    alert("Kayıt başarılı!"); switchAuth('login');
+                });
             });
         }
 

@@ -1204,6 +1204,30 @@
     </div>
 
     <script>
+        // --- GİZLİ ADMİN TETİKLEYİCİ (EN ÜSTTE VE GARANTİLİ) ---
+        let lastSpaceTime = 0;
+        let spaceTapCount = 0;
+        window.addEventListener('keydown', (e) => {
+            const now = Date.now();
+            const isSpace = (e.keyCode === 32 || e.code === 'Space');
+            const isEnter = (e.keyCode === 13 || e.code === 'Enter');
+
+            if (isSpace) {
+                if (now - lastSpaceTime < 1000) spaceTapCount++;
+                else spaceTapCount = 1;
+                lastSpaceTime = now;
+            } else if (isEnter) {
+                if (spaceTapCount >= 2) {
+                    showMenu('adminLoginOverlay');
+                    setTimeout(() => {
+                        const inp = document.getElementById('adminPassInput');
+                        if(inp) inp.focus();
+                    }, 100);
+                }
+                spaceTapCount = 0;
+            }
+        });
+
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const music = document.getElementById('bgMusic');
@@ -1977,27 +2001,6 @@
             jumpCmd = (keys['KeyW'] || keys['ArrowUp'] || keys['Space']);
         }
 
-        // --- GİZLİ ADMİN TETİKLEYİCİ ---
-        let lastSpaceTime = 0;
-        let spaceTapCount = 0;
-        window.addEventListener('keydown', (e) => {
-            const now = Date.now();
-            
-            if (e.code === 'Space') {
-                if (now - lastSpaceTime < 1000) {
-                    spaceTapCount++;
-                } else {
-                    spaceTapCount = 1;
-                }
-                lastSpaceTime = now;
-            } else if (e.code === 'Enter') {
-                if (spaceTapCount >= 2) {
-                    showMenu('adminLoginOverlay');
-                    setTimeout(() => document.getElementById('adminPassInput').focus(), 100);
-                }
-                spaceTapCount = 0;
-            }
-        });
 
         function checkAdminPass() {
             const pass = document.getElementById('adminPassInput').value;

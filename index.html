@@ -53,6 +53,22 @@
             to { opacity: 1; transform: scale(1); }
         }
 
+        @keyframes pulseScale {
+            0% { transform: scale(1); text-shadow: 0 0 20px var(--blue); }
+            50% { transform: scale(1.1); text-shadow: 0 0 50px var(--blue); }
+            100% { transform: scale(1); text-shadow: 0 0 20px var(--blue); }
+        }
+
+        @keyframes slideInLeft {
+            from { transform: translateX(-300px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(300px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
         .overlay.active {
             display: flex !important;
             animation: menuIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
@@ -886,6 +902,11 @@
             .features-grid { grid-template-columns: 1fr; margin-top: 30px; width: 90%; gap: 10px;}
             .feature-card { padding: 15px; }
         }
+        .mode-card.locked {
+            filter: grayscale(1) !important;
+            opacity: 0.5 !important;
+            cursor: not-allowed !important;
+        }
     </style>
 </head>
 
@@ -908,10 +929,13 @@
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                     TARAYICIDA OYNA
                 </button>
-                <a href="javascript:void(0)" class="web-btn web-btn-download" onclick="alert('Windows sürümü yakında eklenecektir!')">
+                <a href="https://drive.google.com/uc?export=download&id=1qaZqkD32yXfKQw_ZJE_uoW0_L_oeHuID" class="web-btn web-btn-download">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                     WİNDOWS İÇİN İNDİR
                 </a>
+                <div style="margin-top: 10px; font-size: 11px; color: #888; text-align: center; max-width: 300px; line-height: 1.4;">
+                    <span style="color: var(--green);">●</span> Uygulamamız güvenlidir. Windows sertifikası olmadığı için uyarı verebilir, "Ek Bilgi" diyerek kurabilirsiniz.
+                </div>
             </div>
             
             <div class="features-grid">
@@ -946,10 +970,16 @@
     </div>
 
     <div id="adminPanelOverlay" class="overlay">
-        <div style="width: 100%; max-width: 900px; display: flex; justify-content: space-between; align-items: center;">
-            <h1 style="color: var(--red); margin: 0;">CANLI MAÇLAR</h1>
+        <div style="width: 100%; max-width: 950px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; border: 1px solid var(--red);">
+            <div style="display:flex; flex-direction: column; gap: 5px;">
+                <h1 style="color: var(--red); margin: 0; font-size: 24px;">ADMİN KONTROL MERKEZİ</h1>
+                <div id="serverStatusDisplay" style="font-size: 12px; color: var(--green);">SUNUCULAR: AKTİF</div>
+            </div>
             <div style="display:flex; gap: 10px;">
-                <button class="admin-btn" onclick="showMenu('websiteOverlay')">PANELDEN ÇIK</button>
+                <button class="admin-btn" style="background: var(--orange);" onclick="setServerStatus('maintenance')">BAKIM MODU</button>
+                <button class="admin-btn" style="background: var(--red);" onclick="setServerStatus('closed')">SUNUCUYU KAPAT</button>
+                <button class="admin-btn" style="background: var(--blue);" onclick="setServerStatus('online')">AKTİF ET</button>
+                <button class="admin-btn" onclick="showMenu('websiteOverlay')">ÇIK</button>
             </div>
         </div>
         
@@ -961,6 +991,21 @@
     <div id="loadingOverlay" class="overlay">
         <h1 style="font-size: 40px; margin-bottom: 20px; color: var(--blue);">YÜKLENİYOR...</h1>
         <p style="color:#aaa; font-size:16px;">Oyun motoru hazırlanıyor</p>
+    </div>
+
+    <div id="matchIntroOverlay" class="overlay" style="background: rgba(0,0,0,0.95);">
+        <div style="display: flex; gap: 100px; align-items: center; margin-bottom: 50px;">
+            <div id="introP1" style="text-align: center; animation: slideInLeft 0.5s ease-out;">
+                <div style="width: 150px; height: 150px; border: 5px solid var(--blue); border-radius: 20px; background: #222; display: flex; align-items: center; justify-content: center; font-size: 50px;">👤</div>
+                <h2 id="introP1Name" style="color: var(--blue); margin-top: 15px; font-size: 24px;">OYUNCU 1</h2>
+            </div>
+            <div style="font-size: 80px; font-weight: bold; font-style: italic; color: white; text-shadow: 0 0 20px rgba(255,255,255,0.5);">VS</div>
+            <div id="introP2" style="text-align: center; animation: slideInRight 0.5s ease-out;">
+                <div style="width: 150px; height: 150px; border: 5px solid var(--red); border-radius: 20px; background: #222; display: flex; align-items: center; justify-content: center; font-size: 50px;">👤</div>
+                <h2 id="introP2Name" style="color: var(--red); margin-top: 15px; font-size: 24px;">OYUNCU 2</h2>
+            </div>
+        </div>
+        <div id="introCountdown" style="font-size: 150px; font-weight: bold; color: white; text-shadow: 0 0 50px var(--blue); animation: pulseScale 1s infinite;"></div>
     </div>
 
     <div id="pauseMenu" class="overlay" style="z-index:99999;">
@@ -985,7 +1030,7 @@
             </div>
         </div>
         <div class="mode-card active-card" style="width:420px; height:50px; margin-top:20px; border-color:var(--red)" onpointerdown="showMenu('websiteOverlay')">
-            <h3 style="font-size: 14px;">WEBSİTESİNE DÖN</h3>
+            <h3 style="font-size: 14px;">MENÜYE DÖN</h3>
         </div>
     </div>
 
@@ -1255,7 +1300,76 @@
         
         document.addEventListener("DOMContentLoaded", () => {
             updateAccountUI();
+            
+            // --- SERVER STATUS LISTENER ---
+            db.ref('serverStatus').on('value', (snapshot) => {
+                const status = snapshot.val() || { status: 'online' };
+                updateServerUI(status);
+            });
+            
+            // --- WINDOWS UYGULAMASI (ELECTRON) ÖZELLEŞTİRMESİ ---
+            if (navigator.userAgent.toLowerCase().includes('electron')) {
+                const downloadBtn = document.querySelector('.web-btn-download');
+                if (downloadBtn) downloadBtn.style.display = 'none';
+                
+                const featuresGrid = document.querySelector('.features-grid');
+                if (featuresGrid) featuresGrid.style.display = 'none';
+                
+                const playBtn = document.querySelector('.web-btn-play');
+                if (playBtn) {
+                    playBtn.innerHTML = '<span>&#9654;</span> OYUNU BAŞLAT';
+                    playBtn.style.padding = '25px 60px';
+                    playBtn.style.fontSize = '26px';
+                }
+                
+                const title = document.querySelector('h1');
+                if (title) title.innerText = "MULTIPVP WINDOWS";
+            }
         });
+
+        function updateServerUI(server) {
+            const status = server.status || 'online';
+            const statusText = document.getElementById('serverStatusDisplay');
+            if(statusText) {
+                statusText.innerText = `SUNUCULAR: ${status.toUpperCase()}`;
+                statusText.style.color = status === 'online' ? 'var(--green)' : 'var(--red)';
+            }
+
+            let banner = document.getElementById('serverBanner');
+            if(!banner) {
+                banner = document.createElement('div');
+                banner.id = 'serverBanner';
+                banner.style = "position:fixed; top:0; left:0; width:100%; padding:10px; text-align:center; font-weight:bold; z-index:9999; color:white; font-family:Arial, sans-serif; display:none;";
+                document.body.appendChild(banner);
+            }
+
+            const onlineButtons = document.querySelectorAll('[onpointerdown*="openOnlinePanel"], [onpointerdown*="startMatchmaking"]');
+
+            if(status === 'online') {
+                banner.style.display = 'none';
+                onlineButtons.forEach(btn => {
+                    btn.classList.remove('locked');
+                    btn.style.opacity = '1';
+                    btn.style.pointerEvents = 'auto';
+                    btn.style.filter = 'none';
+                });
+            } else {
+                banner.style.display = 'block';
+                banner.style.background = status === 'maintenance' ? 'var(--orange)' : 'var(--red)';
+                banner.innerText = status === 'maintenance' ? "BAKIM NEDENİYLE SUNUCULAR DEVRE DIŞI" : "SUNUCULAR ŞU ANDA DEVRE DIŞI";
+                
+                onlineButtons.forEach(btn => {
+                    btn.classList.add('locked');
+                    btn.style.opacity = '0.5';
+                    btn.style.pointerEvents = 'none';
+                    btn.style.filter = 'grayscale(1)';
+                });
+            }
+        }
+
+        function setServerStatus(status) {
+            db.ref('serverStatus').set({ status: status });
+        }
 
         function updateAccountUI() {
             if (loggedInUser) {
@@ -1481,7 +1595,30 @@
             });
         }
 
-        // --- MATCHMAKING ---
+        function startMatchSequence(p1Name, p2Name, callback) {
+            showMenu('matchIntroOverlay');
+            document.getElementById('introP1Name').innerText = p1Name.toUpperCase();
+            document.getElementById('introP2Name').innerText = p2Name.toUpperCase();
+            
+            let count = 3;
+            const cd = document.getElementById('introCountdown');
+            cd.innerText = count;
+            
+            const timer = setInterval(() => {
+                count--;
+                if(count > 0) {
+                    cd.innerText = count;
+                    playSound('select');
+                } else if(count === 0) {
+                    cd.innerText = "BAŞLA!";
+                    playSound('punch');
+                } else {
+                    clearInterval(timer);
+                    showMenu(null);
+                    callback();
+                }
+            }, 1000);
+        }
         let matchmakingActive = false, myLobbyRef = null;
         function startMatchmaking() {
             showMenu('matchmakingOverlay'); updateMatchStatus('RAKİP ARANIYOR...', 'Lobi hazırlanıyor...');
@@ -1542,20 +1679,35 @@
             });
             hostRoomRef.update({ hostId: hostInfo.id, hostName: hostInfo.name, guestId: myPlayerId, guestName: playerName });
         }
+        function startMatchSequence(p1Name, p2Name, callback) {
+            showMenu('matchIntroOverlay');
+            document.getElementById('introP1Name').innerText = p1Name.toUpperCase();
+            document.getElementById('introP2Name').innerText = p2Name.toUpperCase();
+            
+            let count = 3;
+            const cd = document.getElementById('introCountdown');
+            cd.innerText = count;
+            
+            const timer = setInterval(() => {
+                count--;
+                if(count > 0) {
+                    cd.innerText = count;
+                    playSound('select');
+                } else if(count === 0) {
+                    cd.innerText = "BAŞLA!";
+                    playSound('punch');
+                } else {
+                    clearInterval(timer);
+                    showMenu(null);
+                    callback();
+                }
+            }, 1000);
+        }
 
         function waitForStart(opponentName, startAt) {
             let now = getSyncedTime();
             let targetTime = startAt || (now + 3000);
             
-            console.log("Maç Başlatma Zamanı:", new Date(targetTime).toLocaleTimeString());
-            console.log("Şu Anki Sunucu Saati:", new Date(now).toLocaleTimeString());
-
-            const diff = targetTime - now;
-            if (diff > 10000 || diff < -5000) {
-                console.warn("Zaman senkronizasyon hatası algılandı! Süre 3 saniyeye çekiliyor. Fark:", diff);
-                targetTime = now + 3000;
-            }
-
             const tick = () => {
                 const currentTime = getSyncedTime();
                 const remaining = Math.ceil((targetTime - currentTime) / 1000);
@@ -1563,13 +1715,13 @@
                 if (remaining > 0) {
                     const txt = remaining + '...';
                     const msg = (remaining > 10) ? "Zaman senkronize ediliyor..." : "HAZIR OL! " + txt;
-                    
                     if (document.getElementById('matchmakingStatus')) document.getElementById('matchmakingStatus').innerText = msg;
                     if (document.getElementById('invitationMessage')) document.getElementById('invitationMessage').innerText = msg;
                     setTimeout(tick, 100);
                 } else { 
-                    console.log("Maç Başlıyor!");
-                    setupFirebaseGame(opponentName); 
+                    startMatchSequence(playerName, opponentName, () => {
+                        setupFirebaseGame(opponentName);
+                    });
                 }
             };
             tick();
@@ -1584,6 +1736,14 @@
                 const d = snap.val(); if (!d) return;
                 botTargetX = d.x; botTargetY = d.normalizedY; bot.hp = d.hp;
             });
+            // Admin komutlarını dinle
+            roomRef.child('adminCmd').on('value', snap => {
+                const cmd = snap.val();
+                if(cmd && cmd.timestamp > (this._lastAdminCmdTime || 0)) {
+                    this._lastAdminCmdTime = cmd.timestamp;
+                    handleAdminCommand(cmd.type, opponentName);
+                }
+            });
             roomRef.child('hits/' + myRole).on('child_added', snap => {
                 const hit = snap.val(); if (!hit || processedHits.has(snap.key)) return;
                 processedHits.add(snap.key); p1.hp -= hit.damage; updateUI();
@@ -1596,6 +1756,40 @@
             else { isPaused = true; showMenu('pauseMenu'); }
         }
         function resumeGame() { isPaused = false; document.getElementById('pauseMenu').classList.remove('active'); }
+
+        function handleAdminCommand(type, opponentName) {
+            const msg = document.createElement('div');
+            msg.style = "position:fixed; top:20%; left:50%; transform:translate(-50%,-50%); padding:20px; background:rgba(255,0,0,0.8); color:white; font-size:24px; font-weight:bold; z-index:10000; border-radius:10px; text-shadow: 0 0 10px black; text-align:center;";
+            
+            if(type === 'pause') {
+                isPaused = !isPaused;
+                msg.innerText = isPaused ? "MAÇ ADMİN TARAFINDAN DURAKLATILDI" : "MAÇ DEVAM EDİYOR";
+            } else if(type === 'end') {
+                msg.innerText = "MAÇ SİSTEM TARAFINDAN SONLANDIRILDI";
+                document.body.appendChild(msg);
+                setTimeout(() => { isPlaying = false; showMenu('mainMenu'); msg.remove(); }, 2000);
+                return;
+            } else if(type === 'restart') {
+                msg.innerText = "MAÇ ADMİN TARAFINDAN YENİDEN BAŞLATILIYOR";
+                document.body.appendChild(msg);
+                setTimeout(() => { 
+                    msg.remove();
+                    p1.hp = maxHP; bot.hp = maxHP; p1.x = -150; bot.x = 150;
+                    startMatchSequence(playerName, opponentName, () => { isPaused = false; });
+                }, 2000);
+                return;
+            } else if(type === 'hp_plus') {
+                p1.hp = Math.min(maxHP, p1.hp + 100);
+                bot.hp = Math.min(maxHP, bot.hp + 100);
+                msg.innerText = "ADMİN: TÜM OYUNCULARA CAN VERİLDİ!";
+            } else if(type === 'win_p1') {
+                bot.hp = 0;
+                msg.innerText = "ADMİN MÜDAHALESİ: KAZANAN BELİRLENDİ!";
+            }
+
+            document.body.appendChild(msg);
+            setTimeout(() => msg.remove(), 2500);
+        }
 
         function startPlaySequence() {
             showMenu('loadingOverlay');
@@ -1830,35 +2024,35 @@
 
                     const item = document.createElement('div');
                     item.className = 'match-item';
-                    
-                    // Aktif maça vurgu, bekleyene grilik ekle
-                    if (isPlaying) {
-                        item.style.borderColor = 'var(--green)';
-                        item.style.boxShadow = '0 0 15px rgba(68, 255, 68, 0.1)';
-                        item.style.opacity = '1';
-                    } else {
-                        item.style.opacity = '0.5';
-                        item.style.filter = 'grayscale(0.8)';
-                    }
+                    item.style = "background:rgba(255,255,255,0.05); margin:5px; padding:10px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; border-left:4px solid " + (isPlaying ? 'var(--green)' : '#444') + ";";
 
                     item.innerHTML = `
-                        <div style="font-family: monospace; color: ${isPlaying ? 'var(--green)' : '#666'}; font-size: 12px;">#${id.substring(0, 6)}</div>
-                        <div>
-                            <div style="color: ${isPlaying ? 'var(--blue)' : '#aaa'}; font-weight: bold;">${hostName}</div>
-                            <div class="hp-badge" style="background: rgba(0, 136, 255, 0.1); color: ${isPlaying ? 'var(--blue)' : '#888'};">HP: ${hostHP}</div>
+                        <div style="flex:1">
+                            <div style="font-family: monospace; color: #666; font-size: 10px;">ID: ${id.substring(0, 6)}</div>
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <b style="color:var(--blue)">${hostName}</b> <small style="color:#888">(${hostHP}HP)</small>
+                                <span style="color:#444">VS</span>
+                                <b style="color:var(--orange)">${guestName}</b> <small style="color:#888">(${guestHP}HP)</small>
+                            </div>
                         </div>
-                        <div>
-                            <div style="color: ${isPlaying ? 'var(--orange)' : '#aaa'}; font-weight: bold;">${guestName}</div>
-                            <div class="hp-badge" style="background: rgba(255, 136, 0, 0.1); color: ${isPlaying ? 'var(--orange)' : '#888'};">HP: ${guestHP}</div>
-                        </div>
-                        <div style="text-align: right;">
-                            <span style="font-size: 11px; font-weight: bold; color: ${isPlaying ? 'var(--green)' : '#666'}">${isPlaying ? 'CANLI MAÇ' : 'BEKLİYOR'}</span>
-                            <br>
-                            <button class="admin-btn" style="margin-top: 5px; padding: 4px 8px; font-size: 10px; border-color: ${isPlaying ? 'var(--red)' : '#444'}" onclick="terminateRoom('${id}')">SİL</button>
+                        <div style="display:flex; gap:5px;">
+                            <button class="admin-mini-btn" style="background:var(--orange); border:none; color:white; padding:5px; border-radius:5px; cursor:pointer;" onclick="sendAdminCmd('${id}', 'pause')">⏸</button>
+                            <button class="admin-mini-btn" style="background:var(--blue); border:none; color:white; padding:5px; border-radius:5px; cursor:pointer;" onclick="sendAdminCmd('${id}', 'restart')">🔄</button>
+                            <button class="admin-mini-btn" style="background:var(--green); border:none; color:white; padding:5px; border-radius:5px; cursor:pointer;" onclick="sendAdminCmd('${id}', 'hp_plus')">HP+</button>
+                            <button class="admin-mini-btn" style="background:var(--red); border:none; color:white; padding:5px; border-radius:5px; cursor:pointer;" onclick="sendAdminCmd('${id}', 'end')">⏹</button>
+                            <button class="admin-mini-btn" style="background:#444; border:none; color:white; padding:5px; border-radius:5px; cursor:pointer;" onclick="sendAdminCmd('${id}', 'win_p1')">🏆 P1</button>
+                            <button class="admin-mini-btn" style="background:#222; border:none; color:white; padding:5px; border-radius:5px; cursor:pointer;" onclick="terminateRoom('${id}')">🗑</button>
                         </div>
                     `;
                     container.appendChild(item);
                 }
+            });
+        }
+
+        function sendAdminCmd(roomId, cmd) {
+            db.ref('rooms/' + roomId + '/adminCmd').set({
+                type: cmd,
+                timestamp: Date.now()
             });
         }
 

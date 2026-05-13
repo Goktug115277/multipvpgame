@@ -270,31 +270,6 @@
             pointer-events: none;
         }
 
-        /* --- YENİ EKLENTİLER (VERSUS & SUNUCU) --- */
-        #serverInfoBar {
-            position: fixed; top: 0; left: 0; width: 100%; height: 35px;
-            background: var(--red); color: white; display: none; 
-            justify-content: center; align-items: center; font-size: 14px; 
-            font-weight: bold; z-index: 9999; box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-            animation: slideDown 0.5s ease;
-        }
-        @keyframes slideDown { from { transform: translateY(-100%); } to { transform: translateY(0); } }
-
-        #versusScreen {
-            display: none; flex-direction: column; justify-content: center; align-items: center;
-            background: radial-gradient(circle, #1a0033, #000); z-index: 1500;
-        }
-        .vs-container { display: flex; align-items: center; gap: 80px; margin-bottom: 50px; }
-        .vs-player-box { display: flex; flex-direction: column; align-items: center; gap: 15px; animation: playerPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes playerPop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .vs-avatar-big { width: 140px; height: 140px; border: 4px solid var(--blue); border-radius: 20px; background: rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; font-size: 80px; }
-        .vs-name-big { font-size: 32px; font-weight: bold; text-shadow: 0 0 15px var(--blue); }
-        .vs-text { font-size: 80px; font-weight: 900; color: var(--red); font-style: italic; text-shadow: 0 0 30px red; }
-        
-        #countdownOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: none; justify-content: center; align-items: center; z-index: 1600; pointer-events: none; }
-        #countdownNumber { font-size: 200px; font-weight: 900; color: white; text-shadow: 0 0 40px #000; }
-        @keyframes countAnimate { 0% { transform: scale(2); opacity: 0; } 50% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.5); opacity: 0; } }
-
         /* Mobile Responsive Styles */
         @media (max-width: 768px) {
             .overlay h1 {
@@ -1101,13 +1076,13 @@
             &#9664; GERİ
         </div>
         <div style="display:flex; gap:15px">
-            <div class="mode-card" style="border-color:var(--green); width:120px" onpointerdown="showVersusAndCountDown(playerName, 'KOLAY BOT', () => startGame('KOLAY'))">
+            <div class="mode-card" style="border-color:var(--green); width:120px" onpointerdown="startGame('KOLAY')">
                 <h3>KOLAY</h3>
             </div>
-            <div class="mode-card" style="border-color:var(--blue); width:120px" onpointerdown="showVersusAndCountDown(playerName, 'NORMAL BOT', () => startGame('NORMAL'))">
+            <div class="mode-card" style="border-color:var(--blue); width:120px" onpointerdown="startGame('NORMAL')">
                 <h3>NORMAL</h3>
             </div>
-            <div class="mode-card" style="border-color:var(--red); width:120px" onpointerdown="showVersusAndCountDown(playerName, 'ZOR BOT', () => startGame('ZOR'))">
+            <div class="mode-card" style="border-color:var(--red); width:120px" onpointerdown="startGame('ZOR')">
                 <h3>ZOR</h3>
             </div>
         </div>
@@ -1133,36 +1108,12 @@
         </div>
     </div>
 
-    <div id="maintenanceOverlay" class="overlay">
-        <h1 style="color: var(--orange); font-size: 45px; text-shadow: 0 0 20px var(--orange);">BAKIM MODU</h1>
-        <p style="margin: 20px 0; color: #ccc; font-size: 18px; text-align: center; max-width: 500px;">
-            Daha iyi bir deneyim için sunucularımız şu anda bakımdadır.<br>
-            <span style="color:var(--red); font-weight:bold;">Bakım Nedeniyle Sunucular Devre Dışı</span>
-        </p>
-        <div class="mode-card active-card" style="width:250px; height:60px; border-color:var(--blue);" onpointerdown="showMenu('websiteOverlay')">
-            <h3>ANLAŞILDI</h3>
+    <div id="resultMenu" class="overlay">
+        <div id="resTitle" style="font-size: 60px; margin-bottom: 20px;">ZAFER!</div>
+        <div class="mode-card active-card" style="width:150px; height:70px" onpointerdown="returnToMenu()">
+            <h3>MENÜ</h3>
         </div>
     </div>
-
-    <div id="versusScreen" class="overlay">
-        <div class="vs-container">
-            <div class="vs-player-box">
-                <div class="vs-avatar-big">👤</div>
-                <div id="vs_p1Name" class="vs-name-big">OYUNCU 1</div>
-            </div>
-            <div class="vs-text">VS</div>
-            <div class="vs-player-box">
-                <div class="vs-avatar-big" style="border-color:var(--orange)">👤</div>
-                <div id="vs_p2Name" class="vs-name-big" style="text-shadow: 0 0 15px var(--orange);">OYUNCU 2</div>
-            </div>
-        </div>
-    </div>
-
-    <div id="countdownOverlay">
-        <div id="countdownNumber">3</div>
-    </div>
-
-    <div id="serverInfoBar">SUNUCULAR ŞU ANDA DEVRE DIŞI</div>
 
     <div id="tutorialOverlay"
         style="position:fixed; top:20px; width:100%; text-align:center; display:none; flex-direction:column; align-items:center; z-index:2000; pointer-events:none;">
@@ -1204,30 +1155,6 @@
     </div>
 
     <script>
-        // --- GİZLİ ADMİN TETİKLEYİCİ (EN ÜSTTE VE GARANTİLİ) ---
-        let lastSpaceTime = 0;
-        let spaceTapCount = 0;
-        window.addEventListener('keydown', (e) => {
-            const now = Date.now();
-            const isSpace = (e.keyCode === 32 || e.code === 'Space');
-            const isEnter = (e.keyCode === 13 || e.code === 'Enter');
-
-            if (isSpace) {
-                if (now - lastSpaceTime < 1000) spaceTapCount++;
-                else spaceTapCount = 1;
-                lastSpaceTime = now;
-            } else if (isEnter) {
-                if (spaceTapCount >= 2) {
-                    showMenu('adminLoginOverlay');
-                    setTimeout(() => {
-                        const inp = document.getElementById('adminPassInput');
-                        if(inp) inp.focus();
-                    }, 100);
-                }
-                spaceTapCount = 0;
-            }
-        });
-
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const music = document.getElementById('bgMusic');
@@ -1360,100 +1287,20 @@
                     if(!snap.exists() || snap.val().password !== pass) return alert("Hatalı giriş!");
                     loggedInUser = {displayName: user};
                     localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
-        let serverStatus = 'online'; // online, maintenance, offline
-        
-        // Sunucu durumunu dinle
-        db.ref('serverConfig').on('value', (snap) => {
-            const config = snap.val();
-            if (config) {
-                serverStatus = config.status || 'online';
-                updateServerUI();
-            }
-        });
-
-        function updateServerUI() {
-            const maintenanceOverlay = document.getElementById('maintenanceOverlay');
-            const serverInfoBar = document.getElementById('serverInfoBar');
-            const onlineCards = document.querySelectorAll('.mode-card:not(.locked)');
-            
-            // Sıfırla
-            maintenanceOverlay.classList.remove('active');
-            serverInfoBar.style.display = 'none';
-            onlineCards.forEach(card => card.style.opacity = '1');
-            onlineCards.forEach(card => card.style.pointerEvents = 'auto');
-
-            if (serverStatus === 'maintenance') {
-                maintenanceOverlay.classList.add('active');
-                onlineCards.forEach(card => {
-                    if (card.innerText.includes('ONLINE') || card.innerText.includes('DÜELLO') || card.innerText.includes('BUL')) {
-                        card.style.opacity = '0.3';
-                        card.style.pointerEvents = 'none';
-                    }
-                });
-            } else if (serverStatus === 'offline') {
-                serverInfoBar.style.display = 'flex';
-                serverInfoBar.innerText = "SUNUCULAR ŞU ANDA DEVRE DIŞI";
-                onlineCards.forEach(card => {
-                    if (card.innerText.includes('ONLINE') || card.innerText.includes('DÜELLO') || card.innerText.includes('BUL')) {
-                        card.style.opacity = '0.3';
-                        card.style.pointerEvents = 'none';
-                    }
+                    updateAccountUI(); showMenu('mainMenu');
                 });
             }
         }
 
-        function updateAdminMatchList(snap) {
-            const container = document.getElementById('matchListContainer');
-            container.innerHTML = '';
-            const rooms = snap.val();
-            
-            // Global Kontroller
-            const globalDiv = document.createElement('div');
-            globalDiv.style = "background:rgba(255,255,255,0.05); padding:15px; border-radius:10px; margin-bottom:20px; width:100%; border:1px solid #444;";
-            globalDiv.innerHTML = `
-                <div style="font-size:12px; color:#888; margin-bottom:10px; text-align:center">SUNUCU YÖNETİMİ</div>
-                <div style="display:flex; gap:10px; justify-content:center">
-                    <button class="admin-btn" style="background:var(--green); flex:1" onclick="setServerStatus('online')">AKTİF</button>
-                    <button class="admin-btn" style="background:var(--orange); flex:1" onclick="setServerStatus('maintenance')">BAKIM</button>
-                    <button class="admin-btn" style="background:var(--red); flex:1" onclick="setServerStatus('offline')">KAPAT</button>
-                </div>
-            `;
-            container.appendChild(globalDiv);
-
-            if(!rooms) {
-                container.innerHTML += '<div style="color: #666; text-align: center; margin-top: 50px;">Aktif maç bulunamadı.</div>';
-                return;
-            }
-
-            Object.keys(rooms).forEach(id => {
-                const r = rooms[id];
-                if(r.status === 'playing') {
-                    const card = document.createElement('div');
-                    card.className = 'match-card';
-                    card.innerHTML = `
-                        <div style="display:flex; justify-content:space-between; margin-bottom:10px">
-                            <span style="font-size:11px; color:#aaa">ODA: ${id}</span>
-                            <span style="font-size:11px; color:var(--green)">● CANLI</span>
-                        </div>
-                        <div style="text-align:center; font-size:18px; font-weight:bold; margin-bottom:15px">
-                            ${r.hostName || 'P1'} <span style="color:var(--red); font-size:14px">VS</span> ${r.guestName || 'P2'}
-                        </div>
-                        <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px;">
-                            <button class="admin-btn" style="background:var(--red)" onclick="adminAction('${id}', 'end')">SONLANDIR</button>
-                            <button class="admin-btn" style="background:var(--blue)" onclick="adminAction('${id}', 'restart')">Y. BAŞLAT</button>
-                            <button class="admin-btn" style="background:var(--orange)" onclick="adminAction('${id}', 'pause')">DURAKLAT</button>
-                            <button class="admin-btn" onclick="adminAction('${id}', 'lowHP')">HERKES 1HP</button>
-                            <button class="admin-btn" onclick="adminAction('${id}', 'winHost')">HOST KAZANSIN</button>
-                            <button class="admin-btn" onclick="adminAction('${id}', 'winGuest')">GUEST KAZANSIN</button>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                }
-            });
-        }
-
-        window.setServerStatus = (s) => db.ref('serverConfig').set({ status: s });
-        window.adminAction = (rid, type) => db.ref(`rooms/${rid}/adminAction`).set({ type, t: Date.now() });
+        window.returnToMenu = function() {
+            sessionStorage.setItem('openModeMenu', 'true');
+            try {
+                if (window.myLobbyRef) window.myLobbyRef.remove();
+                if (amIHost && roomRef) roomRef.remove();
+                else if (roomRef) roomRef.off();
+            } catch(e) {}
+            location.reload();
+        };
 
         // --- FIGHTER CLASS ---
         class Fighter {
@@ -1731,55 +1578,16 @@
         // --- GAME CORE ---
         let botTargetX = 0, botTargetY = 0;
         function setupFirebaseGame(opponentName) {
-            isOnline = true; 
+            isOnline = true; startGame('ONLINE');
             document.getElementById('botNameDisplay').innerText = opponentName || 'RAKİP';
-            
-            // Online modda versus ve geri sayım
-            showVersusAndCountDown(playerName, opponentName, () => {
-                startGame('ONLINE');
-            });
-
             roomRef.child(myRole === 'host' ? 'guest' : 'host').on('value', snap => {
                 const d = snap.val(); if (!d) return;
                 botTargetX = d.x; botTargetY = d.normalizedY; bot.hp = d.hp;
             });
-            
             roomRef.child('hits/' + myRole).on('child_added', snap => {
                 const hit = snap.val(); if (!hit || processedHits.has(snap.key)) return;
                 processedHits.add(snap.key); p1.hp -= hit.damage; updateUI();
                 playSound('hit'); createParticles(p1.x, 600 - p1.normalizedY, '#ff3333', 15);
-            });
-
-            // ADMIN AKSİYON DİNLEYİCİ
-            roomRef.child('adminAction').on('value', snap => {
-                const action = snap.val();
-                if(!action) return;
-                
-                if(action.type === 'end') {
-                    returnToMenu("MAÇ SİSTEM TARAFINDAN SONLANDIRILDI");
-                } else if(action.type === 'restart') {
-                    document.getElementById('pauseTitle').innerText = "MAÇ ADMİN TARAFINDAN YENİDEN BAŞLATILIYOR";
-                    showMenu('pauseMenu');
-                    setTimeout(() => {
-                        p1.reset(amIHost ? 200 : 800);
-                        bot.reset(amIHost ? 800 : 200);
-                        resumeGame();
-                    }, 2000);
-                } else if(action.type === 'pause') {
-                    isPaused = !isPaused;
-                    if(isPaused) {
-                        document.getElementById('pauseTitle').innerText = "MAÇ ADMİN TARAFINDAN DURAKLATILDI";
-                        showMenu('pauseMenu');
-                    } else {
-                        resumeGame();
-                    }
-                } else if(action.type === 'lowHP') {
-                    p1.hp = 1; bot.hp = 1; updateUI();
-                } else if(action.type === 'winHost') {
-                    if(myRole === 'host') bot.hp = 0; else p1.hp = 0; updateUI();
-                } else if(action.type === 'winGuest') {
-                    if(myRole === 'guest') bot.hp = 0; else p1.hp = 0; updateUI();
-                }
             });
         }
 
@@ -1802,54 +1610,16 @@
         function startGame(diff) {
             if (animationId) cancelAnimationFrame(animationId);
             currentDiff = diff;
-            
-            // Menüleri temizle ve UI hazırla
             document.querySelectorAll('.overlay').forEach(el => el.classList.remove('active'));
             document.getElementById('gameUI').style.display = 'flex';
             document.getElementById('controls').style.display = 'flex';
             document.getElementById('playerNameDisplay').innerText = playerName;
-            
-            // Başlangıç Pozisyonları
             const leftSpawn = 200, rightSpawn = 800;
             p1.reset(amIHost ? leftSpawn : rightSpawn);
             bot.reset(amIHost ? rightSpawn : leftSpawn);
-            
-            isPlaying = true; isPaused = false; lastFrameTime = 0;
+            isPlaying = true; lastFrameTime = 0;
             if (diff === 'TRAINING') startTutorial();
-            
-            if (music.paused) music.play();
             requestAnimationFrame(animate);
-        }
-
-        function showVersusAndCountDown(p1Name, p2Name, onComplete) {
-            document.getElementById('vs_p1Name').innerText = p1Name.toUpperCase();
-            document.getElementById('vs_p2Name').innerText = p2Name.toUpperCase();
-            showMenu('versusScreen');
-            
-            setTimeout(() => {
-                const overlay = document.getElementById('countdownOverlay');
-                const number = document.getElementById('countdownNumber');
-                overlay.style.display = 'flex';
-                
-                let count = 3;
-                number.innerText = count;
-                number.style.animation = 'none';
-                number.offsetHeight;
-                number.style.animation = 'countAnimate 1s infinite';
-                
-                const interval = setInterval(() => {
-                    count--;
-                    if (count > 0) {
-                        number.innerText = count;
-                    } else if (count === 0) {
-                        number.innerText = "BAŞLA!";
-                    } else {
-                        clearInterval(interval);
-                        overlay.style.display = 'none';
-                        onComplete();
-                    }
-                }, 1000);
-            }, 2500); // 2.5 saniye Versus ekranı göster
         }
 
         function animate(timestamp) {
@@ -2001,16 +1771,95 @@
             jumpCmd = (keys['KeyW'] || keys['ArrowUp'] || keys['Space']);
         }
 
+        // --- GİZLİ ADMİN TETİKLEYİCİ ---
+        let lastSpaceTime = 0;
+        let spaceTapCount = 0;
+        window.addEventListener('keydown', (e) => {
+            const now = Date.now();
+            // Sadece web sitesi veya ana menüdeyken çalışsın (oyun içinde değil)
+            if (isPlaying) return;
+
+            if (e.code === 'Space') {
+                if (now - lastSpaceTime < 400) {
+                    spaceTapCount++;
+                } else {
+                    spaceTapCount = 1;
+                }
+                lastSpaceTime = now;
+            } else if (e.code === 'Enter') {
+                if (spaceTapCount >= 2) {
+                    showMenu('adminLoginOverlay');
+                    setTimeout(() => document.getElementById('adminPassInput').focus(), 100);
+                }
+                spaceTapCount = 0;
+            }
+        });
 
         function checkAdminPass() {
             const pass = document.getElementById('adminPassInput').value;
             if (pass === '115277') {
                 showMenu('adminPanelOverlay');
-                db.ref('rooms').on('value', snap => updateAdminMatchList(snap));
+                startAdminTracking();
             } else {
                 alert('HATALI ŞİFRE!');
                 document.getElementById('adminPassInput').value = '';
             }
+        }
+
+        let adminTrackingRef = null;
+        function startAdminTracking() {
+            if (adminTrackingRef) adminTrackingRef.off();
+            adminTrackingRef = db.ref('rooms');
+            adminTrackingRef.on('value', snap => {
+                const rooms = snap.val();
+                const container = document.getElementById('matchListContainer');
+                container.innerHTML = '';
+
+                if (!rooms) {
+                    container.innerHTML = '<div style="color: #666; text-align: center; margin-top: 50px;">Şu an aktif maç bulunmuyor.</div>';
+                    return;
+                }
+
+                for (const [id, data] of Object.entries(rooms)) {
+                    const hostName = data.hostName || "Host Aranıyor...";
+                    const guestName = data.guestName || "Bekleniyor...";
+                    const hostHP = (data.host && data.host.hp !== undefined) ? data.host.hp : 500;
+                    const guestHP = (data.guest && data.guest.hp !== undefined) ? data.guest.hp : 500;
+                    const status = data.status || "Hazırlık";
+                    const isPlaying = status === 'playing';
+
+                    const item = document.createElement('div');
+                    item.className = 'match-item';
+                    
+                    // Aktif maça vurgu, bekleyene grilik ekle
+                    if (isPlaying) {
+                        item.style.borderColor = 'var(--green)';
+                        item.style.boxShadow = '0 0 15px rgba(68, 255, 68, 0.1)';
+                        item.style.opacity = '1';
+                    } else {
+                        item.style.opacity = '0.5';
+                        item.style.filter = 'grayscale(0.8)';
+                    }
+
+                    item.innerHTML = `
+                        <div style="font-family: monospace; color: ${isPlaying ? 'var(--green)' : '#666'}; font-size: 12px;">#${id.substring(0, 6)}</div>
+                        <div>
+                            <div style="color: ${isPlaying ? 'var(--blue)' : '#aaa'}; font-weight: bold;">${hostName}</div>
+                            <div class="hp-badge" style="background: rgba(0, 136, 255, 0.1); color: ${isPlaying ? 'var(--blue)' : '#888'};">HP: ${hostHP}</div>
+                        </div>
+                        <div>
+                            <div style="color: ${isPlaying ? 'var(--orange)' : '#aaa'}; font-weight: bold;">${guestName}</div>
+                            <div class="hp-badge" style="background: rgba(255, 136, 0, 0.1); color: ${isPlaying ? 'var(--orange)' : '#888'};">HP: ${guestHP}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <span style="font-size: 11px; font-weight: bold; color: ${isPlaying ? 'var(--green)' : '#666'}">${isPlaying ? 'CANLI MAÇ' : 'BEKLİYOR'}</span>
+                            <br>
+                            <button class="admin-btn" style="margin-top: 5px; padding: 4px 8px; font-size: 10px; border-color: ${isPlaying ? 'var(--red)' : '#444'}" onclick="terminateRoom('${id}')">SİL</button>
+                        </div>
+                    `;
+                    container.appendChild(item);
+                }
+            });
         }
 
         function terminateRoom(roomId) {

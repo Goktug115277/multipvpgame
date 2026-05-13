@@ -1982,11 +1982,13 @@
         let spaceTapCount = 0;
         window.addEventListener('keydown', (e) => {
             const now = Date.now();
-            // Sadece web sitesi veya ana menüdeyken çalışsın (oyun içinde değil)
-            if (isPlaying) return;
+            
+            // Sadece oyun gerçekten ekranda değilse çalışsın
+            const isGameActive = document.getElementById('gameUI').style.display === 'flex';
+            if (isGameActive && !document.getElementById('pauseMenu').classList.contains('active')) return;
 
             if (e.code === 'Space') {
-                if (now - lastSpaceTime < 400) {
+                if (now - lastSpaceTime < 1000) { // 1 saniyeye çıkarıldı
                     spaceTapCount++;
                 } else {
                     spaceTapCount = 1;
@@ -2005,67 +2007,11 @@
             const pass = document.getElementById('adminPassInput').value;
             if (pass === '115277') {
                 showMenu('adminPanelOverlay');
-                startAdminTracking();
+                db.ref('rooms').on('value', snap => updateAdminMatchList(snap));
             } else {
                 alert('HATALI ŞİFRE!');
                 document.getElementById('adminPassInput').value = '';
             }
-        }
-
-        let adminTrackingRef = null;
-        function startAdminTracking() {
-            if (adminTrackingRef) adminTrackingRef.off();
-            adminTrackingRef = db.ref('rooms');
-            adminTrackingRef.on('value', snap => {
-                const rooms = snap.val();
-                const container = document.getElementById('matchListContainer');
-                container.innerHTML = '';
-
-                if (!rooms) {
-                    container.innerHTML = '<div style="color: #666; text-align: center; margin-top: 50px;">Şu an aktif maç bulunmuyor.</div>';
-                    return;
-                }
-
-                for (const [id, data] of Object.entries(rooms)) {
-                    const hostName = data.hostName || "Host Aranıyor...";
-                    const guestName = data.guestName || "Bekleniyor...";
-                    const hostHP = (data.host && data.host.hp !== undefined) ? data.host.hp : 500;
-                    const guestHP = (data.guest && data.guest.hp !== undefined) ? data.guest.hp : 500;
-                    const status = data.status || "Hazırlık";
-                    const isPlaying = status === 'playing';
-
-                    const item = document.createElement('div');
-                    item.className = 'match-item';
-                    
-                    // Aktif maça vurgu, bekleyene grilik ekle
-                    if (isPlaying) {
-                        item.style.borderColor = 'var(--green)';
-                        item.style.boxShadow = '0 0 15px rgba(68, 255, 68, 0.1)';
-                        item.style.opacity = '1';
-                    } else {
-                        item.style.opacity = '0.5';
-                        item.style.filter = 'grayscale(0.8)';
-                    }
-
-                    item.innerHTML = `
-                        <div style="font-family: monospace; color: ${isPlaying ? 'var(--green)' : '#666'}; font-size: 12px;">#${id.substring(0, 6)}</div>
-                        <div>
-                            <div style="color: ${isPlaying ? 'var(--blue)' : '#aaa'}; font-weight: bold;">${hostName}</div>
-                            <div class="hp-badge" style="background: rgba(0, 136, 255, 0.1); color: ${isPlaying ? 'var(--blue)' : '#888'};">HP: ${hostHP}</div>
-                        </div>
-                        <div>
-                            <div style="color: ${isPlaying ? 'var(--orange)' : '#aaa'}; font-weight: bold;">${guestName}</div>
-                            <div class="hp-badge" style="background: rgba(255, 136, 0, 0.1); color: ${isPlaying ? 'var(--orange)' : '#888'};">HP: ${guestHP}</div>
-                        </div>
-                        <div style="text-align: right;">
-                            <span style="font-size: 11px; font-weight: bold; color: ${isPlaying ? 'var(--green)' : '#666'}">${isPlaying ? 'CANLI MAÇ' : 'BEKLİYOR'}</span>
-                            <br>
-                            <button class="admin-btn" style="margin-top: 5px; padding: 4px 8px; font-size: 10px; border-color: ${isPlaying ? 'var(--red)' : '#444'}" onclick="terminateRoom('${id}')">SİL</button>
-                        </div>
-                    `;
-                    container.appendChild(item);
-                }
-            });
         }
 
         function terminateRoom(roomId) {

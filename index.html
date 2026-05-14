@@ -1195,6 +1195,11 @@
             onpointerdown="showMenu('websiteOverlay')">
             <h3 style="font-size: 14px;">MENÜYE DÖN</h3>
         </div>
+        <div style="position: absolute; bottom: 20px; right: 20px; opacity: 0.1; cursor: pointer; font-size: 10px; color: #555; transition: 0.3s;" 
+             onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.1'"
+             onclick="showMenu('adminLoginOverlay')">
+            ADMIN PANEL
+        </div>
     </div>
 
     <div id="authOverlay" class="overlay">
@@ -2158,6 +2163,8 @@
             jumpCmd = (keys['KeyW'] || keys['ArrowUp'] || keys['Space']);
         }
 
+        let lastSpaceTime = 0;
+        let spaceTapCount = 0;
         window.addEventListener('keydown', (e) => {
             const now = Date.now();
             if (isPlaying) return;

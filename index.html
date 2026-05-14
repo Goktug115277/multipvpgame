@@ -907,6 +907,36 @@
             opacity: 0.5 !important;
             cursor: not-allowed !important;
         }
+        .admin-tab-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid #444;
+            color: #888;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        .admin-tab-btn.active {
+            background: var(--red);
+            color: white;
+            border-color: var(--red);
+            box-shadow: 0 0 10px rgba(255, 68, 68, 0.3);
+        }
+        .admin-panel {
+            animation: menuIn 0.4s ease-out;
+        }
+        .admin-mini-btn {
+            background: #333;
+            border: 1px solid #444;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: 0.2s;
+        }
+        .admin-mini-btn:hover { background: #444; }
     </style>
 </head>
 
@@ -970,21 +1000,42 @@
     </div>
 
     <div id="adminPanelOverlay" class="overlay">
-        <div style="width: 100%; max-width: 950px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.8); padding: 15px; border-radius: 10px; border: 1px solid var(--red);">
-            <div style="display:flex; flex-direction: column; gap: 5px;">
-                <h1 style="color: var(--red); margin: 0; font-size: 24px;">ADMİN KONTROL MERKEZİ</h1>
-                <div id="serverStatusDisplay" style="font-size: 12px; color: var(--green);">SUNUCULAR: AKTİF</div>
+        <div class="admin-panel" style="width: 100%; max-width: 950px; background: rgba(0,0,0,0.9); padding: 20px; border-radius: 10px; border: 1px solid var(--red);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h2 style="margin:0; color:var(--red);">COMMAND CENTER</h2>
+                <div style="display:flex; gap:10px;">
+                    <button class="admin-tab-btn active" onclick="switchAdminTab('matches')">MAÇLAR</button>
+                    <button class="admin-tab-btn" onclick="switchAdminTab('accounts')">HESAPLAR</button>
+                    <button class="admin-tab-btn" onclick="switchAdminTab('console')">KONSOL</button>
+                    <button class="admin-btn" style="background:#444;" onclick="showMenu('mainMenu')">KAPAT</button>
+                </div>
             </div>
-            <div style="display:flex; gap: 10px;">
-                <button class="admin-btn" style="background: var(--orange);" onclick="setServerStatus('maintenance')">BAKIM MODU</button>
-                <button class="admin-btn" style="background: var(--red);" onclick="setServerStatus('closed')">SUNUCUYU KAPAT</button>
-                <button class="admin-btn" style="background: var(--blue);" onclick="setServerStatus('online')">AKTİF ET</button>
-                <button class="admin-btn" onclick="showMenu('websiteOverlay')">ÇIK</button>
+
+            <div id="adminTabMatches">
+                <div id="matchListContainer"></div>
+                <div style="margin-top:20px; padding:15px; background:rgba(0,0,0,0.3); border-radius:10px;">
+                    <h4 style="margin:0 0 10px 0; font-size:12px; color:#888;">GENEL SUNUCU DURUMU</h4>
+                    <div style="display:flex; gap:10px;">
+                        <button class="admin-btn" style="background:var(--green);" onclick="setServerStatus('online')">SUNUCUYU AÇ</button>
+                        <button class="admin-btn" style="background:var(--orange);" onclick="setServerStatus('maintenance')">BAKIM MODU</button>
+                        <button class="admin-btn" style="background:var(--red);" onclick="setServerStatus('closed')">SUNUCUYU KAPAT</button>
+                    </div>
+                </div>
             </div>
-        </div>
-        
-        <div id="matchListContainer" class="match-list">
-            <div style="color: #666; text-align: center; margin-top: 50px;">Aktif maç taranıyor...</div>
+
+            <div id="adminTabAccounts" style="display:none;">
+                <div id="accountListContainer" style="max-height:400px; overflow-y:auto; background:rgba(0,0,0,0.3); padding:10px; border-radius:10px;"></div>
+            </div>
+
+            <div id="adminTabConsole" style="display:none;">
+                <div id="consoleOutput" style="height:300px; background:#000; color:#0f0; font-family:monospace; padding:10px; overflow-y:auto; border-radius:10px; font-size:12px; border:1px solid #333;">
+                    <div>MULTIPVP TERMINAL v1.0.0</div>
+                    <div>Komut bekliyor...</div>
+                </div>
+                <input type="text" id="consoleInput" placeholder="Komut yazın... (örn: server close)" 
+                       style="width:100%; background:#111; border:1px solid #333; color:white; padding:10px; margin-top:10px; font-family:monospace;"
+                       onkeydown="if(event.key==='Enter') executeConsoleCmd(this.value); if(event.key==='Enter') this.value='';">
+            </div>
         </div>
     </div>
 
@@ -1087,7 +1138,7 @@
             <!-- Ayarlar Butonları -->
             <div style="display: flex; gap: 10px; margin-top: 20px; width: 100%;">
                 <button class="auth-btn" style="background: #333;" onclick="showSettings('password')">ŞİFRE DEĞİŞTİR</button>
-                <button class="auth-btn" style="background: #333;" onclick="showSettings('display')">İSİM DEĞİŞTİR</button>
+                <button class="auth-btn" style="background: #333;" onclick="showSettings('username')">K. ADI DEĞİŞTİR</button>
                 <button class="auth-btn" style="background: var(--red);" onclick="handleLogout()">ÇIKIŞ YAP</button>
             </div>
         </div>
@@ -1748,7 +1799,7 @@
                 const cmd = snap.val();
                 if(cmd && cmd.timestamp > (this._lastAdminCmdTime || 0)) {
                     this._lastAdminCmdTime = cmd.timestamp;
-                    handleAdminCommand(cmd.type, opponentName);
+                    handleAdminCommand(cmd.type, opponentName, cmd.target);
                 }
             });
             roomRef.child('hits/' + myRole).on('child_added', snap => {
@@ -1764,7 +1815,10 @@
         }
         function resumeGame() { isPaused = false; document.getElementById('pauseMenu').classList.remove('active'); }
 
-        function handleAdminCommand(type, opponentName) {
+        function handleAdminCommand(type, opponentName, targetRole) {
+            // targetRole 'host' veya 'guest' ise, kendi rolümle karşılaştır
+            if(targetRole !== 'all' && targetRole !== myRole && !['pause', 'end', 'restart'].includes(type)) return;
+
             const msg = document.createElement('div');
             msg.style = "position:fixed; top:20%; left:50%; transform:translate(-50%,-50%); padding:20px; background:rgba(255,0,0,0.8); color:white; font-size:24px; font-weight:bold; z-index:10000; border-radius:10px; text-shadow: 0 0 10px black; text-align:center;";
             
@@ -1774,14 +1828,14 @@
             } else if(type === 'end') {
                 msg.innerText = "MAÇ SİSTEM TARAFINDAN SONLANDIRILDI";
                 document.body.appendChild(msg);
-                document.getElementById('controls').style.display = 'none'; // Kontrolleri hemen gizle
+                document.getElementById('controls').style.display = 'none';
                 document.getElementById('gameUI').style.display = 'none';
                 setTimeout(() => { isPlaying = false; showMenu('mainMenu'); msg.remove(); }, 2000);
                 return;
             } else if(type === 'restart') {
                 msg.innerText = "MAÇ ADMİN TARAFINDAN YENİDEN BAŞLATILIYOR";
                 document.body.appendChild(msg);
-                document.getElementById('controls').style.display = 'none'; // Yeniden başlarken gizle
+                document.getElementById('controls').style.display = 'none';
                 setTimeout(() => { 
                     msg.remove();
                     p1.hp = maxHP; bot.hp = maxHP; p1.x = -150; bot.x = 150;
@@ -1789,12 +1843,11 @@
                 }, 2000);
                 return;
             } else if(type === 'hp_plus') {
-                p1.hp = Math.min(maxHP, p1.hp + 100);
-                bot.hp = Math.min(maxHP, bot.hp + 100);
-                msg.innerText = "ADMİN: TÜM OYUNCULARA CAN VERİLDİ!";
+                p1.hp = maxHP;
+                msg.innerText = `ADMİN: CANINIZ FULLENDİ!`;
             } else if(type === 'win_p1') {
                 bot.hp = 0;
-                msg.innerText = "ADMİN MÜDAHALESİ: KAZANAN BELİRLENDİ!";
+                msg.innerText = `ADMİN MÜDAHALESİ: KAZANDINIZ!`;
             }
 
             document.body.appendChild(msg);
@@ -1999,21 +2052,15 @@
         }
 
         function startAdminTracking() {
+            // Maçları İzle
             db.ref('rooms').on('value', snap => {
                 const rooms = snap.val();
                 const container = document.getElementById('matchListContainer');
                 container.innerHTML = '';
-
-                if (!rooms) {
-                    container.innerHTML = '<div style="color: #666; text-align: center; margin-top: 50px;">Şu an aktif maç bulunmuyor.</div>';
-                    return;
-                }
-
+                if (!rooms) { container.innerHTML = '<div style="color: #666; text-align: center; padding: 20px;">Aktif maç yok.</div>'; return; }
                 for (const [id, data] of Object.entries(rooms)) {
                     const hostName = data.hostName || "Host Aranıyor...";
                     const guestName = data.guestName || "Bekleniyor...";
-                    const hostHP = (data.host && data.host.hp !== undefined) ? data.host.hp : 500;
-                    const guestHP = (data.guest && data.guest.hp !== undefined) ? data.guest.hp : 500;
                     const status = data.status || "Hazırlık";
                     const isPlaying = status === 'playing';
 
@@ -2025,36 +2072,96 @@
                         <div style="flex:1">
                             <div style="font-family: monospace; color: #666; font-size: 10px;">ID: ${id.substring(0, 6)}</div>
                             <div style="display:flex; gap:10px; align-items:center;">
-                                <b style="color:var(--blue)">${hostName}</b> <small style="color:#888">(${hostHP}HP)</small>
+                                <b style="color:var(--blue)">${hostName}</b> <small style="color:#888">(HOST)</small>
                                 <span style="color:#444">VS</span>
-                                <b style="color:var(--orange)">${guestName}</b> <small style="color:#888">(${guestHP}HP)</small>
+                                <b style="color:var(--orange)">${guestName}</b> <small style="color:#888">(GUEST)</small>
                             </div>
                         </div>
                         <div style="display:flex; gap:5px;">
-                            <button class="admin-mini-btn" style="background:var(--orange); border:none; color:white; padding:5px; border-radius:5px; cursor:pointer;" onclick="sendAdminCmd('${id}', 'pause')">⏸</button>
-                            <button class="admin-mini-btn" style="background:var(--blue); border:none; color:white; padding:5px; border-radius:5px; cursor:pointer;" onclick="sendAdminCmd('${id}', 'restart')">🔄</button>
-                            <button class="admin-mini-btn" style="background:var(--green); border:none; color:white; padding:5px; border-radius:5px; cursor:pointer;" onclick="sendAdminCmd('${id}', 'hp_plus')">HP+</button>
-                            <button class="admin-mini-btn" style="background:var(--red); border:none; color:white; padding:5px; border-radius:5px; cursor:pointer;" onclick="sendAdminCmd('${id}', 'end')">⏹</button>
-                            <button class="admin-mini-btn" style="background:#444; border:none; color:white; padding:5px; border-radius:5px; cursor:pointer;" onclick="sendAdminCmd('${id}', 'win_p1')">🏆 P1</button>
-                            <button class="admin-mini-btn" style="background:#222; border:none; color:white; padding:5px; border-radius:5px; cursor:pointer;" onclick="terminateRoom('${id}')">🗑</button>
+                            <button class="admin-mini-btn" title="Duraklat" onclick="sendAdminCmd('${id}', 'pause', 'all')">⏸</button>
+                            <button class="admin-mini-btn" title="Yeniden Başlat" onclick="sendAdminCmd('${id}', 'restart', 'all')">🔄</button>
+                            <button class="admin-mini-btn" style="background:var(--blue)" onclick="sendAdminCmd('${id}', 'hp_plus', prompt('Hangi taraf? (host/guest)'))">HP+</button>
+                            <button class="admin-mini-btn" style="background:var(--green)" onclick="sendAdminCmd('${id}', 'win_p1', prompt('Hangi taraf kazansın? (host/guest)'))">🏆</button>
+                            <button class="admin-mini-btn" style="background:var(--red)" onclick="sendAdminCmd('${id}', 'end', 'all')">⏹</button>
                         </div>
                     `;
                     container.appendChild(item);
                 }
             });
-        }
 
-        function sendAdminCmd(roomId, cmd) {
-            db.ref('rooms/' + roomId + '/adminCmd').set({
-                type: cmd,
-                timestamp: Date.now()
+            // Hesapları İzle
+            db.ref('users').on('value', snap => {
+                const users = snap.val();
+                const container = document.getElementById('accountListContainer');
+                container.innerHTML = '';
+                if(!users) return;
+                for (const [user, data] of Object.entries(users)) {
+                    const row = document.createElement('div');
+                    row.style = "display:grid; grid-template-columns: 1fr 1fr 1fr; padding:8px; border-bottom:1px solid #333; font-size:11px;";
+                    row.innerHTML = `
+                        <div style="color:var(--blue)">@${user}</div>
+                        <div style="color:white">${data.displayName}</div>
+                        <div style="color:#888; font-family:monospace;">${data.password}</div>
+                    `;
+                    container.appendChild(row);
+                }
             });
         }
 
-        function terminateRoom(roomId) {
-            if (confirm(roomId + ' nolu odayı silmek istediğinize emin misiniz?')) {
-                db.ref('rooms/' + roomId).remove();
+        function switchAdminTab(tab) {
+            document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('adminTabMatches').style.display = tab === 'matches' ? 'block' : 'none';
+            document.getElementById('adminTabAccounts').style.display = tab === 'accounts' ? 'block' : 'none';
+            document.getElementById('adminTabConsole').style.display = tab === 'console' ? 'block' : 'none';
+        }
+
+        function executeConsoleCmd(raw) {
+            const out = document.getElementById('consoleOutput');
+            const log = (msg, color='#0f0') => {
+                const d = document.createElement('div');
+                d.style.color = color;
+                d.innerText = `> ${msg}`;
+                out.appendChild(d);
+                out.scrollTop = out.scrollHeight;
+            };
+            
+            log(raw, '#fff');
+            const parts = raw.toLowerCase().split(' ');
+            const cmd = parts[0];
+
+            if(cmd === 'server') {
+                const sub = parts[1];
+                if(sub === 'close') { setServerStatus('closed'); log('Sunucu kapatıldı.'); }
+                else if(sub === 'start') { setServerStatus('online'); log('Sunucu açıldı.'); }
+                else if(sub === 'maintenance') { setServerStatus('maintenance'); log('Bakım modu aktif.'); }
+                else {
+                    const roomId = sub;
+                    const action = parts[2];
+                    if(action === '#') { sendAdminCmd(roomId, 'end', 'all'); log(`Maç ${roomId} sonlandırıldı.`); }
+                    else if(action === '^') { sendAdminCmd(roomId, 'restart', 'all'); log(`Maç ${roomId} yeniden başlatıldı.`); }
+                    else if(action === '/') { sendAdminCmd(roomId, 'pause', 'all'); log(`Maç ${roomId} duraklatıldı.`); }
+                    else if(action === 'hp+') { sendAdminCmd(roomId, 'hp_plus', parts[3]); log(`${parts[3]} HP füllendi.`); }
+                    else if(action === 'win') { sendAdminCmd(roomId, 'win_p1', parts[3]); log(`${parts[3]} kazandırıldı.`); }
+                }
+            } else if(cmd === 'user' && parts[1] === 'getinfo') {
+                const target = parts[2];
+                db.ref('users/' + target).once('value', snap => {
+                    if(!snap.exists()) return log('Kullanıcı bulunamadı.', 'red');
+                    const d = snap.val();
+                    log(`INFO [${target}]:\nGörünen Ad: ${d.displayName}\nŞifre: ${d.password}\nMaç: ${d.stats.played}`, 'var(--blue)');
+                });
+            } else {
+                log('Geçersiz komut!', 'red');
             }
+        }
+
+        function sendAdminCmd(roomId, cmd, target) {
+            db.ref('rooms/' + roomId + '/adminCmd').set({
+                type: cmd,
+                target: target || 'all',
+                timestamp: Date.now()
+            });
         }
 
         function openAuthPanel() {
@@ -2106,26 +2213,66 @@
         function showSettings(mode) {
             currentSettingMode = mode;
             const overlay = document.getElementById('settingsOverlay');
+            const title = document.getElementById('settingsTitle');
+            const notice = document.getElementById('settingsNotice');
+            const input = document.getElementById('settingsInput');
+            
             overlay.classList.add('active');
-            document.getElementById('settingsInput').value = '';
+            input.value = '';
+            
+            if(mode === 'password') {
+                title.innerText = "ŞİFRE DEĞİŞTİR";
+                notice.innerText = "Hesap güvenliğiniz için güçlü bir şifre seçin.";
+                input.type = "password";
+                input.placeholder = "Yeni Şifre";
+            } else {
+                title.innerText = "KULLANICI ADI DEĞİŞTİR";
+                notice.innerText = "Kullanıcı adınızı (@id) 7 günde bir değiştirebilirsiniz.";
+                input.type = "text";
+                input.placeholder = "Yeni Kullanıcı Adı";
+            }
         }
 
         function applySettings() {
-            const val = document.getElementById('settingsInput').value.trim();
+            const val = document.getElementById('settingsInput').value.trim().toLowerCase();
             if(!val) return alert("Boş bırakılamaz!");
+            
             const userRef = db.ref('users/' + loggedInUser.username);
+            
             if(currentSettingMode === 'password') {
-                userRef.update({ password: val }).then(() => { alert("Şifre güncellendi!"); document.getElementById('settingsOverlay').classList.remove('active'); });
+                userRef.update({ password: val }).then(() => {
+                    alert("Şifre güncellendi!");
+                    document.getElementById('settingsOverlay').classList.remove('active');
+                });
             } else {
+                // Kullanıcı Adı Değiştirme (Taşıma İşlemi)
                 userRef.once('value', snap => {
                     const data = snap.val();
                     const now = Date.now();
-                    if(now - (data.lastDisplayNameChange || 0) < 7 * 24 * 60 * 60 * 1000) return alert(`İsminizi değiştirmek için beklemeniz gerekiyor!`);
-                    userRef.update({ displayName: val, lastDisplayNameChange: now }).then(() => {
-                        loggedInUser.displayName = val;
-                        localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
-                        document.getElementById('settingsOverlay').classList.remove('active');
-                        openAuthPanel();
+                    const lastChange = data.lastUsernameChange || 0;
+                    const weekInMs = 7 * 24 * 60 * 60 * 1000;
+                    
+                    if(now - lastChange < weekInMs) {
+                        const diff = weekInMs - (now - lastChange);
+                        const days = Math.floor(diff / (24 * 60 * 60 * 1000));
+                        const hours = Math.floor((diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+                        return alert(`İsminizi değiştirmek için ${days} gün ${hours} saat daha beklemelisiniz!`);
+                    }
+
+                    // Yeni isim boşta mı?
+                    db.ref('users/' + val).once('value', targetSnap => {
+                        if(targetSnap.exists()) return alert("Bu kullanıcı adı zaten alınmış!");
+                        
+                        const newData = {...data, username: val, lastUsernameChange: now};
+                        db.ref('users/' + val).set(newData).then(() => {
+                            userRef.remove().then(() => {
+                                loggedInUser.username = val;
+                                localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+                                alert("Kullanıcı adı başarıyla değiştirildi! Sistem sizi yeni isminizle tanıyor.");
+                                document.getElementById('settingsOverlay').classList.remove('active');
+                                openAuthPanel();
+                            });
+                        });
                     });
                 });
             }

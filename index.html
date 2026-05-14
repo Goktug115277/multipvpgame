@@ -49,24 +49,56 @@
         }
 
         @keyframes menuIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         @keyframes pulseScale {
-            0% { transform: scale(1); text-shadow: 0 0 20px var(--blue); }
-            50% { transform: scale(1.1); text-shadow: 0 0 50px var(--blue); }
-            100% { transform: scale(1); text-shadow: 0 0 20px var(--blue); }
+            0% {
+                transform: scale(1);
+                text-shadow: 0 0 20px var(--blue);
+            }
+
+            50% {
+                transform: scale(1.1);
+                text-shadow: 0 0 50px var(--blue);
+            }
+
+            100% {
+                transform: scale(1);
+                text-shadow: 0 0 20px var(--blue);
+            }
         }
 
         @keyframes slideInLeft {
-            from { transform: translateX(-300px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            from {
+                transform: translateX(-300px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
         @keyframes slideInRight {
-            from { transform: translateX(300px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
+            from {
+                transform: translateX(300px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
         .overlay.active {
@@ -646,7 +678,7 @@
                 display: flex;
             }
         }
-        
+
         /* --- WEB SITE LANDING PAGE CSS --- */
         #websiteOverlay {
             background: linear-gradient(135deg, #050a0e, #112233, #02070a);
@@ -679,7 +711,10 @@
             font-size: 14px;
         }
 
-        .auth-input:focus { border-color: var(--blue); outline: none; }
+        .auth-input:focus {
+            border-color: var(--blue);
+            outline: none;
+        }
 
         .auth-btn {
             background: var(--blue);
@@ -692,7 +727,9 @@
             transition: 0.2s;
         }
 
-        .auth-btn:active { transform: scale(0.95); }
+        .auth-btn:active {
+            transform: scale(0.95);
+        }
 
         .auth-switch {
             color: #888;
@@ -702,7 +739,10 @@
             margin-top: 10px;
         }
 
-        .auth-switch span { color: var(--blue); text-decoration: underline; }
+        .auth-switch span {
+            color: var(--blue);
+            text-decoration: underline;
+        }
 
         #adminLoginOverlay {
             background: rgba(0, 0, 0, 0.95);
@@ -778,7 +818,10 @@
             font-size: 12px;
         }
 
-        .admin-btn:hover { background: var(--red); border-color: var(--red); }
+        .admin-btn:hover {
+            background: var(--red);
+            border-color: var(--red);
+        }
 
         .web-hero {
             display: flex;
@@ -895,20 +938,45 @@
         }
 
         @media (max-width: 768px) {
-            .web-title { font-size: 50px; }
-            .web-subtitle { font-size: 16px; width: 90%; }
-            .web-buttons { flex-direction: column; width: 80%; }
-            .web-btn { width: 100%; justify-content: center; }
-            .features-grid { grid-template-columns: 1fr; margin-top: 30px; width: 90%; gap: 10px;}
-            .feature-card { padding: 15px; }
+            .web-title {
+                font-size: 50px;
+            }
+
+            .web-subtitle {
+                font-size: 16px;
+                width: 90%;
+            }
+
+            .web-buttons {
+                flex-direction: column;
+                width: 80%;
+            }
+
+            .web-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                margin-top: 30px;
+                width: 90%;
+                gap: 10px;
+            }
+
+            .feature-card {
+                padding: 15px;
+            }
         }
+
         .mode-card.locked {
             filter: grayscale(1) !important;
             opacity: 0.5 !important;
             cursor: not-allowed !important;
         }
+
         .admin-tab-btn {
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid #444;
             color: #888;
             padding: 8px 15px;
@@ -917,15 +985,18 @@
             font-size: 12px;
             transition: all 0.3s;
         }
+
         .admin-tab-btn.active {
             background: var(--red);
             color: white;
             border-color: var(--red);
             box-shadow: 0 0 10px rgba(255, 68, 68, 0.3);
         }
+
         .admin-panel {
             animation: menuIn 0.4s ease-out;
         }
+
         .admin-mini-btn {
             background: #333;
             border: 1px solid #444;
@@ -936,7 +1007,10 @@
             font-size: 11px;
             transition: 0.2s;
         }
-        .admin-mini-btn:hover { background: #444; }
+
+        .admin-mini-btn:hover {
+            background: #444;
+        }
     </style>
 </head>
 
@@ -952,55 +1026,73 @@
     <div id="websiteOverlay" class="overlay active">
         <div class="web-hero">
             <h1 class="web-title">MultiPvP</h1>
-            <p class="web-subtitle">Tarayıcı üzerinden oynayarak veya Windows uygulamasını indirerek dünyanın her yerinden arkadaşlarınla gerçek zamanlı, gecikmesiz ve yeteneğe dayalı online maçlara katıl.</p>
-            
+            <p class="web-subtitle">Tarayıcı üzerinden oynayarak veya Windows uygulamasını indirerek dünyanın her
+                yerinden arkadaşlarınla gerçek zamanlı, gecikmesiz ve yeteneğe dayalı online maçlara katıl.</p>
+
             <div class="web-buttons">
                 <button class="web-btn web-btn-play" onclick="startPlaySequence()">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
                     TARAYICIDA OYNA
                 </button>
-                <a href="https://drive.google.com/uc?export=download&id=1qaZqkD32yXfKQw_ZJE_uoW0_L_oeHuID" class="web-btn web-btn-download">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                <a href="https://drive.google.com/uc?export=download&id=1qaZqkD32yXfKQw_ZJE_uoW0_L_oeHuID"
+                    class="web-btn web-btn-download">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="7 10 12 15 17 10"></polyline>
+                        <line x1="12" y1="15" x2="12" y2="3"></line>
+                    </svg>
                     WİNDOWS İÇİN İNDİR
                 </a>
-                <div style="margin-top: 10px; font-size: 11px; color: #888; text-align: center; max-width: 300px; line-height: 1.4;">
-                    <span style="color: var(--green);">●</span> Uygulamamız güvenlidir. Windows sertifikası olmadığı için uyarı verebilir, "Ek Bilgi" diyerek kurabilirsiniz.
+                <div
+                    style="margin-top: 10px; font-size: 11px; color: #888; text-align: center; max-width: 300px; line-height: 1.4;">
+                    <span style="color: var(--green);">●</span> Uygulamamız güvenlidir. Windows sertifikası olmadığı
+                    için uyarı verebilir, "Ek Bilgi" diyerek kurabilirsiniz.
                 </div>
             </div>
-            
+
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">⚡</div>
                     <div class="feature-title">Sıfır Gecikme</div>
-                    <div class="feature-desc">İstemci tarafı tahminleme ile online maçlarda herhangi bir lag problemi yaşamadan pürüzsüzce atak yapın.</div>
+                    <div class="feature-desc">İstemci tarafı tahminleme ile online maçlarda herhangi bir lag problemi
+                        yaşamadan pürüzsüzce atak yapın.</div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">📱</div>
                     <div class="feature-title">Cross-Platform</div>
-                    <div class="feature-desc">İster telefondan, isterseniz PC'den aynı hesaba bağlanarak arkadaşlarınızla platform bağımsız kapışın.</div>
+                    <div class="feature-desc">İster telefondan, isterseniz PC'den aynı hesaba bağlanarak
+                        arkadaşlarınızla platform bağımsız kapışın.</div>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🤖</div>
                     <div class="feature-title">Gelişmiş Yapay Zeka</div>
-                    <div class="feature-desc">Arkadaşınız yoksa bile dert etmeyin; zıplayıp combo yapabilen 3 farklı zorluk seviyesindeki rekabetçi AI botlarla eğlenin.</div>
+                    <div class="feature-desc">Arkadaşınız yoksa bile dert etmeyin; zıplayıp combo yapabilen 3 farklı
+                        zorluk seviyesindeki rekabetçi AI botlarla eğlenin.</div>
                 </div>
             </div>
         </div>
     </div>
 
     <div id="adminLoginOverlay" class="overlay">
-        <div style="position: absolute; top: 25px; left: 25px; font-size: 22px; font-weight: bold; color: var(--red); cursor: pointer; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; border: 2px solid var(--red);" onpointerdown="showMenu('websiteOverlay')">
+        <div style="position: absolute; top: 25px; left: 25px; font-size: 22px; font-weight: bold; color: var(--red); cursor: pointer; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; border: 2px solid var(--red);"
+            onpointerdown="showMenu('websiteOverlay')">
             &#9664; İPTAL
         </div>
         <h1 style="color: var(--red); text-shadow: 0 0 20px var(--red); margin-bottom: 30px;">ADMİN GİRİŞİ</h1>
         <input type="password" id="adminPassInput" class="admin-input" placeholder="ŞİFREYİ GİRİN">
-        <div class="mode-card active-card" style="width:200px; height:60px; border-color:var(--red);" onpointerdown="checkAdminPass()">
+        <div class="mode-card active-card" style="width:200px; height:60px; border-color:var(--red);"
+            onpointerdown="checkAdminPass()">
             <h3>GİRİŞ YAP</h3>
         </div>
     </div>
 
     <div id="adminPanelOverlay" class="overlay">
-        <div class="admin-panel" style="width: 100%; max-width: 950px; background: rgba(0,0,0,0.9); padding: 20px; border-radius: 10px; border: 1px solid var(--red);">
+        <div class="admin-panel"
+            style="width: 100%; max-width: 950px; background: rgba(0,0,0,0.9); padding: 20px; border-radius: 10px; border: 1px solid var(--red);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h2 style="margin:0; color:var(--red);">COMMAND CENTER</h2>
                 <div style="display:flex; gap:10px;">
@@ -1016,25 +1108,31 @@
                 <div style="margin-top:20px; padding:15px; background:rgba(0,0,0,0.3); border-radius:10px;">
                     <h4 style="margin:0 0 10px 0; font-size:12px; color:#888;">GENEL SUNUCU DURUMU</h4>
                     <div style="display:flex; gap:10px;">
-                        <button class="admin-btn" style="background:var(--green);" onclick="setServerStatus('online')">SUNUCUYU AÇ</button>
-                        <button class="admin-btn" style="background:var(--orange);" onclick="setServerStatus('maintenance')">BAKIM MODU</button>
-                        <button class="admin-btn" style="background:var(--red);" onclick="setServerStatus('closed')">SUNUCUYU KAPAT</button>
+                        <button class="admin-btn" style="background:var(--green);"
+                            onclick="setServerStatus('online')">SUNUCUYU AÇ</button>
+                        <button class="admin-btn" style="background:var(--orange);"
+                            onclick="setServerStatus('maintenance')">BAKIM MODU</button>
+                        <button class="admin-btn" style="background:var(--red);"
+                            onclick="setServerStatus('closed')">SUNUCUYU KAPAT</button>
                     </div>
                 </div>
             </div>
 
             <div id="adminTabAccounts" style="display:none;">
-                <div id="accountListContainer" style="max-height:400px; overflow-y:auto; background:rgba(0,0,0,0.3); padding:10px; border-radius:10px;"></div>
+                <div id="accountListContainer"
+                    style="max-height:400px; overflow-y:auto; background:rgba(0,0,0,0.3); padding:10px; border-radius:10px;">
+                </div>
             </div>
 
             <div id="adminTabConsole" style="display:none;">
-                <div id="consoleOutput" style="height:300px; background:#000; color:#0f0; font-family:monospace; padding:10px; overflow-y:auto; border-radius:10px; font-size:12px; border:1px solid #333;">
+                <div id="consoleOutput"
+                    style="height:300px; background:#000; color:#0f0; font-family:monospace; padding:10px; overflow-y:auto; border-radius:10px; font-size:12px; border:1px solid #333;">
                     <div>MULTIPVP TERMINAL v1.0.0</div>
                     <div>Komut bekliyor...</div>
                 </div>
-                <input type="text" id="consoleInput" placeholder="Komut yazın... (örn: server close)" 
-                       style="width:100%; background:#111; border:1px solid #333; color:white; padding:10px; margin-top:10px; font-family:monospace;"
-                       onkeydown="if(event.key==='Enter') executeConsoleCmd(this.value); if(event.key==='Enter') this.value='';">
+                <input type="text" id="consoleInput" placeholder="Komut yazın... (örn: server close)"
+                    style="width:100%; background:#111; border:1px solid #333; color:white; padding:10px; margin-top:10px; font-family:monospace;"
+                    onkeydown="if(event.key==='Enter') executeConsoleCmd(this.value); if(event.key==='Enter') this.value='';">
             </div>
         </div>
     </div>
@@ -1047,24 +1145,36 @@
     <div id="matchIntroOverlay" class="overlay" style="background: rgba(0,0,0,0.95);">
         <div style="display: flex; gap: 100px; align-items: center; margin-bottom: 50px;">
             <div id="introP1" style="text-align: center; animation: slideInLeft 0.5s ease-out;">
-                <div style="width: 150px; height: 150px; border: 5px solid var(--blue); border-radius: 20px; background: #222; display: flex; align-items: center; justify-content: center; font-size: 50px;">👤</div>
+                <div
+                    style="width: 150px; height: 150px; border: 5px solid var(--blue); border-radius: 20px; background: #222; display: flex; align-items: center; justify-content: center; font-size: 50px;">
+                    👤</div>
                 <h2 id="introP1Name" style="color: var(--blue); margin-top: 15px; font-size: 24px;">OYUNCU 1</h2>
             </div>
-            <div style="font-size: 80px; font-weight: bold; font-style: italic; color: white; text-shadow: 0 0 20px rgba(255,255,255,0.5);">VS</div>
+            <div
+                style="font-size: 80px; font-weight: bold; font-style: italic; color: white; text-shadow: 0 0 20px rgba(255,255,255,0.5);">
+                VS</div>
             <div id="introP2" style="text-align: center; animation: slideInRight 0.5s ease-out;">
-                <div style="width: 150px; height: 150px; border: 5px solid var(--red); border-radius: 20px; background: #222; display: flex; align-items: center; justify-content: center; font-size: 50px;">👤</div>
+                <div
+                    style="width: 150px; height: 150px; border: 5px solid var(--red); border-radius: 20px; background: #222; display: flex; align-items: center; justify-content: center; font-size: 50px;">
+                    👤</div>
                 <h2 id="introP2Name" style="color: var(--red); margin-top: 15px; font-size: 24px;">OYUNCU 2</h2>
             </div>
         </div>
-        <div id="introCountdown" style="font-size: 150px; font-weight: bold; color: white; text-shadow: 0 0 50px var(--blue); animation: pulseScale 1s infinite;"></div>
+        <div id="introCountdown"
+            style="font-size: 150px; font-weight: bold; color: white; text-shadow: 0 0 50px var(--blue); animation: pulseScale 1s infinite;">
+        </div>
     </div>
 
     <div id="pauseMenu" class="overlay" style="z-index:99999;">
-        <h2 id="pauseTitle" style="margin-bottom: 20px; color:var(--red); font-size: 30px; text-shadow: 0 0 15px red;">OYUN DURAKLATILDI</h2>
-        <div class="mode-card active-card" style="width:200px; height:60px; border-color:var(--blue); margin-bottom:15px;" onpointerdown="resumeGame()">
+        <h2 id="pauseTitle" style="margin-bottom: 20px; color:var(--red); font-size: 30px; text-shadow: 0 0 15px red;">
+            OYUN DURAKLATILDI</h2>
+        <div class="mode-card active-card"
+            style="width:200px; height:60px; border-color:var(--blue); margin-bottom:15px;"
+            onpointerdown="resumeGame()">
             <h3>DEVAM ET</h3>
         </div>
-        <div class="mode-card active-card" style="width:200px; height:60px; border-color:var(--red);" onpointerdown="returnToMenu()">
+        <div class="mode-card active-card" style="width:200px; height:60px; border-color:var(--red);"
+            onpointerdown="returnToMenu()">
             <h3>MENÜYE ÇIK</h3>
         </div>
     </div>
@@ -1075,18 +1185,21 @@
             <div class="mode-card active-card" style="width:200px; height:90px" onpointerdown="showMenu('modeMenu')">
                 <h3>OYNA</h3>
             </div>
-            <div id="accountBtn" class="mode-card active-card" style="width:200px; height:90px; border-color:var(--green)" onpointerdown="openAuthPanel()">
+            <div id="accountBtn" class="mode-card active-card"
+                style="width:200px; height:90px; border-color:var(--green)" onpointerdown="openAuthPanel()">
                 <span style="font-size: 10px;">HESAP</span>
                 <h3 id="accountBtnText">GİRİŞ YAP</h3>
             </div>
         </div>
-        <div class="mode-card active-card" style="width:420px; height:50px; margin-top:20px; border-color:var(--red)" onpointerdown="showMenu('websiteOverlay')">
+        <div class="mode-card active-card" style="width:420px; height:50px; margin-top:20px; border-color:var(--red)"
+            onpointerdown="showMenu('websiteOverlay')">
             <h3 style="font-size: 14px;">MENÜYE DÖN</h3>
         </div>
     </div>
 
     <div id="authOverlay" class="overlay">
-        <div style="position: absolute; top: 25px; left: 25px; font-size: 22px; font-weight: bold; color: var(--red); cursor: pointer; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; border: 2px solid var(--red);" onpointerdown="showMenu('mainMenu')">
+        <div style="position: absolute; top: 25px; left: 25px; font-size: 22px; font-weight: bold; color: var(--red); cursor: pointer; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; border: 2px solid var(--red);"
+            onpointerdown="showMenu('mainMenu')">
             &#9664; GERİ
         </div>
         <div id="loginBox" class="auth-box">
@@ -1109,18 +1222,21 @@
             <div id="profileInfo" style="text-align: center; margin-bottom: 20px; width: 100%;">
                 <!-- Profil verileri buraya gelecek -->
             </div>
-            
+
             <!-- İstatistik Kartı -->
             <div style="display: flex; gap: 10px; margin-bottom: 20px; width: 100%;">
-                <div style="flex:1; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; border: 1px solid var(--blue);">
+                <div
+                    style="flex:1; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 10px; border: 1px solid var(--blue);">
                     <div style="font-size: 10px; color: #888;">MAÇ</div>
                     <div id="statsPlayed" style="font-size: 20px; font-weight: bold; color: white;">0</div>
                 </div>
-                <div style="flex:1; background: rgba(0,255,0,0.05); padding: 10px; border-radius: 10px; border: 1px solid var(--green);">
+                <div
+                    style="flex:1; background: rgba(0,255,0,0.05); padding: 10px; border-radius: 10px; border: 1px solid var(--green);">
                     <div style="font-size: 10px; color: #888;">GALİBİYET</div>
                     <div id="statsWins" style="font-size: 20px; font-weight: bold; color: var(--green);">0</div>
                 </div>
-                <div style="flex:1; background: rgba(255,0,0,0.05); padding: 10px; border-radius: 10px; border: 1px solid var(--red);">
+                <div
+                    style="flex:1; background: rgba(255,0,0,0.05); padding: 10px; border-radius: 10px; border: 1px solid var(--red);">
                     <div style="font-size: 10px; color: #888;">MAĞLUBİYET</div>
                     <div id="statsLosses" style="font-size: 20px; font-weight: bold; color: var(--red);">0</div>
                 </div>
@@ -1130,15 +1246,18 @@
             <div style="width: 100%; border-top: 1px solid #333; padding-top: 15px;">
                 <h4 style="margin: 0 0 10px 0; font-size: 12px; color: #888;">OYUNCU ARA</h4>
                 <div style="display: flex; gap: 5px;">
-                    <input type="text" id="searchUser" class="auth-input" style="margin:0; flex:1;" placeholder="Kullanıcı Adı...">
+                    <input type="text" id="searchUser" class="auth-input" style="margin:0; flex:1;"
+                        placeholder="Kullanıcı Adı...">
                     <button class="auth-btn" style="width: 80px; margin:0;" onclick="searchPlayer()">ARA</button>
                 </div>
             </div>
 
             <!-- Ayarlar Butonları -->
             <div style="display: flex; gap: 10px; margin-top: 20px; width: 100%;">
-                <button class="auth-btn" style="background: #333;" onclick="showSettings('password')">ŞİFRE DEĞİŞTİR</button>
-                <button class="auth-btn" style="background: #333;" onclick="showSettings('username')">K. ADI DEĞİŞTİR</button>
+                <button class="auth-btn" style="background: #333;" onclick="showSettings('password')">ŞİFRE
+                    DEĞİŞTİR</button>
+                <button class="auth-btn" style="background: #333;" onclick="showSettings('username')">K. ADI
+                    DEĞİŞTİR</button>
                 <button class="auth-btn" style="background: var(--red);" onclick="handleLogout()">ÇIKIŞ YAP</button>
             </div>
         </div>
@@ -1148,7 +1267,8 @@
             <div class="auth-box" style="width: 350px; border: 2px solid var(--blue);">
                 <h2 id="otherTitle" style="color: var(--blue);">OYUNCU KARTI</h2>
                 <div id="otherInfo" style="text-align: center; margin-bottom: 20px;"></div>
-                <button class="auth-btn" onclick="document.getElementById('otherProfileOverlay').classList.remove('active')">KAPAT</button>
+                <button class="auth-btn"
+                    onclick="document.getElementById('otherProfileOverlay').classList.remove('active')">KAPAT</button>
             </div>
         </div>
 
@@ -1159,13 +1279,15 @@
                 <input type="text" id="settingsInput" class="auth-input" placeholder="Yeni değer...">
                 <div id="settingsNotice" style="font-size: 11px; color: #888; margin-bottom: 10px;"></div>
                 <button class="auth-btn" onclick="applySettings()">KAYDET</button>
-                <button class="auth-btn" style="background: #333;" onclick="document.getElementById('settingsOverlay').classList.remove('active')">İPTAL</button>
+                <button class="auth-btn" style="background: #333;"
+                    onclick="document.getElementById('settingsOverlay').classList.remove('active')">İPTAL</button>
             </div>
         </div>
     </div>
 
     <div id="modeMenu" class="overlay">
-        <div style="position: absolute; top: 25px; left: 25px; font-size: 22px; font-weight: bold; color: var(--red); cursor: pointer; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; border: 2px solid var(--red);" onpointerdown="showMenu('mainMenu')">
+        <div style="position: absolute; top: 25px; left: 25px; font-size: 22px; font-weight: bold; color: var(--red); cursor: pointer; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; border: 2px solid var(--red);"
+            onpointerdown="showMenu('mainMenu')">
             &#9664; GERİ
         </div>
         <h2 style="margin-bottom: 20px;">MOD SEÇİMİ</h2>
@@ -1221,7 +1343,8 @@
     </div>
 
     <div id="diffMenu" class="overlay">
-        <div style="position: absolute; top: 25px; left: 25px; font-size: 22px; font-weight: bold; color: var(--red); cursor: pointer; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; border: 2px solid var(--red);" onpointerdown="showMenu('mainMenu')">
+        <div style="position: absolute; top: 25px; left: 25px; font-size: 22px; font-weight: bold; color: var(--red); cursor: pointer; display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 8px; border: 2px solid var(--red);"
+            onpointerdown="showMenu('mainMenu')">
             &#9664; GERİ
         </div>
         <div style="display:flex; gap:15px">
@@ -1279,7 +1402,8 @@
                 <div id="p1H" class="bar-fill" style="background:var(--blue)"></div>
             </div>
             <!-- OYUNU DURDUR BUTONU -->
-            <div id="pauseBtnBtn" onpointerdown="togglePause()" style="position: absolute; top: 60px; left: 0; font-size: 13px; font-weight: bold; background: rgba(0,0,0,0.8); border: 2px solid var(--red); border-radius: 5px; padding: 4px 10px; cursor: pointer; pointer-events: auto;">
+            <div id="pauseBtnBtn" onpointerdown="togglePause()"
+                style="position: absolute; top: 60px; left: 0; font-size: 13px; font-weight: bold; background: rgba(0,0,0,0.8); border: 2px solid var(--red); border-radius: 5px; padding: 4px 10px; cursor: pointer; pointer-events: auto;">
                 ❚❚ ÇIK / DURDUR
             </div>
         </div>
@@ -1381,7 +1505,7 @@
         let myPlayerId = "", roomRef = null, myRole = "host";
         let lastStateSend = 0, currentDuelCode = "";
         const processedHits = new Set();
-        
+
         // --- SUNUCU SAAT SENKRONİZASYONU ---
         let serverTimeOffset = 0;
         db.ref(".info/serverTimeOffset").on("value", (snap) => {
@@ -1401,31 +1525,31 @@
                 }, 50);
             });
         }
-        
+
         document.addEventListener("DOMContentLoaded", () => {
             updateAccountUI();
-            
+
             // --- SERVER STATUS LISTENER ---
             db.ref('serverStatus').on('value', (snapshot) => {
                 const status = snapshot.val() || { status: 'online' };
                 updateServerUI(status);
             });
-            
+
             // --- WINDOWS UYGULAMASI (ELECTRON) ÖZELLEŞTİRMESİ ---
             if (navigator.userAgent.toLowerCase().includes('electron')) {
                 const downloadBtn = document.querySelector('.web-btn-download');
                 if (downloadBtn) downloadBtn.style.display = 'none';
-                
+
                 const featuresGrid = document.querySelector('.features-grid');
                 if (featuresGrid) featuresGrid.style.display = 'none';
-                
+
                 const playBtn = document.querySelector('.web-btn-play');
                 if (playBtn) {
                     playBtn.innerHTML = '<span>&#9654;</span> OYUNU BAŞLAT';
                     playBtn.style.padding = '25px 60px';
                     playBtn.style.fontSize = '26px';
                 }
-                
+
                 const title = document.querySelector('h1');
                 if (title) title.innerText = "MULTIPVP WINDOWS";
             }
@@ -1434,13 +1558,13 @@
         function updateServerUI(server) {
             const status = server.status || 'online';
             const statusText = document.getElementById('serverStatusDisplay');
-            if(statusText) {
+            if (statusText) {
                 statusText.innerText = `SUNUCULAR: ${status.toUpperCase()}`;
                 statusText.style.color = status === 'online' ? 'var(--green)' : 'var(--red)';
             }
 
             let banner = document.getElementById('serverBanner');
-            if(!banner) {
+            if (!banner) {
                 banner = document.createElement('div');
                 banner.id = 'serverBanner';
                 banner.style = "position:fixed; top:0; left:0; width:100%; padding:10px; text-align:center; font-weight:bold; z-index:9999; color:white; font-family:Arial, sans-serif; display:none;";
@@ -1449,7 +1573,7 @@
 
             const onlineButtons = document.querySelectorAll('[onpointerdown*="openOnlinePanel"], [onpointerdown*="startMatchmaking"]');
 
-            if(status === 'online') {
+            if (status === 'online') {
                 banner.style.display = 'none';
                 onlineButtons.forEach(btn => {
                     btn.classList.remove('locked');
@@ -1461,7 +1585,7 @@
                 banner.style.display = 'block';
                 banner.style.background = status === 'maintenance' ? 'var(--orange)' : 'var(--red)';
                 banner.innerText = status === 'maintenance' ? "BAKIM NEDENİYLE SUNUCULAR DEVRE DIŞI" : "SUNUCULAR ŞU ANDA DEVRE DIŞI";
-                
+
                 onlineButtons.forEach(btn => {
                     btn.classList.add('locked');
                     btn.style.opacity = '0.5';
@@ -1486,13 +1610,13 @@
             }
         }
 
-        window.returnToMenu = function() {
+        window.returnToMenu = function () {
             sessionStorage.setItem('openModeMenu', 'true');
             try {
                 if (window.myLobbyRef) window.myLobbyRef.remove();
                 if (amIHost && roomRef) roomRef.remove();
                 else if (roomRef) roomRef.off();
-            } catch(e) {}
+            } catch (e) { }
             location.reload();
         };
 
@@ -1527,7 +1651,7 @@
                     if (this.actionTimer >= 1) { this.actionState = 'IDLE'; this.actionTimer = 0; }
                 }
                 if (this.trails && this.trails.length > 0) {
-                    for(let i = this.trails.length - 1; i >= 0; i--) {
+                    for (let i = this.trails.length - 1; i >= 0; i--) {
                         this.trails[i].life -= 0.04 * deltaTime;
                         if (this.trails[i].life <= 0) this.trails.splice(i, 1);
                     }
@@ -1680,17 +1804,17 @@
             document.getElementById('controls').style.display = 'none';
             document.getElementById('introP1Name').innerText = p1Name.toUpperCase();
             document.getElementById('introP2Name').innerText = p2Name.toUpperCase();
-            
+
             let count = 3;
             const cd = document.getElementById('introCountdown');
             cd.innerText = count;
-            
+
             const timer = setInterval(() => {
                 count--;
-                if(count > 0) {
+                if (count > 0) {
                     cd.innerText = count;
                     playSound('select');
-                } else if(count === 0) {
+                } else if (count === 0) {
                     cd.innerText = "BAŞLA!";
                     playSound('punch');
                 } else {
@@ -1765,18 +1889,18 @@
         function waitForStart(opponentName, startAt) {
             let now = getSyncedTime();
             let targetTime = startAt || (now + 3000);
-            
+
             const tick = () => {
                 const currentTime = getSyncedTime();
                 const remaining = Math.ceil((targetTime - currentTime) / 1000);
-                
+
                 if (remaining > 0) {
                     const txt = remaining + '...';
                     const msg = (remaining > 10) ? "Zaman senkronize ediliyor..." : "HAZIR OL! " + txt;
                     if (document.getElementById('matchmakingStatus')) document.getElementById('matchmakingStatus').innerText = msg;
                     if (document.getElementById('invitationMessage')) document.getElementById('invitationMessage').innerText = msg;
                     setTimeout(tick, 100);
-                } else { 
+                } else {
                     startMatchSequence(playerName, opponentName, () => {
                         setupFirebaseGame(opponentName);
                     });
@@ -1797,7 +1921,7 @@
             // Admin komutlarını dinle
             roomRef.child('adminCmd').on('value', snap => {
                 const cmd = snap.val();
-                if(cmd && cmd.timestamp > (this._lastAdminCmdTime || 0)) {
+                if (cmd && cmd.timestamp > (this._lastAdminCmdTime || 0)) {
                     this._lastAdminCmdTime = cmd.timestamp;
                     handleAdminCommand(cmd.type, opponentName, cmd.target);
                 }
@@ -1817,35 +1941,35 @@
 
         function handleAdminCommand(type, opponentName, targetRole) {
             // targetRole 'host' veya 'guest' ise, kendi rolümle karşılaştır
-            if(targetRole !== 'all' && targetRole !== myRole && !['pause', 'end', 'restart'].includes(type)) return;
+            if (targetRole !== 'all' && targetRole !== myRole && !['pause', 'end', 'restart'].includes(type)) return;
 
             const msg = document.createElement('div');
             msg.style = "position:fixed; top:20%; left:50%; transform:translate(-50%,-50%); padding:20px; background:rgba(255,0,0,0.8); color:white; font-size:24px; font-weight:bold; z-index:10000; border-radius:10px; text-shadow: 0 0 10px black; text-align:center;";
-            
-            if(type === 'pause') {
+
+            if (type === 'pause') {
                 isPaused = !isPaused;
                 msg.innerText = isPaused ? "MAÇ ADMİN TARAFINDAN DURAKLATILDI" : "MAÇ DEVAM EDİYOR";
-            } else if(type === 'end') {
+            } else if (type === 'end') {
                 msg.innerText = "MAÇ SİSTEM TARAFINDAN SONLANDIRILDI";
                 document.body.appendChild(msg);
                 document.getElementById('controls').style.display = 'none';
                 document.getElementById('gameUI').style.display = 'none';
                 setTimeout(() => { isPlaying = false; showMenu('mainMenu'); msg.remove(); }, 2000);
                 return;
-            } else if(type === 'restart') {
+            } else if (type === 'restart') {
                 msg.innerText = "MAÇ ADMİN TARAFINDAN YENİDEN BAŞLATILIYOR";
                 document.body.appendChild(msg);
                 document.getElementById('controls').style.display = 'none';
-                setTimeout(() => { 
+                setTimeout(() => {
                     msg.remove();
                     p1.hp = maxHP; bot.hp = maxHP; p1.x = -150; bot.x = 150;
                     startMatchSequence(playerName, opponentName, () => { isPaused = false; });
                 }, 2000);
                 return;
-            } else if(type === 'hp_plus') {
+            } else if (type === 'hp_plus') {
                 p1.hp = maxHP;
                 msg.innerText = `ADMİN: CANINIZ FULLENDİ!`;
-            } else if(type === 'win_p1') {
+            } else if (type === 'win_p1') {
                 bot.hp = 0;
                 msg.innerText = `ADMİN MÜDAHALESİ: KAZANDINIZ!`;
             }
@@ -1906,7 +2030,7 @@
                     }
                 } else if (isPlaying && !isOnline && !bot.isDead) {
                     const isTutorialActive = (currentDiff === 'TRAINING' && T_STEPS[currentStep] && !T_STEPS[currentStep].final);
-                    let d = p1.x - bot.x; 
+                    let d = p1.x - bot.x;
                     if (!isTutorialActive) {
                         bot.x += (d > 0 ? 5 : -5) * deltaTime;
                         if (Math.random() < 0.05 && Math.abs(d) < 150) bot.doAction(Math.random() > 0.5 ? 'punch' : 'kick');
@@ -1938,7 +2062,7 @@
             document.getElementById('tutTitle').innerText = s.t;
             document.getElementById('tutText').innerText = s.c;
             document.getElementById('tutProgress').innerText = `ADIM: ${currentStep + 1} / ${T_STEPS.length}`;
-            
+
             const checkItv = setInterval(() => {
                 if (s.check()) {
                     clearInterval(checkItv);
@@ -1957,11 +2081,11 @@
             document.getElementById('p2H').style.width = (bot.hp / 5) + "%";
 
             if (!isPlaying) return;
-            
+
             if (p1.hp <= 0 || bot.hp <= 0) {
                 isPlaying = false;
                 const win = p1.hp > 0;
-                
+
                 // İstatistikleri Kaydet
                 if (loggedInUser) {
                     const userRef = db.ref('users/' + loggedInUser.username + '/stats');
@@ -2000,9 +2124,9 @@
         const jBase = document.getElementById('joyBase'), jStick = document.getElementById('joyStick');
         jBase.onpointermove = (e) => {
             if (!e.buttons || !isPlaying) return;
-            const r = jBase.getBoundingClientRect(), dx = e.clientX - (r.left + r.width/2), dy = e.clientY - (r.top + r.height/2);
-            const ang = Math.atan2(dy, dx), dist = Math.min(r.width/2-20, Math.sqrt(dx*dx+dy*dy));
-            jStick.style.transform = `translate(${Math.cos(ang)*dist}px, ${Math.sin(ang)*dist}px)`;
+            const r = jBase.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
+            const ang = Math.atan2(dy, dx), dist = Math.min(r.width / 2 - 20, Math.sqrt(dx * dx + dy * dy));
+            jStick.style.transform = `translate(${Math.cos(ang) * dist}px, ${Math.sin(ang) * dist}px)`;
             moveDir = dx > 20 ? 6 : (dx < -20 ? -6 : 0); jumpCmd = dy < -30;
         };
         jBase.onpointerup = () => { jStick.style.transform = 'none'; moveDir = 0; jumpCmd = false; };
@@ -2094,7 +2218,7 @@
                 const users = snap.val();
                 const container = document.getElementById('accountListContainer');
                 container.innerHTML = '';
-                if(!users) return;
+                if (!users) return;
                 for (const [user, data] of Object.entries(users)) {
                     const row = document.createElement('div');
                     row.style = "display:grid; grid-template-columns: 1fr 1fr 1fr; padding:8px; border-bottom:1px solid #333; font-size:11px;";
@@ -2118,36 +2242,36 @@
 
         function executeConsoleCmd(raw) {
             const out = document.getElementById('consoleOutput');
-            const log = (msg, color='#0f0') => {
+            const log = (msg, color = '#0f0') => {
                 const d = document.createElement('div');
                 d.style.color = color;
                 d.innerText = `> ${msg}`;
                 out.appendChild(d);
                 out.scrollTop = out.scrollHeight;
             };
-            
+
             log(raw, '#fff');
             const parts = raw.toLowerCase().split(' ');
             const cmd = parts[0];
 
-            if(cmd === 'server') {
+            if (cmd === 'server') {
                 const sub = parts[1];
-                if(sub === 'close') { setServerStatus('closed'); log('Sunucu kapatıldı.'); }
-                else if(sub === 'start') { setServerStatus('online'); log('Sunucu açıldı.'); }
-                else if(sub === 'maintenance') { setServerStatus('maintenance'); log('Bakım modu aktif.'); }
+                if (sub === 'close') { setServerStatus('closed'); log('Sunucu kapatıldı.'); }
+                else if (sub === 'start') { setServerStatus('online'); log('Sunucu açıldı.'); }
+                else if (sub === 'maintenance') { setServerStatus('maintenance'); log('Bakım modu aktif.'); }
                 else {
                     const roomId = sub;
                     const action = parts[2];
-                    if(action === '#') { sendAdminCmd(roomId, 'end', 'all'); log(`Maç ${roomId} sonlandırıldı.`); }
-                    else if(action === '^') { sendAdminCmd(roomId, 'restart', 'all'); log(`Maç ${roomId} yeniden başlatıldı.`); }
-                    else if(action === '/') { sendAdminCmd(roomId, 'pause', 'all'); log(`Maç ${roomId} duraklatıldı.`); }
-                    else if(action === 'hp+') { sendAdminCmd(roomId, 'hp_plus', parts[3]); log(`${parts[3]} HP füllendi.`); }
-                    else if(action === 'win') { sendAdminCmd(roomId, 'win_p1', parts[3]); log(`${parts[3]} kazandırıldı.`); }
+                    if (action === '#') { sendAdminCmd(roomId, 'end', 'all'); log(`Maç ${roomId} sonlandırıldı.`); }
+                    else if (action === '^') { sendAdminCmd(roomId, 'restart', 'all'); log(`Maç ${roomId} yeniden başlatıldı.`); }
+                    else if (action === '/') { sendAdminCmd(roomId, 'pause', 'all'); log(`Maç ${roomId} duraklatıldı.`); }
+                    else if (action === 'hp+') { sendAdminCmd(roomId, 'hp_plus', parts[3]); log(`${parts[3]} HP füllendi.`); }
+                    else if (action === 'win') { sendAdminCmd(roomId, 'win_p1', parts[3]); log(`${parts[3]} kazandırıldı.`); }
                 }
-            } else if(cmd === 'user' && parts[1] === 'getinfo') {
+            } else if (cmd === 'user' && parts[1] === 'getinfo') {
                 const target = parts[2];
                 db.ref('users/' + target).once('value', snap => {
-                    if(!snap.exists()) return log('Kullanıcı bulunamadı.', 'red');
+                    if (!snap.exists()) return log('Kullanıcı bulunamadı.', 'red');
                     const d = snap.val();
                     log(`INFO [${target}]:\nGörünen Ad: ${d.displayName}\nŞifre: ${d.password}\nMaç: ${d.stats.played}`, 'var(--blue)');
                 });
@@ -2170,7 +2294,7 @@
                 document.getElementById('loginBox').style.display = 'none';
                 document.getElementById('registerBox').style.display = 'none';
                 document.getElementById('profileBox').style.display = 'flex';
-                
+
                 db.ref('users/' + loggedInUser.username).once('value', snap => {
                     const data = snap.val();
                     const stats = data.stats || { played: 0, wins: 0, losses: 0 };
@@ -2190,9 +2314,9 @@
 
         function searchPlayer() {
             const user = document.getElementById('searchUser').value.trim().toLowerCase();
-            if(!user) return;
+            if (!user) return;
             db.ref('users/' + user).once('value', snap => {
-                if(!snap.exists()) return alert("Oyuncu bulunamadı!");
+                if (!snap.exists()) return alert("Oyuncu bulunamadı!");
                 const data = snap.val();
                 const stats = data.stats || { played: 0, wins: 0, losses: 0 };
                 document.getElementById('otherProfileOverlay').classList.add('active');
@@ -2216,11 +2340,11 @@
             const title = document.getElementById('settingsTitle');
             const notice = document.getElementById('settingsNotice');
             const input = document.getElementById('settingsInput');
-            
+
             overlay.classList.add('active');
             input.value = '';
-            
-            if(mode === 'password') {
+
+            if (mode === 'password') {
                 title.innerText = "ŞİFRE DEĞİŞTİR";
                 notice.innerText = "Hesap güvenliğiniz için güçlü bir şifre seçin.";
                 input.type = "password";
@@ -2235,11 +2359,11 @@
 
         function applySettings() {
             const val = document.getElementById('settingsInput').value.trim().toLowerCase();
-            if(!val) return alert("Boş bırakılamaz!");
-            
+            if (!val) return alert("Boş bırakılamaz!");
+
             const userRef = db.ref('users/' + loggedInUser.username);
-            
-            if(currentSettingMode === 'password') {
+
+            if (currentSettingMode === 'password') {
                 userRef.update({ password: val }).then(() => {
                     alert("Şifre güncellendi!");
                     document.getElementById('settingsOverlay').classList.remove('active');
@@ -2251,8 +2375,8 @@
                     const now = Date.now();
                     const lastChange = data.lastUsernameChange || 0;
                     const weekInMs = 7 * 24 * 60 * 60 * 1000;
-                    
-                    if(now - lastChange < weekInMs) {
+
+                    if (now - lastChange < weekInMs) {
                         const diff = weekInMs - (now - lastChange);
                         const days = Math.floor(diff / (24 * 60 * 60 * 1000));
                         const hours = Math.floor((diff % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
@@ -2261,9 +2385,9 @@
 
                     // Yeni isim boşta mı?
                     db.ref('users/' + val).once('value', targetSnap => {
-                        if(targetSnap.exists()) return alert("Bu kullanıcı adı zaten alınmış!");
-                        
-                        const newData = {...data, username: val, lastUsernameChange: now};
+                        if (targetSnap.exists()) return alert("Bu kullanıcı adı zaten alınmış!");
+
+                        const newData = { ...data, username: val, lastUsernameChange: now };
                         db.ref('users/' + val).set(newData).then(() => {
                             userRef.remove().then(() => {
                                 loggedInUser.username = val;
@@ -2341,4 +2465,5 @@
         window.onresize = resize; resize();
     </script>
 </body>
+
 </html>

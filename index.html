@@ -947,26 +947,28 @@
                 width: 90%;
             }
 
-            .web-buttons {
-                flex-direction: column;
-                width: 80%;
+            .web-hero h1 { font-size: 40px; }
+            .web-subtitle { font-size: 14px; }
+            .web-buttons { flex-direction: column; width: 90%; }
+            .web-btn { width: 100%; justify-content: center; }
+            .features-grid { grid-template-columns: 1fr; width: 95%; }
+            
+            .admin-panel { 
+                width: 95% !important; 
+                max-height: 90vh; 
+                overflow-y: auto; 
+                padding: 10px !important;
             }
-
-            .web-btn {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
-                margin-top: 30px;
-                width: 90%;
-                gap: 10px;
-            }
-
-            .feature-card {
-                padding: 15px;
-            }
+            .admin-tab-btn { padding: 5px 8px; font-size: 10px; }
+            .match-item { flex-direction: column; align-items: flex-start !important; gap: 10px; }
+            .match-item div { width: 100%; justify-content: flex-start; }
+            
+            .auth-box { width: 95% !important; padding: 15px !important; }
+            .auth-input { padding: 10px; font-size: 14px; }
+            
+            h1 { font-size: 30px !important; }
+            .mode-card { width: 160px !important; height: 70px !important; }
+            .mode-card h3 { font-size: 14px !important; }
         }
 
         .mode-card.locked {
@@ -1080,14 +1082,14 @@
 
     <div id="adminPanelOverlay" class="overlay">
         <div class="admin-panel"
-            style="width: 100%; max-width: 950px; background: rgba(0,0,0,0.9); padding: 20px; border-radius: 10px; border: 1px solid var(--red);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h2 style="margin:0; color:var(--red);">COMMAND CENTER</h2>
-                <div style="display:flex; gap:10px;">
+            style="width: 950px; background: rgba(0,0,0,0.95); padding: 25px; border-radius: 15px; border: 1px solid var(--red); box-shadow: 0 0 50px rgba(255,0,0,0.2);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap: wrap; gap: 10px;">
+                <h2 style="margin:0; color:var(--red); font-size: 18px;">COMMAND CENTER</h2>
+                <div style="display:flex; gap:5px; flex-wrap: wrap;">
                     <button class="admin-tab-btn active" onclick="switchAdminTab('matches')">MAÇLAR</button>
                     <button class="admin-tab-btn" onclick="switchAdminTab('accounts')">HESAPLAR</button>
                     <button class="admin-tab-btn" onclick="switchAdminTab('console')">KONSOL</button>
-                    <button class="admin-btn" style="background:#444;" onclick="showMenu('mainMenu')">KAPAT</button>
+                    <button class="admin-btn" style="background:#444; padding: 5px 10px; font-size: 11px;" onclick="showMenu('mainMenu')">KAPAT</button>
                 </div>
             </div>
 
@@ -1122,6 +1124,14 @@
                     style="width:100%; background:#111; border:1px solid #333; color:white; padding:10px; margin-top:10px; font-family:monospace;"
                     onkeydown="if(event.key==='Enter') executeConsoleCmd(this.value); if(event.key==='Enter') this.value='';">
             </div>
+        </div>
+    </div>
+
+    <div id="banOverlay" class="overlay" style="background: black; z-index: 10000;">
+        <h1 style="color: var(--red); font-size: 50px; text-shadow: 0 0 20px var(--red);">ERİŞİM ENGELENDİ</h1>
+        <p style="color: white; font-size: 18px; text-align: center; max-width: 400px;">Hesabınız kuralları ihlal ettiği için süresiz olarak banlanmıştır.</p>
+        <div class="mode-card active-card" style="width:200px; height:60px; border-color:var(--red); margin-top: 30px;" onpointerdown="location.reload()">
+            <h3>TEKRAR DENE</h3>
         </div>
     </div>
 
@@ -2197,29 +2207,29 @@
                 container.innerHTML = '';
                 if (!users) return;
                 
-                // Başlık Satırı
                 const header = document.createElement('div');
-                header.style = "display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; padding:8px; border-bottom:1px solid #444; font-weight:bold; font-size:10px; color:#888;";
-                header.innerHTML = `<div>KULLANICI</div><div>GÖRÜNEN AD</div><div>ŞİFRE</div><div>YETKİ</div>`;
+                header.style = "display:grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; padding:8px; border-bottom:1px solid #444; font-weight:bold; font-size:10px; color:#888;";
+                header.innerHTML = `<div>KULLANICI</div><div>GÖRÜNEN AD</div><div>ŞİFRE</div><div>YETKİ</div><div>İŞLEM</div>`;
                 container.appendChild(header);
 
                 for (const [user, data] of Object.entries(users)) {
                     const isAdmin = data.isAdmin || user === 'trovix' || user === 'trovixyt';
+                    const isBanned = data.isBanned === true;
                     const isProtected = user === 'trovix' || user === 'trovixyt';
                     
                     const row = document.createElement('div');
-                    row.style = "display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; padding:10px; border-bottom:1px solid #333; font-size:11px; align-items:center;";
+                    row.style = "display:grid; grid-template-columns: 1fr 1fr 1fr 1fr 1fr; padding:10px; border-bottom:1px solid #333; font-size:11px; align-items:center;";
                     row.innerHTML = `
                         <div style="color:var(--blue)">@${user}</div>
                         <div style="color:white">${data.displayName}</div>
                         <div style="color:#888; font-family:monospace;">${data.password}</div>
-                        <div style="display:flex; gap:5px; align-items:center;">
-                            <span style="color:${isAdmin ? 'var(--green)' : '#666'}">${isAdmin ? 'ADMİN' : 'ÜYE'}</span>
+                        <div style="color:${isAdmin ? 'var(--green)' : (isBanned ? 'var(--red)' : '#666')}">${isAdmin ? 'ADMİN' : (isBanned ? 'BANLI' : 'ÜYE')}</div>
+                        <div style="display:flex; gap:3px;">
                             ${!isProtected ? `
-                                <button onclick="toggleAdmin('${user}', ${!isAdmin})" style="background:${isAdmin ? 'var(--red)' : 'var(--green)'}; border:none; color:white; padding:3px 7px; border-radius:3px; cursor:pointer; font-size:9px;">
-                                    ${isAdmin ? 'AL' : 'VER'}
-                                </button>
-                            ` : ''}
+                                <button onclick="toggleAdmin('${user}', ${!isAdmin})" title="Yetki" style="background:${isAdmin ? '#444' : 'var(--green)'}; border:none; color:white; padding:4px; border-radius:3px; cursor:pointer;">👑</button>
+                                <button onclick="toggleBan('${user}', ${!isBanned})" title="Ban" style="background:${isBanned ? 'var(--blue)' : 'var(--red)'}; border:none; color:white; padding:4px; border-radius:3px; cursor:pointer;">${isBanned ? '🔓' : '🚫'}</button>
+                                <button onclick="forceLogoutUser('${user}')" title="Logout" style="background:var(--orange); border:none; color:white; padding:4px; border-radius:3px; cursor:pointer;">🚪</button>
+                            ` : '🔒'}
                         </div>
                     `;
                     container.appendChild(row);
@@ -2229,6 +2239,12 @@
 
         function toggleAdmin(username, status) {
             db.ref('users/' + username).update({ isAdmin: status });
+        }
+        function toggleBan(username, status) {
+            db.ref('users/' + username).update({ isBanned: status });
+        }
+        function forceLogoutUser(username) {
+            db.ref('users/' + username).update({ forceLogout: Date.now() });
         }
 
         function switchAdminTab(tab) {
@@ -2255,16 +2271,40 @@
 
             if (cmd === 'help') {
                 log('MEVCUT KOMUTLAR:', 'var(--blue)');
-                log('server close/start/maintenance - Sunucu durumu');
+                log('server start/close/maintenance - Sunucu durumu');
                 log('server stop [ID] - Maçı sonlandırır');
                 log('server restart [ID] - Maçı yeniden başlatır');
                 log('server pause [ID] - Maçı duraklatır');
-                log('server [ID] hp+ [host/guest] - Oyuncu canını fuller');
-                log('server [ID] win [host/guest] - Oyuncu kazandırır');
-                log('user getinfo [k.adı] - Hesap bilgileri & Profil kartı');
-                log('skipnamecooldown [k.adı] - İsim değiştirme süresini sıfırlar');
-                log('giveaccess [k.adı] - Admin yetkisi verir');
-                log('takeaccess [k.adı] - Admin yetkisini alır');
+                log('server hp+ [ID] [host/guest] - Can fuller');
+                log('server win [ID] [host/guest] - Kazandırır');
+                log('user getinfo [k.adı] - Hesap bilgileri');
+                log('skipnamecooldown [k.adı] - İsim süresini sıfırlar');
+                log('giveaccess/takeaccess [k.adı] - Yetki yönetimi');
+                log('ban/unban [k.adı] - Oyuncuyu yasaklar/açar');
+                log('logout [k.adı] - Oturumu uzaktan kapatır');
+            } else if (cmd === 'ban') {
+                const target = parts[1];
+                if (!target) return log('Lütfen kullanıcı adı belirtin.', 'red');
+                db.ref('users/' + target).once('value', snap => {
+                    const d = snap.val();
+                    if (!d) return log('Kullanıcı bulunamadı.', 'red');
+                    if (d.isAdmin || target === 'trovix' || target === 'trovixyt') return log('Adminleri banlayamazsın!', 'red');
+                    db.ref('users/' + target).update({ isBanned: true }).then(() => log(`${target} banlandı!`, 'var(--red)'));
+                });
+            } else if (cmd === 'unban') {
+                const target = parts[1];
+                if (!target) return log('Lütfen kullanıcı adı belirtin.', 'red');
+                db.ref('users/' + target).update({ isBanned: false }).then(() => log(`${target} banı açıldı.`, 'var(--green)'));
+            } else if (cmd === 'logout') {
+                const target = parts[1];
+                if (!target) return log('Lütfen kullanıcı adı belirtin.', 'red');
+                db.ref('users/' + target).update({ forceLogout: Date.now() }).then(() => log(`${target} oturumu kapatıldı.`, 'var(--orange)'));
+            } else if (cmd === 'skipnamecooldown') {
+                const target = parts[1];
+                if (!target) return log('Lütfen kullanıcı adı belirtin.', 'red');
+                db.ref('users/' + target).update({ lastUsernameChange: 0 }).then(() => {
+                    log(`${target} için bekleme süresi sıfırlandı!`, 'var(--green)');
+                });
             } else if (cmd === 'giveaccess') {
                 const target = parts[1];
                 if (!target) return log('Lütfen kullanıcı adı belirtin.', 'red');
@@ -2278,41 +2318,38 @@
                 db.ref('users/' + target).update({ isAdmin: false }).then(() => {
                     log(`${target} yetkisi alındı.`, 'var(--orange)');
                 });
-            } else if (cmd === 'skipnamecooldown') {
-                const target = parts[1];
-                if (!target) return log('Lütfen kullanıcı adı belirtin.', 'red');
-                db.ref('users/' + target).update({ lastUsernameChange: 0 }).then(() => {
-                    log(`${target} için bekleme süresi sıfırlandı!`, 'var(--green)');
-                });
             } else if (cmd === 'server') {
-                const sub = parts[1];
-                if (sub === 'close') { setServerStatus('closed'); log('Sunucu kapatıldı.'); }
-                else if (sub === 'start') { setServerStatus('online'); log('Sunucu açıldı.'); }
-                else if (sub === 'maintenance') { setServerStatus('maintenance'); log('Bakım modu aktif.'); }
-                else {
-                    const roomId = sub;
-                    const action = parts[2];
-                    const target = parts[3] || 'all';
-                    if (action === 'stop') { sendAdminCmd(roomId, 'end', 'all'); log(`Maç ${roomId} sonlandırıldı.`); }
+                const action = parts[1];
+                const roomId = parts[2];
+                const target = parts[3] || 'all';
+
+                if (action === 'start') { setServerStatus('online'); log('Sunucu açıldı.'); }
+                else if (action === 'close') { setServerStatus('closed'); log('Sunucu kapatıldı.'); }
+                else if (action === 'maintenance') { setServerStatus('maintenance'); log('Bakım modu aktif.'); }
+                else if (['stop', 'restart', 'pause', 'hp+', 'win'].includes(action)) {
+                    if (!roomId) return log('Lütfen Maç ID belirtin!', 'red');
+                    if (action === 'stop') { sendAdminCmd(roomId, 'end', 'all'); log(`Maç ${roomId} durduruldu.`); }
                     else if (action === 'restart') { sendAdminCmd(roomId, 'restart', 'all'); log(`Maç ${roomId} yeniden başlatıldı.`); }
                     else if (action === 'pause') { sendAdminCmd(roomId, 'pause', 'all'); log(`Maç ${roomId} duraklatıldı.`); }
                     else if (action === 'hp+') { 
-                        if(target === 'all') { log('Lütfen hedef belirtin (host/guest)', 'orange'); return; }
-                        sendAdminCmd(roomId, 'hp_plus', target); 
-                        log(`${target} HP füllendi.`); 
+                        if (target === 'all') return log('Hedef belirtin! (host/guest)', 'orange');
+                        sendAdminCmd(roomId, 'hp_plus', target); log(`${target} HP füllendi.`); 
                     }
                     else if (action === 'win') { 
-                        if(target === 'all') { log('Lütfen hedef belirtin (host/guest)', 'orange'); return; }
-                        sendAdminCmd(roomId, 'win_p1', target); 
-                        log(`${target} kazandırıldı.`); 
+                        if (target === 'all') return log('Hedef belirtin! (host/guest)', 'orange');
+                        sendAdminCmd(roomId, 'win_p1', target); log(`${target} kazandırıldı.`); 
                     }
+                } else {
+                    log('Geçersiz sunucu eylemi!', 'red');
                 }
             } else if (cmd === 'user' && parts[1] === 'getinfo') {
                 const target = parts[2];
                 db.ref('users/' + target).once('value', snap => {
                     if (!snap.exists()) return log('Kullanıcı bulunamadı.', 'red');
                     const d = snap.val();
-                    log(`INFO [${target}]:\nGörünen Ad: ${d.displayName}\nŞifre: ${d.password}\nMaç: ${d.stats.played}`, 'var(--blue)');
+                    log(`INFO [${target}]:\nGörünen Ad: ${d.displayName}\nŞifre: ${d.password}\nMaç: ${d.stats ? d.stats.played : 0}`, 'var(--blue)');
+                    document.getElementById('searchUser').value = target;
+                    searchPlayer();
                 });
             } else {
                 log('Geçersiz komut! (help yazarak yardım alabilirsiniz)', 'red');
@@ -2472,7 +2509,8 @@
                 if (data && data.password === pass) {
                     loggedInUser = {
                         username: data.username,
-                        displayName: data.displayName
+                        displayName: data.displayName,
+                        loginTime: Date.now()
                     };
                     localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
                     alert("Giriş başarılı! Hoş geldin " + data.displayName);
@@ -2492,15 +2530,42 @@
             alert("Çıkış yapıldı.");
         }
 
+        let currentUserListener = null;
         function updateAccountUI() {
             const btnText = document.getElementById('accountBtnText');
             const adminBtn = document.getElementById('adminPanelBtn');
+            
+            // Eski dinleyiciyi temizle
+            if (currentUserListener) {
+                db.ref('users/' + loggedInUser.username).off('value', currentUserListener);
+                currentUserListener = null;
+            }
+
             if (loggedInUser) {
                 btnText.innerText = "PROFİLİM";
-                // Admin Butonu Kontrolü
-                db.ref('users/' + loggedInUser.username).once('value', snap => {
+                
+                // Gerçek zamanlı ban ve logout takibi
+                currentUserListener = db.ref('users/' + loggedInUser.username).on('value', snap => {
                     const data = snap.val();
-                    if (data && (data.isAdmin || data.username === 'trovix' || data.username === 'trovixyt')) {
+                    if (!data) return;
+
+                    // Ban kontrolü
+                    if (data.isBanned) {
+                        showMenu('banOverlay');
+                        isPlaying = false;
+                        localStorage.removeItem('loggedInUser');
+                        return;
+                    }
+
+                    // Uzaktan çıkış kontrolü
+                    if (data.forceLogout && data.forceLogout > (loggedInUser.loginTime || 0)) {
+                        handleLogout();
+                        alert("Oturumunuz admin tarafından sonlandırıldı.");
+                        return;
+                    }
+
+                    // Admin Butonu Kontrolü
+                    if (data.isAdmin || data.username === 'trovix' || data.username === 'trovixyt') {
                         adminBtn.style.display = 'flex';
                     } else {
                         adminBtn.style.display = 'none';

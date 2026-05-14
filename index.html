@@ -2256,7 +2256,9 @@
             if (cmd === 'help') {
                 log('MEVCUT KOMUTLAR:', 'var(--blue)');
                 log('server close/start/maintenance - Sunucu durumu');
-                log('server [ID] #/^// - Maç Sonlandır/Yeniden Başlat/Durdur');
+                log('server stop [ID] - Maçı sonlandırır');
+                log('server restart [ID] - Maçı yeniden başlatır');
+                log('server pause [ID] - Maçı duraklatır');
                 log('server [ID] hp+ [host/guest] - Oyuncu canını fuller');
                 log('server [ID] win [host/guest] - Oyuncu kazandırır');
                 log('user getinfo [k.adı] - Hesap bilgileri & Profil kartı');
@@ -2290,11 +2292,20 @@
                 else {
                     const roomId = sub;
                     const action = parts[2];
-                    if (action === '#') { sendAdminCmd(roomId, 'end', 'all'); log(`Maç ${roomId} sonlandırıldı.`); }
-                    else if (action === '^') { sendAdminCmd(roomId, 'restart', 'all'); log(`Maç ${roomId} yeniden başlatıldı.`); }
-                    else if (action === '/') { sendAdminCmd(roomId, 'pause', 'all'); log(`Maç ${roomId} duraklatıldı.`); }
-                    else if (action === 'hp+') { sendAdminCmd(roomId, 'hp_plus', parts[3]); log(`${parts[3]} HP füllendi.`); }
-                    else if (action === 'win') { sendAdminCmd(roomId, 'win_p1', parts[3]); log(`${parts[3]} kazandırıldı.`); }
+                    const target = parts[3] || 'all';
+                    if (action === 'stop') { sendAdminCmd(roomId, 'end', 'all'); log(`Maç ${roomId} sonlandırıldı.`); }
+                    else if (action === 'restart') { sendAdminCmd(roomId, 'restart', 'all'); log(`Maç ${roomId} yeniden başlatıldı.`); }
+                    else if (action === 'pause') { sendAdminCmd(roomId, 'pause', 'all'); log(`Maç ${roomId} duraklatıldı.`); }
+                    else if (action === 'hp+') { 
+                        if(target === 'all') { log('Lütfen hedef belirtin (host/guest)', 'orange'); return; }
+                        sendAdminCmd(roomId, 'hp_plus', target); 
+                        log(`${target} HP füllendi.`); 
+                    }
+                    else if (action === 'win') { 
+                        if(target === 'all') { log('Lütfen hedef belirtin (host/guest)', 'orange'); return; }
+                        sendAdminCmd(roomId, 'win_p1', target); 
+                        log(`${target} kazandırıldı.`); 
+                    }
                 }
             } else if (cmd === 'user' && parts[1] === 'getinfo') {
                 const target = parts[2];

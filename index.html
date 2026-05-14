@@ -1488,6 +1488,10 @@
         let shake = 0, isOnline = false, amIHost = false, currentPeerId = "";
         let playerName = localStorage.getItem('playerName') || "OYUNCU";
         let loggedInUser = JSON.parse(localStorage.getItem('loggedInUser')) || null;
+        if (loggedInUser && !loggedInUser.loginTime) {
+            loggedInUser.loginTime = Date.now();
+            localStorage.setItem('loggedInUser', JSON.stringify(loggedInUser));
+        }
         if (loggedInUser) playerName = loggedInUser.displayName;
 
         const GROUND_Y = 100;
@@ -1601,16 +1605,6 @@
             db.ref('serverStatus').set({ status: status });
         }
 
-        function updateAccountUI() {
-            if (loggedInUser) {
-                document.getElementById('accountBtnText').innerText = loggedInUser.displayName.toUpperCase();
-                document.getElementById('currentNameSpan').innerText = loggedInUser.displayName;
-                document.getElementById('playerNameInput').value = loggedInUser.displayName;
-                playerName = loggedInUser.displayName;
-            } else {
-                document.getElementById('accountBtnText').innerText = "GİRİŞ YAP";
-            }
-        }
 
         window.returnToMenu = function () {
             sessionStorage.setItem('openModeMenu', 'true');
@@ -2531,18 +2525,24 @@
         }
 
         let currentUserListener = null;
+        let lastListenerUser = null;
         function updateAccountUI() {
             const btnText = document.getElementById('accountBtnText');
             const adminBtn = document.getElementById('adminPanelBtn');
             
             // Eski dinleyiciyi temizle
-            if (currentUserListener) {
-                db.ref('users/' + loggedInUser.username).off('value', currentUserListener);
+            if (currentUserListener && lastListenerUser) {
+                db.ref('users/' + lastListenerUser).off('value', currentUserListener);
                 currentUserListener = null;
+                lastListenerUser = null;
             }
 
             if (loggedInUser) {
-                btnText.innerText = "PROFİLİM";
+                lastListenerUser = loggedInUser.username;
+                btnText.innerText = loggedInUser.displayName.toUpperCase();
+                document.getElementById('currentNameSpan').innerText = loggedInUser.displayName;
+                document.getElementById('playerNameInput').value = loggedInUser.displayName;
+                playerName = loggedInUser.displayName;
                 
                 // Gerçek zamanlı ban ve logout takibi
                 currentUserListener = db.ref('users/' + loggedInUser.username).on('value', snap => {
@@ -2559,8 +2559,9 @@
 
                     // Uzaktan çıkış kontrolü
                     if (data.forceLogout && data.forceLogout > (loggedInUser.loginTime || 0)) {
+                        console.log("Force logout triggered for:", loggedInUser.username);
                         handleLogout();
-                        alert("Oturumunuz admin tarafından sonlandırıldı.");
+                        setTimeout(() => alert("Oturumunuz admin tarafından sonlandırıldı."), 100);
                         return;
                     }
 
